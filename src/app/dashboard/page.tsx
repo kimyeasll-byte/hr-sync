@@ -1,13 +1,15 @@
 "use client";
 import BusinessCardGenerator from "@/components/BusinessCardGenerator";
 import OnboardingJourney from "@/components/OnboardingJourney";
+import AssetManagement from "@/components/AssetManagement";
+import DocumentPrintModal, { PrintDocumentData } from "@/components/DocumentPrintModal";
 
 import { useState, useEffect, useRef } from "react";
-import { UserPlus, UserMinus, Calendar, Briefcase, Loader2, AlertCircle, CheckCircle2, Clock, Search, RefreshCw, FileText, IdCard, LogOut, Mail } from "lucide-react";
+import { UserPlus, UserMinus, Calendar, Briefcase, Loader2, AlertCircle, CheckCircle2, Clock, Search, RefreshCw, FileText, IdCard, LogOut, Mail, Laptop, Download, Printer } from "lucide-react";
 import { supabase } from "@/utils/supabase/client";
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState<"onboard" | "journey" | "offboard" | "history" | "card">("onboard");
+  const [activeTab, setActiveTab] = useState<"onboard" | "journey" | "assets" | "offboard" | "history" | "card">("onboard");
 
   // Onboarding States
   const [onName, setOnName] = useState("");
@@ -66,6 +68,45 @@ export default function DashboardPage() {
     } finally {
       setCancellingTaskId(null);
     }
+  };
+
+  const [auditPrintData, setAuditPrintData] = useState<PrintDocumentData | null>(null);
+
+  const handleExportAuditExcel = () => {
+    if (!historyData || historyData.length === 0) {
+      alert("다운로드할 감사 로그 데이터가 없습니다.");
+      return;
+    }
+
+    const headers = ["작업 ID", "임직원 성명", "소속 부서", "작업 유형", "처리 상태", "요청/생성 일시", "감사 감사 결과 메시지"];
+    const rows = historyData.map((task) => {
+      const latestMessage = task.logs && task.logs.length > 0 
+        ? [...task.logs].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]?.result_message 
+        : "";
+      const taskLabel = task.task_type === 'ONBOARDING' ? '신규 입사 계정 세팅' : '퇴사자 권한 회수';
+      const statusLabel = task.status === 'CANCELLED' ? '작업 철회됨' : (task.status === 'COMPLETED' ? '완료' : task.status);
+      const createdAt = new Date(task.created_at).toLocaleString();
+
+      return [
+        `"${task.id}"`,
+        `"${task.employees?.name || ''}"`,
+        `"${task.employees?.department || ''}"`,
+        `"${taskLabel}"`,
+        `"${statusLabel}"`,
+        `"${createdAt}"`,
+        `"${(latestMessage || '').replace(/"/g, '""')}"`
+      ];
+    });
+
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `POWERNET_ITGC_Audit_Log_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   useEffect(() => {
@@ -256,6 +297,9 @@ export default function DashboardPage() {
         <button onClick={() => setActiveTab("journey")} className="px-5 py-2 text-sm font-bold transition-all flex items-center gap-1.5" style={{ backgroundColor: activeTab === "journey" ? 'var(--color-surface)' : 'transparent', color: activeTab === "journey" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "journey" ? 'var(--shadow-subtle)' : 'none' }}>
           <Calendar size={15} className={activeTab === "journey" ? "text-blue-400" : ""} /> 온보딩 여정 관리
         </button>
+        <button onClick={() => setActiveTab("assets")} className="px-5 py-2 text-sm font-bold transition-all flex items-center gap-1.5" style={{ backgroundColor: activeTab === "assets" ? 'var(--color-surface)' : 'transparent', color: activeTab === "assets" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "assets" ? 'var(--shadow-subtle)' : 'none' }}>
+          <Laptop size={15} className={activeTab === "assets" ? "text-blue-400" : ""} /> IT 자산 관리
+        </button>
         <button onClick={() => setActiveTab("offboard")} className="px-5 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "offboard" ? 'var(--color-surface)' : 'transparent', color: activeTab === "offboard" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "offboard" ? 'var(--shadow-subtle)' : 'none' }}>퇴사자 권한 회수</button>
         <button onClick={() => setActiveTab("card")} className="px-5 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "card" ? 'var(--color-surface)' : 'transparent', color: activeTab === "card" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "card" ? 'var(--shadow-subtle)' : 'none' }}>명함 제작</button>
         <button onClick={() => setActiveTab("history")} className="px-5 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "history" ? 'var(--color-surface)' : 'transparent', color: activeTab === "history" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "history" ? 'var(--shadow-subtle)' : 'none' }}>Log</button>
@@ -407,6 +451,11 @@ export default function DashboardPage() {
         />
       )}
 
+      {/* IT 자산 및 장비 관리 탭 */}
+      {activeTab === "assets" && (
+        <AssetManagement />
+      )}
+
       {activeTab === "offboard" && (
         <div style={{ backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-6)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-subtle)' }}>
           <div className="flex items-center gap-3 mb-6">
@@ -477,6 +526,21 @@ export default function DashboardPage() {
                 <div className="relative"><Calendar className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-muted)' }} size={18} strokeWidth={1.5} /><input type="date" value={offDate} onChange={(e) => setOffDate(e.target.value)} required className="w-full pl-10 pr-4 py-3 outline-none bg-transparent" style={{ border: '1px solid var(--color-error-text)', borderRadius: 'var(--radius-sm)', color: 'var(--color-error-text)', fontWeight: 'bold' }} /></div>
               </div>
 
+              {offName && (
+                <div className="mt-3 p-3 rounded-lg border border-blue-500/20 bg-blue-500/5 flex items-center justify-between text-xs">
+                  <span className="text-neutral-300">
+                    💡 <strong>{offName}</strong> 님의 지급 대여 장비(PC/모니터/보안카드) 반납 상태를 확인하세요.
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("assets")}
+                    className="px-2.5 py-1 rounded bg-blue-600/40 hover:bg-blue-600/60 text-blue-300 border border-blue-500/40 font-bold transition-colors"
+                  >
+                    IT 자산 대장 확인
+                  </button>
+                </div>
+              )}
+
               <div className="flex justify-end mt-6">
                 <button type="submit" disabled={!offName || offStatus === "loading"} className="px-6 py-3 flex items-center justify-center gap-2" style={{ backgroundColor: (!offName || offStatus === "loading") ? 'var(--color-disabled-bg)' : 'var(--color-error-bg)', color: (!offName || offStatus === "loading") ? 'var(--color-disabled-text)' : 'var(--color-error-text)', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
                   {offStatus === "loading" ? <><Loader2 size={18} className="animate-spin" /> 예약 중...</> : "권한 회수 예약하기"}
@@ -510,9 +574,17 @@ export default function DashboardPage() {
               <div className="p-2 rounded-lg" style={{ backgroundColor: 'var(--color-bg)' }}><FileText size={24} style={{ color: 'var(--color-text-title)' }} strokeWidth={1.5} /></div>
               <div><h2 className="text-xl font-bold" style={{ color: 'var(--color-text-title)' }}>Log</h2><p style={{ color: 'var(--color-text-muted)', fontSize: '14px' }}>최대 3년간 안전하게 보존되는 계정 세팅 및 회수 작업 로그입니다.</p></div>
             </div>
-            <button onClick={() => fetchHistory(logSearchQuery)} className="p-2 rounded-lg transition-colors hover:bg-gray-100" style={{ color: 'var(--color-text-muted)' }}>
-              <RefreshCw size={20} className={isHistoryLoading ? "animate-spin" : ""} />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleExportAuditExcel}
+                className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 transition-colors shadow-sm"
+              >
+                <Download size={14} /> ITGC 엑셀(CSV) 다운로드
+              </button>
+              <button onClick={() => fetchHistory(logSearchQuery)} className="p-2 rounded-lg transition-colors hover:bg-neutral-800" style={{ color: 'var(--color-text-muted)' }}>
+                <RefreshCw size={18} className={isHistoryLoading ? "animate-spin" : ""} />
+              </button>
+            </div>
           </div>
 
           {/* 로그 필터링 검색바 */}
@@ -545,7 +617,7 @@ export default function DashboardPage() {
                       <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>({task.employees?.department})</span>
                       <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ 
                         backgroundColor: isCancelled 
-                          ? '#374151' 
+                           ? '#374151' 
                           : (task.task_type === 'ONBOARDING' ? 'var(--color-success-bg)' : 'var(--color-error-bg)'),
                         color: isCancelled 
                           ? '#9CA3AF' 
@@ -558,7 +630,26 @@ export default function DashboardPage() {
                       {latestMessage || (task.status === 'PENDING' ? '예약 대기 중 (D+1 실행 예정)' : '작업 진행 중')}
                     </p>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3">
+                    {/* 감사 증빙서 출력 버튼 */}
+                    <button
+                      onClick={() => {
+                        const isOff = task.task_type === 'OFFBOARDING' || task.task_type === 'REVOKE_ACCESS';
+                        setAuditPrintData({
+                          type: isOff ? "OFFBOARDING_REVOKE_CERTIFICATE" : "ONBOARDING_CERTIFICATE",
+                          empName: task.employees?.name || '임직원',
+                          department: task.employees?.department || '부서',
+                          targetDate: new Date(task.created_at).toISOString().split("T")[0],
+                          completedDate: new Date(task.created_at).toISOString().split("T")[0],
+                          docNo: `PWN-AUDIT-${new Date().getFullYear()}-${task.id.slice(0, 6).toUpperCase()}`,
+                          location: "suwon",
+                          progressPercent: 100
+                        });
+                      }}
+                      className="text-xs px-2.5 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700 font-semibold flex items-center gap-1 transition-colors"
+                    >
+                      <Printer size={12} /> 증빙서 출력
+                    </button>
                     {isCancelled ? (
                       <span className="text-xs px-2.5 py-1 rounded bg-gray-800 text-gray-400 font-bold border border-gray-700">
                         철회 완료
@@ -597,6 +688,12 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* ITGC 공식 증빙서 인쇄/PDF 모달 */}
+      <DocumentPrintModal 
+        data={auditPrintData} 
+        onClose={() => setAuditPrintData(null)} 
+      />
 
     </div>
   );

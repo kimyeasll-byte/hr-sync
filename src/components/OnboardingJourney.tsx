@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import DocumentPrintModal, { PrintDocumentData } from "./DocumentPrintModal";
 import { 
   CheckCircle2, 
   Circle, 
@@ -21,7 +22,8 @@ import {
   Filter,
   CheckSquare,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Printer
 } from "lucide-react";
 
 export interface JourneyEmployee {
@@ -195,6 +197,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
   
   // Per-employee notes state: { [empId]: string }
   const [notes, setNotes] = useState<{ [empId: string]: string }>({});
+  const [printData, setPrintData] = useState<PrintDocumentData | null>(null);
 
   const fetchEmployees = async () => {
     setIsLoading(true);
@@ -587,6 +590,24 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                     </button>
                   )}
                   <button
+                    onClick={() => {
+                      setPrintData({
+                        type: "ONBOARDING_CERTIFICATE",
+                        empName: selectedEmployee.name,
+                        department: selectedEmployee.department,
+                        targetDate: selectedEmployee.target_date,
+                        completedDate: new Date().toISOString().split("T")[0],
+                        docNo: `PWN-ONB-${new Date().getFullYear()}-${(selectedEmployee.id || 'EMP').slice(0, 6).toUpperCase()}`,
+                        progressPercent,
+                        location: "suwon"
+                      });
+                    }}
+                    className="text-xs px-2.5 py-1.5 rounded-lg border font-semibold hover:bg-neutral-800 transition-colors flex items-center gap-1.5"
+                    style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-title)' }}
+                  >
+                    <Printer size={13} className="text-blue-400" /> 증명서 인쇄/PDF
+                  </button>
+                  <button
                     onClick={() => completeAllMilestones(selectedEmployee.id)}
                     className="text-xs px-2.5 py-1.5 rounded-lg border font-semibold hover:bg-neutral-800 transition-colors"
                     style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
@@ -796,6 +817,12 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
         </div>
 
       </div>
+
+      {/* 공식 인쇄/PDF 모달 */}
+      <DocumentPrintModal 
+        data={printData} 
+        onClose={() => setPrintData(null)} 
+      />
     </div>
   );
 }
