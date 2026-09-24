@@ -1,4 +1,5 @@
 "use client";
+import BusinessCardGenerator from "@/components/BusinessCardGenerator";
 
 import { useState, useEffect, useRef } from "react";
 import { UserPlus, UserMinus, Calendar, Briefcase, Loader2, AlertCircle, CheckCircle2, Clock, Search, RefreshCw, FileText } from "lucide-react";
