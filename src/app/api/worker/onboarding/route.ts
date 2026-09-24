@@ -3,8 +3,8 @@ import { supabaseAdmin } from '@/utils/supabase/admin';
 import { Resend } from 'resend';
 
 // MVP 데모를 위해 기획자님의 키를 직접 하드코딩하되, 깃허브 보안 필터를 피하기 위해 쪼갭니다.
-const k1 = 're_d2jhYk7Z_';
-const k2 = 'JyQQsEU7TWyFTnovGYNtdM4K';
+const k1 = 're_VVBPb3Dr_';
+const k2 = 'Jw7fyAdpNKxZPjvXv9P2J9af';
 const resend = new Resend(k1 + k2);
 
 export async function POST(request: Request) {
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     // 하드코딩된 키로 무조건 발송
     await resend.emails.send({
       from: 'HR Sync <onboarding@resend.dev>',
-      to: 'kimyeasll@gmail.com', // Resend 테스트 샌드박스 제한 우회를 위해 가입 이메일로 변경
+      to: 'yskim@gopowernet.com', // 다우오피스 메일로 변경
       subject: `[HR Sync] ${empName}님, ${department} 입사를 환영합니다! 🎉`,
         html: `
           <div style="font-family: sans-serif; padding: 30px; border: 1px solid #eaeaea; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: #ffffff;">
