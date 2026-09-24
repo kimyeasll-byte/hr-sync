@@ -2,7 +2,7 @@
 import BusinessCardGenerator from "@/components/BusinessCardGenerator";
 
 import { useState, useEffect, useRef } from "react";
-import { UserPlus, UserMinus, Calendar, Briefcase, Loader2, AlertCircle, CheckCircle2, Clock, Search, RefreshCw, FileText, IdCard } from "lucide-react";
+import { UserPlus, UserMinus, Calendar, Briefcase, Loader2, AlertCircle, CheckCircle2, Clock, Search, RefreshCw, FileText, IdCard, LogOut } from "lucide-react";
 import { supabase } from "@/utils/supabase/client";
 
 export default function DashboardPage() {
@@ -204,7 +204,47 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8" style={{ color: 'var(--color-text-title)', letterSpacing: '-1px' }}>오늘의 할 일</h1>
+      {/* 파워넷 공식 엔터프라이즈 헤더 */}
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pb-5 border-b" style={{ borderColor: 'var(--color-border)' }}>
+        <div className="flex items-center gap-3.5">
+          <div className="w-24 sm:w-28 flex-shrink-0">
+            <img src="/logo.png" alt="POWER NET" className="w-full h-auto object-contain" />
+          </div>
+          <div className="h-6 w-[1px] hidden sm:block" style={{ backgroundColor: 'var(--color-border)' }} />
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xl sm:text-2xl font-extrabold tracking-tight" style={{ color: 'var(--color-text-title)' }}>
+                HR Sync
+              </span>
+            </div>
+            <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+              (주)파워넷 인사 계정 관리 포털
+            </p>
+          </div>
+        </div>
+
+        {/* 관리자 프로필 & 로그아웃 */}
+        <div className="flex items-center gap-3 self-end sm:self-auto">
+          <div className="text-right">
+            <div className="text-xs font-bold" style={{ color: 'var(--color-text-title)' }}>yskim@gopowernet.com</div>
+            <div className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>인사관리자 (Admin)</div>
+          </div>
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href = '/login';
+            }}
+            className="text-xs px-3 py-1.5 rounded border transition-colors font-semibold flex items-center gap-1.5 hover:opacity-80"
+            style={{ 
+              backgroundColor: 'var(--color-surface)',
+              borderColor: 'var(--color-border)',
+              color: 'var(--color-text-title)'
+            }}
+          >
+            <LogOut size={13} /> 로그아웃
+          </button>
+        </div>
+      </header>
 
       <div className="flex gap-2 mb-8 p-1" style={{ backgroundColor: 'var(--color-border)', borderRadius: 'var(--radius-sm)', width: 'fit-content' }}>
         <button onClick={() => setActiveTab("onboard")} className="px-6 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "onboard" ? 'var(--color-surface)' : 'transparent', color: activeTab === "onboard" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "onboard" ? 'var(--shadow-subtle)' : 'none' }}>신규 입사자 세팅</button>
