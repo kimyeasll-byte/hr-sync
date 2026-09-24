@@ -249,7 +249,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen p-8 max-w-4xl mx-auto">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8 w-full max-w-[1920px] mx-auto">
       {/* 파워넷 공식 엔터프라이즈 헤더 */}
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pb-5 border-b" style={{ borderColor: 'var(--color-border)' }}>
         <div className="flex items-center gap-3.5">

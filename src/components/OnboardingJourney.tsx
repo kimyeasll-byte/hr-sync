@@ -524,8 +524,8 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
       {/* 2. 메인 컨텐츠: 좌측 대상자 목록 & 우측 마일스톤 체크리스트 */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* 좌측: 신규 입사자 목록 (4 컬럼) */}
-        <div className="lg:col-span-4 space-y-3">
+        {/* 좌측: 신규 입사자 목록 (4 컬럼, 와이드 3 컬럼) */}
+        <div className="lg:col-span-4 xl:col-span-3 space-y-3">
           <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-bold flex items-center gap-1.5" style={{ color: 'var(--color-text-title)' }}>
@@ -662,8 +662,8 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
           </div>
         </div>
 
-        {/* 우측: 선택된 입사자의 온보딩 상세 여정 타임라인 & 마일스톤 (8 컬럼) */}
-        <div className="lg:col-span-8 space-y-4">
+        {/* 우측: 선택된 입사자의 온보딩 상세 여정 타임라인 & 마일스톤 (8 컬럼, 와이드 9 컬럼) */}
+        <div className="lg:col-span-8 xl:col-span-9 space-y-4">
           {selectedEmployee ? (
             <div className="p-6 rounded-xl border space-y-6" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
               
@@ -796,7 +796,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
                   {[
                     { type: 'DAY_1' as const, label: '출근 1일차 웰컴 안내', phase: 'D-Day', date: selectedEmployee.target_date, summary: '웰컴 키트 수령, PC 초기 비밀번호 변경, 사원증 사진 제출 안내' },
                     { type: 'WEEK_1' as const, label: '1주차 멘토링 & 런치', phase: 'D+7', date: calculateMilestoneDate(selectedEmployee.target_date, 7), summary: '멘토 1:1 티타임, 사내 프로필 사진 등록, 전자결재 가이드' },
