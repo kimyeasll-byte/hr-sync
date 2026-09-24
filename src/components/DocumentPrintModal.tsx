@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useRef } from "react";
-import { Printer, X, Download, ShieldCheck, CheckCircle2, Building2 } from "lucide-react";
+import React from "react";
+import { Printer, X, ShieldCheck } from "lucide-react";
 
 export interface PrintDocumentData {
   type: "ONBOARDING_CERTIFICATE" | "OFFBOARDING_REVOKE_CERTIFICATE";
@@ -13,7 +13,6 @@ export interface PrintDocumentData {
   targetDate: string;
   completedDate?: string;
   docNo: string;
-  // Specific fields
   systems?: string[];
   equipmentSummary?: string;
   progressPercent?: number;
@@ -32,21 +31,13 @@ export default function DocumentPrintModal({ data, onClose }: DocumentPrintModal
   const title = isOffboarding ? "계정 및 사내 시스템 권한 회수 확인서" : "신규 입사 온보딩 및 장비 지급 완료 증명서";
   const subTitle = isOffboarding ? "(내부회계관리제도 ITGC 및 정보보안 감사 증빙용)" : "(주)파워넷 공식 온보딩 여정 완료 및 자산 불출 확인증";
 
-  // 단 1장의 문서만 격리 인쇄하는 iframe 전용 인쇄 함수 (백그라운드 리스트 출력 완전 방지)
+  // 단 1장의 문서만 격리 인쇄하는 iframe 전용 인쇄 함수
   const handlePrint = () => {
-    const printArea = document.getElementById("powernet-print-area");
-    if (!printArea) {
-      window.print();
-      return;
-    }
+    const oldFrame = document.getElementById("pwn-print-frame");
+    if (oldFrame) oldFrame.remove();
 
-    // 1. 페이지 내 모든 스타일시트 복제
-    const styles = Array.from(document.querySelectorAll("style, link[rel='stylesheet']"))
-      .map(el => el.outerHTML)
-      .join("\n");
-
-    // 2. 비가시적 전용 인쇄 iframe 생성
     const printFrame = document.createElement("iframe");
+    printFrame.id = "pwn-print-frame";
     printFrame.style.position = "fixed";
     printFrame.style.right = "0";
     printFrame.style.bottom = "0";
@@ -61,48 +52,330 @@ export default function DocumentPrintModal({ data, onClose }: DocumentPrintModal
       return;
     }
 
-    frameDoc.open();
-    frameDoc.write(`
+    const printHTML = `
       <!DOCTYPE html>
       <html lang="ko">
         <head>
           <meta charset="utf-8" />
           <title>${title} - ${data.empName}</title>
-          ${styles}
           <style>
             @page {
               size: A4 portrait;
-              margin: 10mm 15mm;
+              margin: 12mm 15mm;
             }
-            html, body {
+            * {
+              box-sizing: border-box;
+              font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", "Noto Sans KR", sans-serif;
+            }
+            body {
+              margin: 0;
+              padding: 0;
               background: #ffffff !important;
               color: #111827 !important;
-              margin: 0 !important;
-              padding: 0 !important;
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
             }
-            #powernet-print-area {
-              display: block !important;
-              width: 100% !important;
-              max-width: none !important;
-              background: #ffffff !important;
-              color: #111827 !important;
-              padding: 0 !important;
-              margin: 0 !important;
+            .doc-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              border-bottom: 2px solid #111827;
+              padding-bottom: 10px;
+              margin-bottom: 18px;
+            }
+            .doc-logo {
+              width: 120px;
+              height: auto;
+            }
+            .doc-meta {
+              text-align: right;
+              font-size: 11px;
+              color: #4b5563;
+              line-height: 1.5;
+            }
+            .doc-title-box {
+              text-align: center;
+              margin: 18px 0;
+            }
+            .doc-title {
+              font-size: 22px;
+              font-weight: 900;
+              color: #111827;
+              margin: 0 0 6px 0;
+              letter-spacing: -0.5px;
+            }
+            .doc-subtitle {
+              font-size: 12px;
+              color: #6b7280;
+              margin: 0;
+            }
+            .sec-title {
+              font-size: 12px;
+              font-weight: 700;
+              color: #1f2937;
+              margin: 0 0 8px 0;
+            }
+            table.doc-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 18px;
+              font-size: 11.5px;
+            }
+            table.doc-table th, table.doc-table td {
+              border: 1px solid #d1d5db;
+              padding: 8px 10px;
+            }
+            table.doc-table th {
+              background-color: #f3f4f6 !important;
+              color: #374151;
+              font-weight: bold;
+              text-align: left;
+            }
+            table.doc-table td {
+              color: #111827;
+            }
+            .status-done {
+              color: #047857;
+              font-weight: bold;
+              text-align: center;
+            }
+            .notice-box {
+              margin: 18px 0;
+              padding: 12px 16px;
+              border: 1px solid #d1d5db;
+              background-color: #f9fafb !important;
+              border-radius: 4px;
+              font-size: 11px;
+              color: #4b5563;
+              line-height: 1.6;
+              text-align: center;
+            }
+            .sig-row {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-top: 24px;
+              padding-top: 14px;
+              border-top: 1px solid #d1d5db;
+            }
+            .sig-left-title {
+              font-size: 11px;
+              color: #6b7280;
+            }
+            .sig-left-name {
+              font-size: 13px;
+              font-weight: bold;
+              color: #111827;
+              margin-top: 3px;
+            }
+            .sig-right {
+              position: relative;
+              text-align: right;
+              padding-right: 32px;
+            }
+            .sig-comp {
+              font-size: 14px;
+              font-weight: 900;
+              color: #111827;
+            }
+            .sig-title {
+              font-size: 11px;
+              color: #4b5563;
+              font-weight: 600;
+            }
+            .seal-stamp {
+              position: absolute;
+              top: -8px;
+              right: -10px;
+              width: 58px;
+              height: 58px;
+              border: 2px solid #dc2626;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transform: rotate(-12deg);
+              opacity: 0.85;
+            }
+            .seal-stamp span {
+              font-size: 9px;
+              font-weight: 900;
+              color: #dc2626;
+              text-align: center;
+              line-height: 1.1;
+            }
+            .doc-footer {
+              margin-top: 18px;
+              text-align: center;
+              font-size: 9px;
+              color: #9ca3af;
+              font-family: monospace;
             }
           </style>
         </head>
         <body>
-          <div id="powernet-print-area">
-            ${printArea.innerHTML}
+          <div class="doc-header">
+            <img src="/logo.png" alt="POWER NET" class="doc-logo" />
+            <div class="doc-meta">
+              <div>문서번호: <strong>${data.docNo}</strong></div>
+              <div>발행일자: ${data.completedDate || new Date().toISOString().split("T")[0]}</div>
+              <div>보존연한: 영구 (ITGC 회계감사 증빙)</div>
+            </div>
+          </div>
+
+          <div class="doc-title-box">
+            <h1 class="doc-title">${title}</h1>
+            <p class="doc-subtitle">${subTitle}</p>
+          </div>
+
+          <div class="sec-title">■ 대상 임직원 기본 정보</div>
+          <table class="doc-table">
+            <tbody>
+              <tr>
+                <th style="width: 25%;">성 명</th>
+                <td style="width: 25%; font-weight: bold;">${data.empName}</td>
+                <th style="width: 25%;">소속 부서</th>
+                <td style="width: 25%;">${data.department}</td>
+              </tr>
+              <tr>
+                <th>직급 / 직책</th>
+                <td>${data.rank || "Staff"} ${data.role ? `/ ${data.role}` : ""}</td>
+                <th>근무 사업장</th>
+                <td>${data.location === "seoul" ? "서울사업장 (본사)" : "수원사업장 (연구소/제조)"}</td>
+              </tr>
+              <tr>
+                <th>${isOffboarding ? "퇴사 예정일" : "입사일자"}</th>
+                <td style="font-weight: bold;">${data.targetDate}</td>
+                <th>${isOffboarding ? "권한 차단 일시" : "온보딩 진척도"}</th>
+                <td style="font-weight: bold;">${isOffboarding ? `${data.targetDate} 익일 00:00 (D+1)` : `${data.progressPercent || 100}% 완료`}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="sec-title">■ ${isOffboarding ? "계정 차단 및 IT 자산 회수 확인 내역" : "IT 장비 및 사내 권한 지급 현황"}</div>
+          ${isOffboarding ? `
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px; text-align: center;">No.</th>
+                  <th>통제 대상 시스템 및 자산</th>
+                  <th>통제 내용</th>
+                  <th style="width: 80px; text-align: center;">처리 상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="text-align: center; color: #6b7280;">1</td>
+                  <td style="font-weight: bold;">그룹웨어 및 사내 메일 (@gopowernet.com)</td>
+                  <td style="color: #4b5563;">계정 잠금 및 로그인 영구 비활성화 (보안 아카이빙)</td>
+                  <td class="status-done">회수 완료</td>
+                </tr>
+                <tr>
+                  <td style="text-align: center; color: #6b7280;">2</td>
+                  <td style="font-weight: bold;">ERP & MES 전산 회계/생산 시스템</td>
+                  <td style="color: #4b5563;">전표 입력, 결재선 및 데이터베이스 접근 권한 회수</td>
+                  <td class="status-done">회수 완료</td>
+                </tr>
+                <tr>
+                  <td style="text-align: center; color: #6b7280;">3</td>
+                  <td style="font-weight: bold;">사내 고정 IP 및 방화벽/VPN 정책</td>
+                  <td style="color: #4b5563;">원격 접속 및 인트라넷 보안 정책 즉시 차단</td>
+                  <td class="status-done">회수 완료</td>
+                </tr>
+                <tr>
+                  <td style="text-align: center; color: #6b7280;">4</td>
+                  <td style="font-weight: bold;">업무용 PC/노트북 및 모니터 장비</td>
+                  <td style="color: #4b5563;">하드디스크 완전 포맷(Degaussing/데이터 파기) 및 반납</td>
+                  <td class="status-done">반납 확인</td>
+                </tr>
+                <tr>
+                  <td style="text-align: center; color: #6b7280;">5</td>
+                  <td style="font-weight: bold;">에스원(S1) 사내 출입증 / 보안카드</td>
+                  <td style="color: #4b5563;">사업장 정문 및 연구동 출입 통제 권한 무효화 및 실물 회수</td>
+                  <td class="status-done">회수 완료</td>
+                </tr>
+              </tbody>
+            </table>
+          ` : `
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px; text-align: center;">No.</th>
+                  <th>지급 및 준비 항목</th>
+                  <th>세부 규격 및 안내</th>
+                  <th style="width: 80px; text-align: center;">지급 상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="text-align: center; color: #6b7280;">1</td>
+                  <td style="font-weight: bold;">업무용 PC / 노트북 단말기</td>
+                  <td style="color: #4b5563;">OS 초기 세팅, 사내 보안 소프트웨어 설치 완료</td>
+                  <td class="status-done">지급 완료</td>
+                </tr>
+                <tr>
+                  <td style="text-align: center; color: #6b7280;">2</td>
+                  <td style="font-weight: bold;">사내 고정 IP 및 네트워크 환경</td>
+                  <td style="color: #4b5563;">이더넷 포트 연결 및 인트라넷 방화벽 포트 승인</td>
+                  <td class="status-done">부여 완료</td>
+                </tr>
+                <tr>
+                  <td style="text-align: center; color: #6b7280;">3</td>
+                  <td style="font-weight: bold;">그룹웨어 & 메일 (@gopowernet.com)</td>
+                  <td style="color: #4b5563;">공식 계정 생성 및 초기 로그인 안내장 발송</td>
+                  <td class="status-done">생성 완료</td>
+                </tr>
+                <tr>
+                  <td style="text-align: center; color: #6b7280;">4</td>
+                  <td style="font-weight: bold;">웰컴 패키지 및 사무용품</td>
+                  <td style="color: #4b5563;">파워넷 다이어리, 노트, 필기구, 사내 규정집</td>
+                  <td class="status-done">지급 완료</td>
+                </tr>
+                <tr>
+                  <td style="text-align: center; color: #6b7280;">5</td>
+                  <td style="font-weight: bold;">사원증 발주 및 공식 명함 시안</td>
+                  <td style="color: #4b5563;">에스원(S1) 출입증 제작 접수 및 명함 스튜디오 인쇄 발주</td>
+                  <td class="status-done">발주 완료</td>
+                </tr>
+              </tbody>
+            </table>
+          `}
+
+          <div class="notice-box">
+            ${isOffboarding ? `
+              위 직원은 당사 규정 및 외부 감사 기준(ITGC)에 의거하여 사내 전산 자원, 그룹웨어, ERP 권한 및<br />
+              출입 보안카드가 정해진 기한 내에 완전하게 회수 및 차단되었음을 공식 확인합니다.
+            ` : `
+              위 직원은 (주)파워넷의 신규 입사 온보딩 프로세스를 정상적으로 이수하고,<br />
+              업무 수행에 필요한 필수 IT 자산 및 사내 시스템 계정을 수령하였음을 증명합니다.
+            `}
+          </div>
+
+          <div class="sig-row">
+            <div>
+              <div class="sig-left-title">인사기획팀 / 전산총무팀 확인자:</div>
+              <div class="sig-left-name">김예슬 (인사기획 & 전산총무 관리자) (인)</div>
+            </div>
+            <div class="sig-right">
+              <div class="sig-comp">주식회사 파워넷</div>
+              <div class="sig-title">대표이사 및 인사총괄</div>
+              <div class="seal-stamp">
+                <span>주식회사<br />파워넷<br />인</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="doc-footer">
+            POWER NET CO., LTD. · HR Lifecycle Sync Portal · 본 문서는 감사 증빙용 법적 효력을 갖는 전자 기록물입니다.
           </div>
         </body>
       </html>
-    `);
+    `;
+
+    frameDoc.open();
+    frameDoc.write(printHTML);
     frameDoc.close();
 
-    // 3. 렌더링 완료 후 정확히 해당 iframe만 단독 인쇄
     setTimeout(() => {
       try {
         printFrame.contentWindow?.focus();
@@ -121,20 +394,10 @@ export default function DocumentPrintModal({ data, onClose }: DocumentPrintModal
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-      
-      {/* 백그라운드 인쇄 누출 방지 전역 스타일 */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media print {
-          body > * {
-            visibility: hidden !important;
-          }
-        }
-      ` }} />
-
       {/* 모달 윈도우 컨테이너 */}
       <div className="w-full max-w-3xl flex flex-col max-h-[95vh] rounded-2xl border overflow-hidden shadow-2xl bg-neutral-900 border-neutral-700">
         
-        {/* 상단 툴바 (인쇄 시 제외) */}
+        {/* 상단 툴바 */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800 bg-neutral-950">
           <div className="flex items-center gap-2">
             <span className="p-1.5 rounded-lg bg-blue-600/20 text-blue-400">
@@ -161,10 +424,10 @@ export default function DocumentPrintModal({ data, onClose }: DocumentPrintModal
           </div>
         </div>
 
-        {/* 실제 문서 본문 (A4 1장 최적화 레이아웃) */}
+        {/* 모달 화면 내 문서 미리보기 (사용자 눈에 보이는 뷰) */}
         <div className="flex-1 overflow-y-auto p-6 sm:p-10 bg-white text-neutral-900 font-sans">
           
-          <div id="powernet-print-area">
+          <div>
             {/* 1. 공문서 헤더 */}
             <div className="flex items-center justify-between border-b-2 border-neutral-900 pb-3 mb-5">
               <div className="w-28 sm:w-32">
