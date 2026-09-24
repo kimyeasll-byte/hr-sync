@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { toPng } from 'html-to-image';
-import { Download, FileText, Sparkles, Building2 } from 'lucide-react';
+import { Download, FileText, Sparkles, AtSign } from 'lucide-react';
 
 const LOCATIONS = {
   seoul: {
@@ -19,11 +19,11 @@ const LOCATIONS = {
   }
 };
 
-// 파워넷 직급/직책 영문 사전
-const TITLE_MAP: Record<string, string> = {
+// 파워넷 공식 직급 영문 맵
+const RANK_MAP: Record<string, string> = {
   // [사업부 직급]
-  '사원': 'Associate',
-  '주임': 'Assistant Manager',
+  '사원': 'Staff',
+  '주임': 'Senior Staff',
   '대리': 'Assistant Manager',
   '과장': 'Manager',
   '차장': 'Senior Manager',
@@ -41,9 +41,11 @@ const TITLE_MAP: Record<string, string> = {
   '주임연구원': 'Associate Research Engineer',
   '선임연구원': 'Senior Research Engineer',
   '책임연구원': 'Principal Research Engineer',
-  '수석연구원': 'Lead Research Engineer',
+  '수석연구원': 'Lead Research Engineer'
+};
 
-  // [직책]
+// 파워넷 직책 영문 맵
+const ROLE_MAP: Record<string, string> = {
   '팀원': 'Team Member',
   '파트장': 'Part Leader',
   '팀장': 'Team Leader',
@@ -51,36 +53,6 @@ const TITLE_MAP: Record<string, string> = {
   '연구소장': 'Head of R&D Center',
   '그룹장': 'Group Leader'
 };
-
-// 한글 직급 -> 영문 직급 자동 변환 함수
-function autoTranslateTitle(koreanTitle: string): string {
-  if (!koreanTitle) return '';
-  const trimmed = koreanTitle.trim();
-
-  // 1. 단어 단위 매칭 (슬래시 '/' 또는 공백 구분 지원: 예: "전무이사 / C프로젝트 팀장" 또는 "대리 / 경영지원팀")
-  const tokens = trimmed.split(/[\/\s,]+/).map(t => t.trim()).filter(Boolean);
-  const matchedTokens: string[] = [];
-
-  for (const token of tokens) {
-    if (TITLE_MAP[token]) {
-      matchedTokens.push(TITLE_MAP[token]);
-    }
-  }
-
-  if (matchedTokens.length > 0) {
-    return matchedTokens.join(' / ');
-  }
-
-  // 2. 부분 일치 검색 (길이가 긴 직급부터 우선 매칭: 예: "선임연구원"이 "연구원"보다 먼저 매칭)
-  const sortedKeys = Object.keys(TITLE_MAP).sort((a, b) => b.length - a.length);
-  for (const key of sortedKeys) {
-    if (trimmed.includes(key)) {
-      return TITLE_MAP[key];
-    }
-  }
-
-  return '';
-}
 
 export default function BusinessCardGenerator({ initialName = "", initialDept = "" }: { initialName?: string, initialDept?: string }) {
   const frontRef = useRef<HTMLDivElement>(null);
@@ -90,20 +62,46 @@ export default function BusinessCardGenerator({ initialName = "", initialDept = 
   const [formData, setFormData] = useState({
     name: initialName || '',
     nameEn: '',
-    title: '',
-    titleEn: '',
-    deptEn: initialDept || '',
+    rank: '',           // 직급 (예: 대리, 과장, 선임연구원 등)
+    role: initialDept || '', // 직책 또는 소속팀 (예: 경영지원팀, C프로젝트 팀장 등)
+    rankEn: '',         // 영문 직급 (자동 완성)
+    roleEn: '',         // 영문 직책/부서
     phone: '02-3282-0700',
     mobile: '',
     fax: '02-3282-0889',
-    email: '',
+    emailId: '',        // 아이디만 입력 (yskim)
     location: 'suwon' as 'seoul' | 'suwon'
   });
+
+  // 직급 변경 시 영문 직급 자동 연동
+  const handleRankChange = (rankValue: string) => {
+    const en = RANK_MAP[rankValue] || '';
+    setFormData(prev => ({
+      ...prev,
+      rank: rankValue,
+      rankEn: en || prev.rankEn
+    }));
+  };
+
+  // 직책/소속팀 변경 시 자동 영문 연동
+  const handleRoleChange = (roleValue: string) => {
+    let matchedEn = '';
+    for (const [k, v] of Object.entries(ROLE_MAP)) {
+      if (roleValue.includes(k)) {
+        matchedEn = v;
+        break;
+      }
+    }
+    setFormData(prev => ({
+      ...prev,
+      role: roleValue,
+      roleEn: matchedEn || prev.roleEn
+    }));
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
-    // 발령지 변경 시 전화/팩스 기본값도 함께 세팅
     if (name === 'location') {
       const loc = value as 'seoul' | 'suwon';
       setFormData(prev => ({
@@ -115,34 +113,19 @@ export default function BusinessCardGenerator({ initialName = "", initialDept = 
       return;
     }
 
-    // 한글 직급 입력 시 영문 직급 자동 연동
-    if (name === 'title') {
-      const translated = autoTranslateTitle(value);
-      setFormData(prev => ({
-        ...prev,
-        title: value,
-        titleEn: translated || prev.titleEn
-      }));
+    if (name === 'emailId') {
+      // @gopowernet.com 포함 입력 시 아이디만 추출
+      const cleaned = value.replace('@gopowernet.com', '').trim();
+      setFormData(prev => ({ ...prev, emailId: cleaned }));
       return;
     }
 
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // 직급 빠른 선택 태그 클릭 핸들러
-  const handleQuickTitle = (korTitle: string) => {
-    const current = formData.title.trim();
-    let newTitle = korTitle;
-    if (current && !current.includes(korTitle)) {
-      newTitle = `${current} / ${korTitle}`;
-    }
-    const translated = autoTranslateTitle(newTitle);
-    setFormData(prev => ({
-      ...prev,
-      title: newTitle,
-      titleEn: translated || prev.titleEn
-    }));
-  };
+  const fullEmail = formData.emailId 
+    ? (formData.emailId.includes('@') ? formData.emailId : `${formData.emailId}@gopowernet.com`) 
+    : '';
 
   const downloadCard = async (ref: React.RefObject<HTMLDivElement | null>, side: 'front' | 'back') => {
     if (!ref.current) return;
@@ -150,7 +133,7 @@ export default function BusinessCardGenerator({ initialName = "", initialDept = 
       setIsExporting(true);
       const dataUrl = await toPng(ref.current, { quality: 1, pixelRatio: 3 });
       const link = document.createElement('a');
-      link.download = `파워넷_명함_${formData.name || '미입력'}_${side}.png`;
+      link.download = `파워넷_명함_${formData.name || '직원'}_${side}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
@@ -163,7 +146,7 @@ export default function BusinessCardGenerator({ initialName = "", initialDept = 
 
   return (
     <div className="flex flex-col xl:flex-row gap-8">
-      {/* 왼쪽 입력 폼 (다크 테마 고대비 적용) */}
+      {/* 왼쪽 입력 폼 */}
       <div 
         className="w-full xl:w-1/3 p-6 border shadow-sm"
         style={{ 
@@ -214,20 +197,62 @@ export default function BusinessCardGenerator({ initialName = "", initialDept = 
             </div>
           </div>
 
-          {/* 직급 (국문) & 빠른 선택 칩 */}
+          {/* 1. 직급 (슬래시 없이 독립된 선택창) */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-bold" style={{ color: 'var(--color-text-muted)' }}>직급/직책 (국문)</label>
+              <label className="block text-xs font-bold" style={{ color: 'var(--color-text-muted)' }}>직급 (Rank)</label>
               <span className="text-[11px] text-blue-400 flex items-center gap-1 font-medium">
-                <Sparkles size={12} /> 입력 시 영문 자동 완성
+                <Sparkles size={12} /> 선택 시 영문 직급 자동 연동
               </span>
+            </div>
+            <select
+              value={formData.rank}
+              onChange={(e) => handleRankChange(e.target.value)}
+              className="w-full p-2.5 border rounded outline-none text-sm font-semibold transition-colors cursor-pointer"
+              style={{ 
+                backgroundColor: 'var(--color-bg)', 
+                borderColor: 'var(--color-border)', 
+                color: 'var(--color-text-title)' 
+              }}
+            >
+              <option value="">-- 직급 선택 --</option>
+              <optgroup label="[사업부 직급]">
+                <option value="사원">사원 (Staff)</option>
+                <option value="주임">주임 (Senior Staff)</option>
+                <option value="대리">대리 (Assistant Manager)</option>
+                <option value="과장">과장 (Manager)</option>
+                <option value="차장">차장 (Senior Manager)</option>
+                <option value="부장">부장 (General Manager)</option>
+                <option value="담당">담당 (Director)</option>
+                <option value="이사">이사 (Managing Director)</option>
+                <option value="상무">상무 (Senior Managing Director)</option>
+                <option value="전무">전무 (Senior Managing Director)</option>
+                <option value="전무이사">전무이사 (Senior Managing Director)</option>
+                <option value="부사장">부사장 (Executive Vice President)</option>
+                <option value="대표이사">대표이사 (CEO & President)</option>
+              </optgroup>
+              <optgroup label="[연구소 직급]">
+                <option value="연구원">연구원 (Research Engineer)</option>
+                <option value="주임연구원">주임연구원 (Associate Research Engineer)</option>
+                <option value="선임연구원">선임연구원 (Senior Research Engineer)</option>
+                <option value="책임연구원">책임연구원 (Principal Research Engineer)</option>
+                <option value="수석연구원">수석연구원 (Lead Research Engineer)</option>
+              </optgroup>
+            </select>
+          </div>
+
+          {/* 2. 직책 / 소속팀 (슬래시 없이 독립된 칸) */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-bold" style={{ color: 'var(--color-text-muted)' }}>직책 / 소속팀</label>
+              <span className="text-[11px] text-gray-400">예: 경영지원팀, C프로젝트 팀장</span>
             </div>
             <input 
               type="text" 
-              name="title" 
-              placeholder="예: 과장 / 개발팀장"
-              value={formData.title} 
-              onChange={handleChange} 
+              name="role" 
+              placeholder="예: 경영지원팀 또는 개발팀장"
+              value={formData.role} 
+              onChange={(e) => handleRoleChange(e.target.value)} 
               className="w-full p-2.5 border rounded outline-none text-sm font-medium transition-colors" 
               style={{ 
                 backgroundColor: 'var(--color-bg)', 
@@ -236,13 +261,13 @@ export default function BusinessCardGenerator({ initialName = "", initialDept = 
               }} 
             />
 
-            {/* 직급 빠른 선택 버튼들 */}
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {['대리', '과장', '차장', '부장', '팀장', '선임연구원', '책임연구원'].map((tag) => (
+            {/* 직책 빠른 태그 */}
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {['팀원', '파트장', '팀장', '사업부장', '연구소장', '그룹장'].map((tag) => (
                 <button
                   key={tag}
                   type="button"
-                  onClick={() => handleQuickTitle(tag)}
+                  onClick={() => handleRoleChange(tag)}
                   className="text-[11px] px-2 py-0.5 rounded border transition-colors hover:border-blue-500"
                   style={{ 
                     backgroundColor: 'var(--color-bg)', 
@@ -262,9 +287,9 @@ export default function BusinessCardGenerator({ initialName = "", initialDept = 
               <label className="block text-xs font-bold mb-1" style={{ color: 'var(--color-text-muted)' }}>영문 직급 (자동 완성)</label>
               <input 
                 type="text" 
-                name="titleEn" 
-                placeholder="Manager"
-                value={formData.titleEn} 
+                name="rankEn" 
+                placeholder="Senior Staff"
+                value={formData.rankEn} 
                 onChange={handleChange} 
                 className="w-full p-2.5 border rounded outline-none text-sm font-medium transition-colors" 
                 style={{ 
@@ -275,12 +300,12 @@ export default function BusinessCardGenerator({ initialName = "", initialDept = 
               />
             </div>
             <div>
-              <label className="block text-xs font-bold mb-1" style={{ color: 'var(--color-text-muted)' }}>영문 부서명</label>
+              <label className="block text-xs font-bold mb-1" style={{ color: 'var(--color-text-muted)' }}>영문 부서/직책</label>
               <input 
                 type="text" 
-                name="deptEn" 
-                placeholder="R&D Team"
-                value={formData.deptEn} 
+                name="roleEn" 
+                placeholder="Management Team"
+                value={formData.roleEn} 
                 onChange={handleChange} 
                 className="w-full p-2.5 border rounded outline-none text-sm font-medium transition-colors" 
                 style={{ 
@@ -289,6 +314,38 @@ export default function BusinessCardGenerator({ initialName = "", initialDept = 
                   color: 'var(--color-text-title)' 
                 }} 
               />
+            </div>
+          </div>
+
+          {/* 이메일 (아이디만 입력하면 @gopowernet.com 자동 결합) */}
+          <div>
+            <label className="block text-xs font-bold mb-1" style={{ color: 'var(--color-text-muted)' }}>사내 이메일 (아이디만 입력)</label>
+            <div 
+              className="flex items-center rounded border overflow-hidden transition-colors"
+              style={{ 
+                borderColor: 'var(--color-border)', 
+                backgroundColor: 'var(--color-bg)' 
+              }}
+            >
+              <input 
+                type="text" 
+                name="emailId" 
+                placeholder="yskim"
+                value={formData.emailId} 
+                onChange={handleChange} 
+                className="w-full p-2.5 outline-none text-sm font-medium bg-transparent" 
+                style={{ color: 'var(--color-text-title)' }} 
+              />
+              <span 
+                className="px-3 text-xs font-bold select-none py-3 border-l"
+                style={{ 
+                  borderColor: 'var(--color-border)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: '#60a5fa'
+                }}
+              >
+                @gopowernet.com
+              </span>
             </div>
           </div>
 
@@ -327,24 +384,8 @@ export default function BusinessCardGenerator({ initialName = "", initialDept = 
             </div>
           </div>
 
-          {/* 이메일 & 팩스 */}
+          {/* 팩스번호 & 발령지 */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold mb-1" style={{ color: 'var(--color-text-muted)' }}>사내 이메일</label>
-              <input 
-                type="email" 
-                name="email" 
-                placeholder="id@gopowernet.com"
-                value={formData.email} 
-                onChange={handleChange} 
-                className="w-full p-2.5 border rounded outline-none text-sm font-medium transition-colors" 
-                style={{ 
-                  backgroundColor: 'var(--color-bg)', 
-                  borderColor: 'var(--color-border)', 
-                  color: 'var(--color-text-title)' 
-                }} 
-              />
-            </div>
             <div>
               <label className="block text-xs font-bold mb-1" style={{ color: 'var(--color-text-muted)' }}>팩스 번호</label>
               <input 
@@ -360,25 +401,23 @@ export default function BusinessCardGenerator({ initialName = "", initialDept = 
                 }} 
               />
             </div>
-          </div>
-
-          {/* 발령지 선택 */}
-          <div>
-            <label className="block text-xs font-bold mb-1" style={{ color: 'var(--color-text-muted)' }}>발령지 (근무지 사업장)</label>
-            <select 
-              name="location" 
-              value={formData.location} 
-              onChange={handleChange} 
-              className="w-full p-2.5 border rounded outline-none text-sm font-bold transition-colors cursor-pointer"
-              style={{ 
-                backgroundColor: 'var(--color-bg)', 
-                borderColor: 'var(--color-border)', 
-                color: '#60a5fa' 
-              }}
-            >
-              <option value="suwon">수원1 (영통구 현대테라타워 A동 1403호)</option>
-              <option value="seoul">서울1 (금천구 현대지식산업센터 B동 17층)</option>
-            </select>
+            <div>
+              <label className="block text-xs font-bold mb-1" style={{ color: 'var(--color-text-muted)' }}>발령지 (근무지)</label>
+              <select 
+                name="location" 
+                value={formData.location} 
+                onChange={handleChange} 
+                className="w-full p-2.5 border rounded outline-none text-sm font-bold transition-colors cursor-pointer"
+                style={{ 
+                  backgroundColor: 'var(--color-bg)', 
+                  borderColor: 'var(--color-border)', 
+                  color: '#60a5fa' 
+                }}
+              >
+                <option value="suwon">수원1 (영통 현대테라타워)</option>
+                <option value="seoul">서울1 (금천 현대지식산업센터)</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -422,7 +461,6 @@ export default function BusinessCardGenerator({ initialName = "", initialDept = 
             className="bg-white relative overflow-hidden shadow-2xl rounded-sm"
             style={{ width: '450px', height: '260px', fontFamily: '"Malgun Gothic", sans-serif' }}
           >
-            {/* 얇은 테두리 */}
             <div className="absolute inset-0 border-[2px] border-[#ececec]"></div>
             
             <div className="p-8 h-full flex flex-col justify-between relative z-10">
@@ -437,15 +475,20 @@ export default function BusinessCardGenerator({ initialName = "", initialDept = 
                       {formData.nameEn || 'English Name'}
                     </span>
                   </div>
+                  {/* 국문 직급 / 소속팀 조합 */}
                   <div className="text-[11px] font-bold text-[#1f2937] leading-tight mb-0.5">
-                    {formData.title || '직급 / 직책'}
+                    {formData.rank && formData.role 
+                      ? `${formData.rank} / ${formData.role}` 
+                      : (formData.rank || formData.role || '직급 / 부서')}
                   </div>
+                  {/* 영문 직급 */}
                   <div className="text-[10px] text-gray-500 leading-tight">
-                    {formData.titleEn || 'Position / Title'}
+                    {formData.rankEn || 'Position'}
                   </div>
-                  {formData.deptEn && (
+                  {/* 영문 직책/부서 */}
+                  {formData.roleEn && (
                     <div className="text-[10px] text-gray-500 leading-tight">
-                      {formData.deptEn}
+                      {formData.roleEn}
                     </div>
                   )}
                 </div>
@@ -468,7 +511,7 @@ export default function BusinessCardGenerator({ initialName = "", initialDept = 
                   <div className="flex items-center gap-1.5"><span className="font-extrabold text-[#083a81]">T</span> {formData.phone}</div>
                   <div className="flex items-center gap-1.5"><span className="font-extrabold text-[#083a81]">M</span> {formData.mobile || '010-0000-0000'}</div>
                   <div className="flex items-center gap-1.5"><span className="font-extrabold text-[#083a81]">F</span> {formData.fax}</div>
-                  <div className="flex items-center gap-1.5"><span className="font-extrabold text-[#083a81]">E</span> {formData.email || 'id@gopowernet.com'}</div>
+                  <div className="flex items-center gap-1.5"><span className="font-extrabold text-[#083a81]">E</span> {fullEmail || 'id@gopowernet.com'}</div>
                 </div>
               </div>
             </div>
