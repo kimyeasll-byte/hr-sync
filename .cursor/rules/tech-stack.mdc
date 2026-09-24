@@ -1,0 +1,16 @@
+---
+description: 항상 적용되는 기본 기술 스택 및 아키텍처 규칙
+globs: *.ts, *.tsx, *.js, *.jsx
+---
+# 기술 스택 및 아키텍처 개발 규칙
+
+1. **비동기 작업 강제 규정 (Timeout 방지)**
+   - 시간이 오래 걸리는 외부 API(ERP, 그룹웨어) 통신 로직을 Next.js API/Route 안에서 동기식(`await`)으로 무한정 기다리지 마라. 무료 서버 제한에 걸린다.
+   - 반드시 Upstash QStash 큐에 작업을 밀어 넣고 즉시 성공(`200 OK`)을 프론트엔드로 반환하라.
+
+2. **Supabase 권한 및 보안 통제**
+   - Supabase 클라이언트를 생성할 때, 관리자 권한이 필요한 백엔드 로직에서는 반드시 `SUPABASE_SERVICE_ROLE_KEY`를 사용하고, 클라이언트(브라우저)에서는 익명 키(`NEXT_PUBLIC_SUPABASE_ANON_KEY`)를 써라.
+   - 데이터베이스 Row Level Security (RLS)는 비활성화하여 서버 로직 내에서 통제함으로써 구조 복잡도를 낮춘다.
+
+3. **데이터베이스 접근**
+   - 복잡한 쿼리 빌더(ORM)를 억지로 도입하지 말고, Supabase 공식 JS Client( `@supabase/supabase-js` )를 통해 직관적이고 단순하게 쿼리를 작성하라.

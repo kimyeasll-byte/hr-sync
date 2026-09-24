@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>전체 화면 보고서</title>
+<style>
+:root {
+  --spacing-2: 8px; --spacing-3: 12px; --spacing-4: 16px; --spacing-6: 24px;
+  --radius-md: 12px; --border-thin: 1px solid var(--color-border);
+  --color-bg: #f5f5f7; --color-surface: #ffffff;
+  --color-text-title: #1d1d1f; --color-text-muted: #86868b;
+  --color-border: #d2d2d7;
+  --color-primary-bg: #000000; --color-primary-text: #ffffff;
+  --color-error-bg: #ffeceb; --color-error-text: #cc2925;
+  --color-progress-bg: #e5f0fa; --color-progress-text: #0052a3;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #000000; --color-surface: #1c1c1e;
+    --color-text-title: #f5f5f7; --color-text-muted: #98989d; --color-border: #38383a;
+    --color-primary-bg: #ffffff; --color-primary-text: #000000;
+    --color-error-bg: #cc2925; --color-error-text: #ffffff;
+    --color-progress-bg: #0052a3; --color-progress-text: #ffffff;
+  }
+}
+body { font-family: -apple-system, sans-serif; background: var(--color-bg); color: var(--color-text-title); padding: 40px; }
+h1 { font-size: 32px; font-weight: 700; margin-bottom: var(--spacing-6); letter-spacing: -1px; }
+.card { background: var(--color-surface); border: var(--border-thin); border-radius: var(--radius-md); padding: var(--spacing-6); margin-bottom: var(--spacing-4); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.btn { display: inline-flex; align-items: center; gap: var(--spacing-2); background: var(--color-primary-bg); color: var(--color-primary-text); border: none; padding: var(--spacing-3) var(--spacing-4); border-radius: var(--radius-md); font-weight: 600; cursor: pointer; }
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-left: var(--spacing-2); border: 1px solid currentColor; }
+.badge.progress { background: var(--color-progress-bg); color: var(--color-progress-text); }
+.alert { background: var(--color-surface); border-left: 5px solid var(--color-error-bg); border-radius: var(--radius-md); padding: var(--spacing-6); margin-bottom: var(--spacing-6); }
+@media (prefers-color-scheme: dark) { .badge { border: none; } }
+</style>
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <h1>오늘의 할 일</h1>
+  
+  <div class="alert">
+    <h3 style="color:var(--color-error-text); margin:0 0 8px 0; font-size:16px;">
+      <i data-lucide="alert-triangle" stroke-width="1.5" style="width:18px;height:18px;vertical-align:-3px;"></i> 그룹웨어 성공, ERP 계정 생성 실패
+    </h3>
+    <p style="color:var(--color-text-muted); font-size:14px; margin:0 0 16px 0;">홍길동 님의 ERP 계정을 만드는 중 권한 오류가 발생했습니다.</p>
+    <button class="btn" style="background:transparent; color:var(--color-error-text); border:1px solid currentColor;">
+      <i data-lucide="external-link" stroke-width="1.5"></i> ERP 관리자 페이지 열기
+    </button>
+  </div>
+
+  <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <div style="font-size:18px; font-weight:700;">신규 입사자 '홍길동' <span class="badge progress"><i data-lucide="loader" stroke-width="1.5" style="width:12px;height:12px;"></i> 작업 중 30%</span></div>
+      <div style="font-size:14px; color:var(--color-text-muted); margin-top:6px;">기획팀 · 백그라운드 설치 중</div>
+    </div>
+    <button class="btn" disabled><i data-lucide="loader" stroke-width="1.5"></i> 처리 중</button>
+  </div>
+  
+  <script>lucide.createIcons();</script>
+</body>
+</html>

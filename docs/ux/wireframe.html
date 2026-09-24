@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>흑백 와이어프레임 보고서</title>
+<style>
+  body { font-family: sans-serif; background: #f0f0f0; margin: 0; padding: 20px; color: #333; }
+  .screen { background: #fff; border: 2px solid #333; margin-bottom: 40px; padding: 20px; box-shadow: 4px 4px 0 #999; }
+  .header { font-size: 24px; font-weight: bold; border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 20px; }
+  .box { border: 1px solid #333; padding: 10px; margin: 10px 0; background: #f9f9f9; }
+  .button-primary { display: inline-block; background: #333; color: #fff; padding: 10px 20px; text-decoration: none; font-weight: bold; margin-top: 10px; border: none; cursor: pointer; }
+  .button-secondary { display: inline-block; border: 1px solid #333; color: #333; padding: 10px 20px; text-decoration: none; font-weight: bold; margin-top: 10px; cursor: pointer; }
+  .arrow { font-size: 24px; text-align: center; margin: 20px 0; font-weight: bold; color: #666; }
+  .note { color: #666; font-size: 14px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<h1>사용자 흐름 와이어프레임</h1>
+
+<div class="screen">
+  <div class="header">1. 첫 화면 (대시보드) - 비어 있을 때</div>
+  <div class="box" style="text-align:center; padding: 50px 10px;">
+    [ 그림: 텅 빈 박스 일러스트 ]<br><br>
+    현재 예정된 입사/퇴사 일정이 없습니다.<br>
+    <div class="note">마음 편히 다른 업무를 보세요!</div>
+    <br>
+    <div class="button-secondary">+ 수동으로 새 입사/퇴사 건 등록하기</div>
+  </div>
+</div>
+
+<div class="arrow">↓ 명단이 들어와서 할 일이 생김 ↓</div>
+
+<div class="screen">
+  <div class="header">2. 첫 화면 (대시보드) - 목록 뷰</div>
+  <div>
+    [달력 뷰] | <b>[목록 뷰]</b>
+  </div>
+  <div class="box">
+    <b>신규 입사자 '홍길동' 입사 준비 (오늘)</b><br>
+    <div class="button-secondary">클릭하여 세팅하기</div>
+  </div>
+  <div class="box">
+    <b>퇴사자 '김철수' 권한 회수 (내일)</b>
+  </div>
+</div>
+
+<div class="arrow">↓ 홍길동 입사 준비를 클릭하면 꽉 찬 새 화면으로 이동 ↓</div>
+
+<div class="screen">
+  <div class="header">3. 입사자 세팅 화면</div>
+  <div class="box">
+    입사자 이름: [ 홍길동 ]<br>
+    소속 부서: [ 기획팀 ]
+  </div>
+  <div class="box">
+    <b>설치할 프로그램 및 권한 선택</b><br>
+    [v] 그룹웨어<br>
+    [v] ERP<br>
+    [ ] MES
+  </div>
+  <div style="text-align: right;">
+    <div class="button-primary">[ 입사 준비 완료 처리 ]</div>
+  </div>
+</div>
+
+<div class="arrow">↓ 버튼 클릭 후 즉시 '첫 화면'으로 복귀 (기다림) ↓</div>
+
+<div class="screen">
+  <div class="header">4. 첫 화면 (작업 중 표시)</div>
+  <div class="box">
+    <b>신규 입사자 '홍길동' 입사 준비 (오늘)</b> - <i>작업 중 (30%) ⏳</i>
+  </div>
+  <div class="note">화면이 막히지 않아 다른 작업을 병행할 수 있음</div>
+</div>
+
+<div class="arrow">↓ 약 1~2분 후 자동화 완료 및 오류 알림 발생 ↓</div>
+
+<div class="screen">
+  <div class="header">5. 알림 패널 (오류 발생 시)</div>
+  <div class="box" style="border-left: 5px solid #000;">
+    <b>⚠️ 그룹웨어 성공, ERP 계정 생성 실패</b><br>
+    홍길동 님의 ERP 계정을 만드는 중 문제가 발생했습니다.<br>
+    <div class="button-secondary">[ ERP 관리자 페이지 열기 ]</div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,79 @@
+/* 2. 디자인 토큰 파일 (CSS Variables) */
+
+:root {
+  /* 8. 간격 (Spacing) - 4px 단위 */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-12: 48px;
+
+  /* 7. 형태 (Shape) */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --border-thin: 1px solid var(--color-border);
+
+  /* 9. 상호작용 (Interaction) */
+  --transition-fast: 0.15s cubic-bezier(0.2, 0, 0, 1);
+  --active-scale: scale(0.97);
+
+  /* 10. 아이콘 (Icon) */
+  --icon-stroke-width: 1.5px;
+}
+
+/* 4. 라이트 모드 컬러 (기본) */
+:root {
+  --color-bg: #f5f5f7;
+  --color-surface: #ffffff;
+  --color-text-title: #1d1d1f;
+  --color-text-body: #515154;
+  --color-text-muted: #86868b;
+  --color-border: #d2d2d7;
+
+  /* 3. 기준색 (검정) */
+  --color-primary-bg: #000000;
+  --color-primary-text: #ffffff;
+  --color-primary-hover: rgba(0, 0, 0, 0.8);
+  --color-disabled-bg: #e5e5ea;
+  --color-disabled-text: #aeaeb2;
+
+  /* 5. 의미색 (대비비 4.5:1 충족) */
+  --color-success-bg: #e5f9e7;
+  --color-success-text: #198c39;
+  --color-error-bg: #ffeceb;
+  --color-error-text: #cc2925;
+  --color-progress-bg: #e5f0fa;
+  --color-progress-text: #0052a3;
+}
+
+/* 4. 다크 모드 컬러 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #000000;
+    --color-surface: #1c1c1e;
+    --color-text-title: #f5f5f7;
+    --color-text-body: #c7c7cc;
+    --color-text-muted: #98989d;
+    --color-border: #38383a;
+
+    /* 다크모드 반전 기준색 */
+    --color-primary-bg: #ffffff;
+    --color-primary-text: #000000;
+    --color-primary-hover: rgba(255, 255, 255, 0.8);
+    --color-disabled-bg: #3a3a3c;
+    --color-disabled-text: #636366;
+
+    /* 다크모드용 고대비 의미색 */
+    --color-success-bg: #198c39;
+    --color-success-text: #ffffff;
+    --color-error-bg: #cc2925;
+    --color-error-text: #ffffff;
+    --color-progress-bg: #0052a3;
+    --color-progress-text: #ffffff;
+  }
+}
