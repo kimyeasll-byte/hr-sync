@@ -54,23 +54,42 @@ const ROLE_MAP: Record<string, string> = {
   '그룹장': 'Group Leader'
 };
 
-export default function BusinessCardGenerator({ initialName = "", initialDept = "" }: { initialName?: string, initialDept?: string }) {
+export default function BusinessCardGenerator({ 
+  initialName = "", 
+  initialDept = "",
+  initialRank = "",
+  initialRole = "",
+  initialLocation = "suwon",
+  initialEmail = ""
+}: { 
+  initialName?: string;
+  initialDept?: string;
+  initialRank?: string;
+  initialRole?: string;
+  initialLocation?: 'seoul' | 'suwon';
+  initialEmail?: string;
+}) {
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
+
+  const emailPrefix = initialEmail ? initialEmail.split('@')[0] : '';
+  const initialCombinedRole = initialDept && initialRole 
+    ? `${initialDept} ${initialRole}` 
+    : (initialDept || initialRole || '');
 
   const [isExporting, setIsExporting] = useState(false);
   const [formData, setFormData] = useState({
     name: initialName || '',
     nameEn: '',
-    rank: '',           // 직급 (예: 대리, 과장, 선임연구원 등)
-    role: initialDept || '', // 직책 또는 소속팀 (예: 경영지원팀, C프로젝트 팀장 등)
-    rankEn: '',         // 영문 직급 (자동 완성)
-    roleEn: '',         // 영문 직책/부서
-    phone: '02-3282-0700',
+    rank: initialRank || '',           // 직급 (자동 동기화)
+    role: initialCombinedRole,         // 소속팀 / 직책 (자동 동기화)
+    rankEn: RANK_MAP[initialRank] || '', // 영문 직급 (자동 완성)
+    roleEn: ROLE_MAP[initialRole] || '', // 영문 직책 (자동 완성)
+    phone: LOCATIONS[initialLocation].phone,
     mobile: '',
-    fax: '02-3282-0889',
-    emailId: '',        // 아이디만 입력 (yskim)
-    location: 'suwon' as 'seoul' | 'suwon'
+    fax: LOCATIONS[initialLocation].fax,
+    emailId: emailPrefix,              // 이메일 아이디 (자동 추출)
+    location: initialLocation
   });
 
   // 직급 변경 시 영문 직급 자동 연동

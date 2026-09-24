@@ -11,6 +11,9 @@ export default function DashboardPage() {
   // Onboarding States
   const [onName, setOnName] = useState("");
   const [onDept, setOnDept] = useState("");
+  const [onRank, setOnRank] = useState("");
+  const [onRole, setOnRole] = useState("");
+  const [onLocation, setOnLocation] = useState<'seoul' | 'suwon'>('suwon');
   const [onDate, setOnDate] = useState("");
   const [onEmail, setOnEmail] = useState("");
   const [onStatus, setOnStatus] = useState<"idle" | "loading" | "in_progress" | "completed" | "error">("idle");
@@ -265,7 +268,7 @@ export default function DashboardPage() {
           {(onStatus === "in_progress" || onStatus === "completed") ? (
             <div>
               <div className="flex items-center justify-between p-4" style={{ backgroundColor: 'var(--color-bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}>
-                <div><div className="flex items-center gap-2 mb-1"><span className="font-bold text-lg" style={{ color: 'var(--color-text-title)' }}>{onName}</span></div><p style={{ color: 'var(--color-text-muted)', fontSize: '14px' }}>{onDept} · {onDate} 출근 예정 {onEmail ? `· 📩 ${onEmail}` : ''}</p></div>
+                <div><div className="flex items-center gap-2 mb-1"><span className="font-bold text-lg" style={{ color: 'var(--color-text-title)' }}>{onName} {onRank ? `(${onRank})` : ''}</span></div><p style={{ color: 'var(--color-text-muted)', fontSize: '14px' }}>{onDept} {onRole ? `· ${onRole}` : ''} · {onLocation === 'suwon' ? '수원사업장' : '서울사업장'} · {onDate} 출근 예정 {onEmail ? `· 📩 ${onEmail}` : ''}</p></div>
                 {onStatus === "in_progress" ? ( <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold" style={{ backgroundColor: 'var(--color-progress-bg)', color: 'var(--color-progress-text)', border: '1px solid currentColor' }}><Loader2 size={16} strokeWidth={2} className="animate-spin" /><span>작업 중 30%</span></div> ) : ( <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold" style={{ backgroundColor: 'var(--color-success-bg)', color: 'var(--color-success-text)', border: '1px solid currentColor' }}><CheckCircle2 size={16} strokeWidth={2} /><span>100% 완료</span></div> )}
               </div>
               {onStatus === "completed" && (
@@ -276,11 +279,11 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-blue-900">명함을 바로 만드시겠어요?</h4>
-                      <p className="text-xs text-blue-700">입사자 정보가 자동 입력된 명함 스튜디오로 이동합니다.</p>
+                      <p className="text-xs text-blue-700">입력하신 정보(이름/부서/직급/발령지)가 자동 동기화된 명함 스튜디오로 이동합니다.</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => { setOnStatus("idle"); setOnName(""); setOnDept(""); setOnDate(""); setOnEmail(""); }} className="px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors">
+                    <button onClick={() => { setOnStatus("idle"); setOnName(""); setOnDept(""); setOnRank(""); setOnRole(""); setOnLocation("suwon"); setOnDate(""); setOnEmail(""); }} className="px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors">
                       닫기
                     </button>
                     <button onClick={() => setActiveTab("card")} className="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm transition-colors flex items-center gap-2">
@@ -293,12 +296,94 @@ export default function DashboardPage() {
           ) : (
             <form onSubmit={handleOnboardSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="relative"><UserPlus className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-muted)' }} size={18} strokeWidth={1.5} /><input type="text" value={onName} onChange={(e) => setOnName(e.target.value)} placeholder="입사자 이름" className="w-full pl-10 pr-4 py-3 outline-none" style={{ backgroundColor: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text-title)', fontSize: '15px' }} /></div>
-                <div className="relative"><Briefcase className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-muted)' }} size={18} strokeWidth={1.5} /><input type="text" value={onDept} onChange={(e) => setOnDept(e.target.value)} placeholder="소속 팀" className="w-full pl-10 pr-4 py-3 outline-none" style={{ backgroundColor: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text-title)', fontSize: '15px' }} /></div>
-                <div className="relative"><Calendar className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-muted)' }} size={18} strokeWidth={1.5} /><input type="date" value={onDate} onChange={(e) => setOnDate(e.target.value)} className="w-full pl-10 pr-4 py-3 outline-none" style={{ backgroundColor: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text-title)', fontSize: '15px' }} /></div>
-                <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-muted)' }} size={18} strokeWidth={1.5} /><input type="email" value={onEmail} onChange={(e) => setOnEmail(e.target.value)} placeholder="개인 이메일 (온보딩 안내장 발송용)" className="w-full pl-10 pr-4 py-3 outline-none" style={{ backgroundColor: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text-title)', fontSize: '15px' }} /></div>
+                {/* 1. 입사자 이름 */}
+                <div className="relative">
+                  <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-muted)' }} size={18} strokeWidth={1.5} />
+                  <input type="text" value={onName} onChange={(e) => setOnName(e.target.value)} placeholder="입사자 이름 (예: 김예슬)" className="w-full pl-10 pr-4 py-3 outline-none" style={{ backgroundColor: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text-title)', fontSize: '15px' }} />
+                </div>
+
+                {/* 2. 소속 부서 */}
+                <div className="relative">
+                  <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-muted)' }} size={18} strokeWidth={1.5} />
+                  <input type="text" value={onDept} onChange={(e) => setOnDept(e.target.value)} placeholder="소속 부서 (예: 경영지원실 인사기획P)" className="w-full pl-10 pr-4 py-3 outline-none" style={{ backgroundColor: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text-title)', fontSize: '15px' }} />
+                </div>
+
+                {/* 3. 직급 (Rank) */}
+                <div className="relative">
+                  <select 
+                    value={onRank} 
+                    onChange={(e) => setOnRank(e.target.value)} 
+                    className="w-full px-4 py-3 outline-none cursor-pointer"
+                    style={{ backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text-title)', fontSize: '15px' }}
+                  >
+                    <option value="">-- 직급 선택 (Rank) --</option>
+                    <optgroup label="[사업부 직급]">
+                      <option value="사원">사원 (Staff)</option>
+                      <option value="주임">주임 (Senior Staff)</option>
+                      <option value="대리">대리 (Assistant Manager)</option>
+                      <option value="과장">과장 (Manager)</option>
+                      <option value="차장">차장 (Senior Manager)</option>
+                      <option value="부장">부장 (General Manager)</option>
+                      <option value="담당">담당 (Director)</option>
+                      <option value="이사">이사 (Managing Director)</option>
+                      <option value="상무">상무 (Senior Managing Director)</option>
+                      <option value="전무">전무 (Senior Managing Director)</option>
+                      <option value="전무이사">전무이사 (Senior Managing Director)</option>
+                      <option value="부사장">부사장 (Executive Vice President)</option>
+                      <option value="대표이사">대표이사 (CEO & President)</option>
+                    </optgroup>
+                    <optgroup label="[연구소 직급]">
+                      <option value="연구원">연구원 (Research Engineer)</option>
+                      <option value="주임연구원">주임연구원 (Associate Research Engineer)</option>
+                      <option value="선임연구원">선임연구원 (Senior Research Engineer)</option>
+                      <option value="책임연구원">책임연구원 (Principal Research Engineer)</option>
+                      <option value="수석연구원">수석연구원 (Lead Research Engineer)</option>
+                    </optgroup>
+                  </select>
+                </div>
+
+                {/* 4. 직책 (Role) */}
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={onRole} 
+                    onChange={(e) => setOnRole(e.target.value)} 
+                    placeholder="직책 (예: 팀원, 파트장, 팀장)" 
+                    className="w-full px-4 py-3 outline-none" 
+                    style={{ backgroundColor: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text-title)', fontSize: '15px' }} 
+                  />
+                </div>
+
+                {/* 5. 발령지 (근무 사업장) */}
+                <div className="relative">
+                  <select 
+                    value={onLocation} 
+                    onChange={(e) => setOnLocation(e.target.value as 'seoul' | 'suwon')} 
+                    className="w-full px-4 py-3 outline-none cursor-pointer font-medium"
+                    style={{ backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: '#60a5fa', fontSize: '15px' }}
+                  >
+                    <option value="suwon">수원1 (영통 현대테라타워 A동 1403호)</option>
+                    <option value="seoul">서울1 (금천 현대지식산업센터 B동 17층)</option>
+                  </select>
+                </div>
+
+                {/* 6. 출근 예정일 */}
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-muted)' }} size={18} strokeWidth={1.5} />
+                  <input type="date" value={onDate} onChange={(e) => setOnDate(e.target.value)} className="w-full pl-10 pr-4 py-3 outline-none" style={{ backgroundColor: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text-title)', fontSize: '15px' }} />
+                </div>
+
+                {/* 7. 개인 이메일 (전체 폭) */}
+                <div className="relative md:col-span-2">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-muted)' }} size={18} strokeWidth={1.5} />
+                  <input type="email" value={onEmail} onChange={(e) => setOnEmail(e.target.value)} placeholder="입사자 개인 이메일 (온보딩 안내장 발송용: 예 imyesir@naver.com)" className="w-full pl-10 pr-4 py-3 outline-none" style={{ backgroundColor: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text-title)', fontSize: '15px' }} />
+                </div>
               </div>
-              <div className="flex justify-end mt-6"><button type="submit" disabled={onStatus === "loading"} className="px-6 py-3 flex items-center justify-center gap-2" style={{ backgroundColor: onStatus === "loading" ? 'var(--color-disabled-bg)' : 'var(--color-primary-bg)', color: onStatus === "loading" ? 'var(--color-disabled-text)' : 'var(--color-primary-text)', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>{onStatus === "loading" ? <><Loader2 size={18} className="animate-spin" /> 처리 중...</> : "입사 세팅하기"}</button></div>
+              <div className="flex justify-end mt-6">
+                <button type="submit" disabled={onStatus === "loading"} className="px-6 py-3 flex items-center justify-center gap-2" style={{ backgroundColor: onStatus === "loading" ? 'var(--color-disabled-bg)' : 'var(--color-primary-bg)', color: onStatus === "loading" ? 'var(--color-disabled-text)' : 'var(--color-primary-text)', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
+                  {onStatus === "loading" ? <><Loader2 size={18} className="animate-spin" /> 처리 중...</> : "입사 세팅하기"}
+                </button>
+              </div>
             </form>
           )}
         </div>
@@ -387,7 +472,15 @@ export default function DashboardPage() {
       
       {/* 명함 제작 탭 */}
       {activeTab === 'card' && (
-        <BusinessCardGenerator initialName={onName} initialDept={onDept} key={onName + onDept} />
+        <BusinessCardGenerator 
+          initialName={onName} 
+          initialDept={onDept}
+          initialRank={onRank}
+          initialRole={onRole}
+          initialLocation={onLocation}
+          initialEmail={onEmail}
+          key={`${onName}-${onDept}-${onRank}-${onRole}-${onLocation}`} 
+        />
       )}
 
 
