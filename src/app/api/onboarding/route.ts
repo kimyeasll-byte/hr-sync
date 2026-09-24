@@ -7,12 +7,13 @@ const qstashClient = new Client({ token: process.env.QSTASH_TOKEN || 'mock' });
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, department, target_date } = body;
+    const { name, department, target_date, targetDate } = body;
+    const finalTargetDate = target_date || targetDate;
 
     // 1. employees 테이블 인서트
     const { data: empData, error: empError } = await supabaseAdmin
       .from('employees')
-      .insert({ name, department, status: 'ONBOARDING', target_date })
+      .insert({ name, department, status: 'ONBOARDING', target_date: finalTargetDate })
       .select()
       .single();
 
