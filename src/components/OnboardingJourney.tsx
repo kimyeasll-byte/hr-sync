@@ -23,7 +23,12 @@ import {
   CheckSquare,
   FileText,
   AlertCircle,
-  Printer
+  Printer,
+  Mail,
+  Send,
+  Eye,
+  Loader2,
+  X
 } from "lucide-react";
 
 export interface JourneyEmployee {
@@ -199,6 +204,18 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
   const [notes, setNotes] = useState<{ [empId: string]: string }>({});
   const [printData, setPrintData] = useState<PrintDocumentData | null>(null);
 
+  // 자동 안내 이메일 발송 & 미리보기 관련 상태
+  const [sendingMilestone, setSendingMilestone] = useState<string | null>(null);
+  const [previewMilestone, setPreviewMilestone] = useState<{
+    type: 'DAY_1' | 'WEEK_1' | 'MONTH_1' | 'MONTH_3';
+    title: string;
+    subtitle: string;
+    items: string[];
+    tip: string;
+    date: string;
+  } | null>(null);
+  const [sentMilestones, setSentMilestones] = useState<{ [key: string]: boolean }>({});
+
   const fetchEmployees = async () => {
     setIsLoading(true);
     try {
@@ -229,10 +246,109 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
       if (savedNotes) {
         setNotes(JSON.parse(savedNotes));
       }
+      const savedSent = localStorage.getItem("powernet_sent_milestones");
+      if (savedSent) {
+        setSentMilestones(JSON.parse(savedSent));
+      }
     } catch (e) {
       console.error("Failed to load saved journey state", e);
     }
   }, []);
+
+  const getMilestoneDetails = (type: 'DAY_1' | 'WEEK_1' | 'MONTH_1' | 'MONTH_3', emp: JourneyEmployee) => {
+    switch (type) {
+      case 'DAY_1':
+        return {
+          type,
+          title: "출근 첫날 환영 및 웰컴 키트 수령 안내",
+          subtitle: "파워넷 입사를 진심으로 환영합니다! 오늘 진행할 주요 절차입니다.",
+          items: [
+            "경영지원실 총무팀에서 웰컴 키트 및 다이어리 수령",
+            "배정된 자리에서 업무용 PC 부팅 및 초기 임시 비밀번호 변경",
+            "에스원 출입증 발급용 증명사진 제출 또는 촬영 안내 확인",
+            "부서 멘토(사수) 및 팀원들과 첫 대면 인사"
+          ],
+          tip: "💡 사내 그룹웨어 접속 주소 및 초기 접속 비밀번호는 사전 발송된 메일을 확인해주세요.",
+          date: emp.target_date || '입사 당일'
+        };
+      case 'WEEK_1':
+        return {
+          type,
+          title: "입사 1주차: 팀 웰컴 런치 & 멘토링 1:1 체크인",
+          subtitle: "파워넷에서의 첫 일주일, 고생 많으셨습니다! 업무 환경에 잘 적응하고 계신가요?",
+          items: [
+            "배정된 멘토(사수)와 1:1 티타임 진행 및 업무 궁금증 질문",
+            "사내 그룹웨어 프로필 사진 등록 및 기본 전자결재 상신 가이드 확인",
+            "업무용 소프트웨어(ERP/MES/Office) 권한 정상 작동 여부 확인",
+            "팀원들과의 웰컴 런치 식사"
+          ],
+          tip: "💡 업무 시스템 권한에 이상이 있을 경우 사내 인트라넷 전산 헬프데스크로 즉시 문의해주세요.",
+          date: calculateMilestoneDate(emp.target_date, 7)
+        };
+      case 'MONTH_1':
+        return {
+          type,
+          title: "입사 1개월차: 온보딩 적응도 설문 및 인사팀 피드백",
+          subtitle: "파워넷의 소중한 일원으로 한 달간 함께해 주셔서 감사합니다!",
+          items: [
+            "온보딩 1개월차 조직 적응도 자가진단 설문 참여 (약 3분 소요)",
+            "인쇄 제작 완료된 정규 사원증 및 공식 명함 실물 수령 확인",
+            "팀장님과의 1개월차 중간 업무 방향성 1:1 면담",
+            "인사팀 온보딩 담당자와의 캐주얼 커피챗 (고충 및 건의사항)"
+          ],
+          tip: "💡 초기 적응 과정에서 겪는 어려운 점이나 필요한 장비가 있다면 인사기획팀에 편하게 말씀해주세요.",
+          date: calculateMilestoneDate(emp.target_date, 30)
+        };
+      case 'MONTH_3':
+        return {
+          type,
+          title: "입사 3개월차: 수습 기간 종료 및 정규직 전환 안내",
+          subtitle: "3개월간의 수습 온보딩 여정을 훌륭히 마쳐가고 계십니다!",
+          items: [
+            "수습기간 직무 수행 자체 점검표 작성 및 부서장 면담",
+            "인사총괄 정규직 전환 인터뷰 진행",
+            "정규직 임용 발령 및 사내 포털 인사 정보 최종 확정",
+            "수습 온보딩 최종 수료 및 축하 기념품 수령"
+          ],
+          tip: "💡 정규직 전환 인터뷰 일정은 인사기획팀에서 부서장님과 조율 후 별도 캘린더 초대를 드립니다.",
+          date: calculateMilestoneDate(emp.target_date, 90)
+        };
+    }
+  };
+
+  const handleSendMilestone = async (emp: JourneyEmployee, milestoneType: 'DAY_1' | 'WEEK_1' | 'MONTH_1' | 'MONTH_3') => {
+    const key = `${emp.id}_${milestoneType}`;
+    setSendingMilestone(key);
+    try {
+      const res = await fetch('/api/milestone/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          empName: emp.name,
+          department: emp.department,
+          targetDate: emp.target_date,
+          hireEmail: 'yskim@gopowernet.com',
+          milestoneType,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || '발송 중 오류가 발생했습니다.');
+        return;
+      }
+
+      const data = await res.json();
+      const updated = { ...sentMilestones, [key]: true };
+      setSentMilestones(updated);
+      localStorage.setItem("powernet_sent_milestones", JSON.stringify(updated));
+      alert(`[${data.milestoneTitle}] 안내 이메일이 ${emp.name} 님에게 성공적으로 발송되었습니다!\n(수신처: ${data.sentTo})`);
+    } catch (err) {
+      alert('서버 통신 오류가 발생했습니다.');
+    } finally {
+      setSendingMilestone(null);
+    }
+  };
 
   const saveChecklistsToStorage = (updated: { [empId: string]: { [key: string]: boolean } }) => {
     setChecklists(updated);
@@ -663,6 +779,94 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                 </div>
               </div>
 
+              {/* 신입사원 자동 미션 안내 이메일 스케줄러 (입사일 기준 자동 발송) */}
+              <div className="p-5 rounded-xl border space-y-4" style={{ backgroundColor: 'var(--color-bg)', borderColor: 'rgba(59, 130, 246, 0.35)' }}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
+                  <div>
+                    <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--color-text-title)' }}>
+                      <Mail size={16} className="text-blue-400" />
+                      입사일 기준 신입사원 자동 미션 안내 스케줄러
+                    </h3>
+                    <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
+                      인사팀이 수동으로 챙길 필요 없이, 입사일({selectedEmployee.target_date}) 기준으로 1일차/1주차/1개월차/3개월차 미션을 신입사원 이메일로 자동 전송합니다.
+                    </p>
+                  </div>
+                  <span className="text-[11px] px-2.5 py-1 rounded bg-blue-950 text-blue-400 border border-blue-800 font-semibold self-start sm:self-auto flex items-center gap-1.5">
+                    <Clock size={12} /> 자동 스케줄러 가동 중
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {[
+                    { type: 'DAY_1' as const, label: '출근 1일차 웰컴 안내', phase: 'D-Day', date: selectedEmployee.target_date, summary: '웰컴 키트 수령, PC 초기 비밀번호 변경, 사원증 사진 제출 안내' },
+                    { type: 'WEEK_1' as const, label: '1주차 멘토링 & 런치', phase: 'D+7', date: calculateMilestoneDate(selectedEmployee.target_date, 7), summary: '멘토 1:1 티타임, 사내 프로필 사진 등록, 전자결재 가이드' },
+                    { type: 'MONTH_1' as const, label: '1개월차 적응도 설문', phase: 'D+30', date: calculateMilestoneDate(selectedEmployee.target_date, 30), summary: '조직 적응도 자가진단(3분), 정규 사원증/명함 수령 확인' },
+                    { type: 'MONTH_3' as const, label: '3개월차 수습 평가', phase: 'D+90', date: calculateMilestoneDate(selectedEmployee.target_date, 90), summary: '수습기간 직무 수행 자체 점검표 작성, 정규직 전환 인터뷰' },
+                  ].map((m) => {
+                    const key = `${selectedEmployee.id}_${m.type}`;
+                    const isSent = !!sentMilestones[key];
+                    const isSending = sendingMilestone === key;
+
+                    return (
+                      <div 
+                        key={m.type}
+                        className="p-3.5 rounded-lg border flex flex-col justify-between transition-colors"
+                        style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="font-bold text-xs" style={{ color: 'var(--color-text-title)' }}>
+                              {m.label}
+                            </span>
+                            <span className="text-[10px] px-2 py-0.5 rounded font-bold bg-neutral-800 text-blue-400 border border-neutral-700">
+                              {m.phase} ({m.date})
+                            </span>
+                          </div>
+                          <p className="text-[11px] mb-3 leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+                            {m.summary}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2 border-t text-[11px]" style={{ borderColor: 'var(--color-border)' }}>
+                          <div>
+                            {isSent ? (
+                              <span className="text-emerald-400 font-bold flex items-center gap-1 text-[11px]">
+                                <CheckCircle2 size={13} /> 자동 발송 완료
+                              </span>
+                            ) : (
+                              <span className="text-neutral-400 flex items-center gap-1 text-[11px]">
+                                <Clock size={12} /> 발송 예약 대기
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setPreviewMilestone(getMilestoneDetails(m.type, selectedEmployee))}
+                              className="px-2 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700 font-semibold flex items-center gap-1 transition-colors"
+                            >
+                              <Eye size={11} /> 미리보기
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isSending}
+                              onClick={() => handleSendMilestone(selectedEmployee, m.type)}
+                              className="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
+                            >
+                              {isSending ? (
+                                <><Loader2 size={11} className="animate-spin" /> 발송 중</>
+                              ) : (
+                                <><Send size={11} /> 지금 발송</>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* 4단계 마일스톤 체크리스트 */}
               <div className="space-y-6">
                 {phases.map((phase) => {
@@ -823,6 +1027,100 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
         data={printData} 
         onClose={() => setPrintData(null)} 
       />
+
+      {/* 신입사원 수신 이메일 미리보기 모달 */}
+      {previewMilestone && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <div 
+            className="w-full max-w-lg rounded-2xl border p-6 shadow-2xl space-y-4"
+            style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+          >
+            <div className="flex items-center justify-between pb-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-blue-600/20 text-blue-400">
+                  <Mail size={16} />
+                </span>
+                <h3 className="text-sm font-bold" style={{ color: 'var(--color-text-title)' }}>
+                  신입사원 수신 이메일 미리보기
+                </h3>
+              </div>
+              <button
+                onClick={() => setPreviewMilestone(null)}
+                className="p-1 rounded text-neutral-400 hover:text-white transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* 메일 뷰어 본체 */}
+            <div className="p-4 rounded-xl border bg-white text-neutral-900 text-xs space-y-3 font-sans">
+              <div className="border-b pb-2 text-[11px] text-neutral-500 space-y-0.5">
+                <div>보낸사람: <strong>POWER NET HR Sync</strong> &lt;onboarding@resend.dev&gt;</div>
+                <div>받는사람: <strong>{selectedEmployee.name}</strong> &lt;{selectedEmployee.name}@gopowernet.com&gt;</div>
+                <div>발송예정일: <strong>{previewMilestone.date}</strong></div>
+              </div>
+
+              <div>
+                <h4 className="font-extrabold text-sm text-neutral-900 mb-1">
+                  {selectedEmployee.name} 님, {previewMilestone.title} 🚀
+                </h4>
+                <p className="text-neutral-600 leading-relaxed text-[11px]">
+                  {previewMilestone.subtitle}
+                </p>
+              </div>
+
+              <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-200">
+                <div className="font-bold text-neutral-800 text-[11px] mb-1.5">
+                  📌 이번 마일스톤 수행 체크리스트
+                </div>
+                <ul className="space-y-1 text-neutral-700 text-[11px]">
+                  {previewMilestone.items.map((it, idx) => (
+                    <li key={idx} className="flex items-start gap-1.5">
+                      <span className="text-blue-600 font-bold">✔</span> {it}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="p-2.5 bg-blue-50 text-blue-800 rounded text-[10px] leading-relaxed">
+                {previewMilestone.tip}
+              </div>
+
+              <div className="text-center pt-2">
+                <button
+                  type="button"
+                  className="px-4 py-2 rounded-lg bg-blue-700 text-white font-bold text-xs"
+                >
+                  신입사원 온보딩 로드맵 확인하기 →
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setPreviewMilestone(null)}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-neutral-800 transition-colors"
+                style={{ color: 'var(--color-text-muted)' }}
+              >
+                닫기
+              </button>
+              <button
+                type="button"
+                disabled={sendingMilestone === `${selectedEmployee.id}_${previewMilestone.type}`}
+                onClick={() => {
+                  const mType = previewMilestone.type;
+                  setPreviewMilestone(null);
+                  handleSendMilestone(selectedEmployee, mType);
+                }}
+                className="px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 transition-colors"
+              >
+                <Send size={12} /> 지금 즉시 테스트 발송
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
