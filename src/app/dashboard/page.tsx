@@ -1,12 +1,13 @@
 "use client";
 import BusinessCardGenerator from "@/components/BusinessCardGenerator";
+import OnboardingJourney from "@/components/OnboardingJourney";
 
 import { useState, useEffect, useRef } from "react";
 import { UserPlus, UserMinus, Calendar, Briefcase, Loader2, AlertCircle, CheckCircle2, Clock, Search, RefreshCw, FileText, IdCard, LogOut, Mail } from "lucide-react";
 import { supabase } from "@/utils/supabase/client";
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState<"onboard" | "offboard" | "history" | "card">("onboard");
+  const [activeTab, setActiveTab] = useState<"onboard" | "journey" | "offboard" | "history" | "card">("onboard");
 
   // Onboarding States
   const [onName, setOnName] = useState("");
@@ -250,11 +251,14 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <div className="flex gap-2 mb-8 p-1" style={{ backgroundColor: 'var(--color-border)', borderRadius: 'var(--radius-sm)', width: 'fit-content' }}>
-        <button onClick={() => setActiveTab("onboard")} className="px-6 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "onboard" ? 'var(--color-surface)' : 'transparent', color: activeTab === "onboard" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "onboard" ? 'var(--shadow-subtle)' : 'none' }}>신규 입사자 세팅</button>
-        <button onClick={() => setActiveTab("offboard")} className="px-6 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "offboard" ? 'var(--color-surface)' : 'transparent', color: activeTab === "offboard" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "offboard" ? 'var(--shadow-subtle)' : 'none' }}>퇴사자 권한 회수</button>
-        <button onClick={() => setActiveTab("history")} className="px-6 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "history" ? 'var(--color-surface)' : 'transparent', color: activeTab === "history" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "history" ? 'var(--shadow-subtle)' : 'none' }}>Log</button>
-        <button onClick={() => setActiveTab("card")} className="px-6 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "card" ? 'var(--color-surface)' : 'transparent', color: activeTab === "card" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "card" ? 'var(--shadow-subtle)' : 'none' }}>명함 제작</button>
+      <div className="flex gap-1.5 mb-8 p-1 overflow-x-auto" style={{ backgroundColor: 'var(--color-border)', borderRadius: 'var(--radius-sm)', width: 'fit-content' }}>
+        <button onClick={() => setActiveTab("onboard")} className="px-5 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "onboard" ? 'var(--color-surface)' : 'transparent', color: activeTab === "onboard" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "onboard" ? 'var(--shadow-subtle)' : 'none' }}>신규 입사자 세팅</button>
+        <button onClick={() => setActiveTab("journey")} className="px-5 py-2 text-sm font-bold transition-all flex items-center gap-1.5" style={{ backgroundColor: activeTab === "journey" ? 'var(--color-surface)' : 'transparent', color: activeTab === "journey" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "journey" ? 'var(--shadow-subtle)' : 'none' }}>
+          <Calendar size={15} className={activeTab === "journey" ? "text-blue-400" : ""} /> 온보딩 여정 관리
+        </button>
+        <button onClick={() => setActiveTab("offboard")} className="px-5 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "offboard" ? 'var(--color-surface)' : 'transparent', color: activeTab === "offboard" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "offboard" ? 'var(--shadow-subtle)' : 'none' }}>퇴사자 권한 회수</button>
+        <button onClick={() => setActiveTab("card")} className="px-5 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "card" ? 'var(--color-surface)' : 'transparent', color: activeTab === "card" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "card" ? 'var(--shadow-subtle)' : 'none' }}>명함 제작</button>
+        <button onClick={() => setActiveTab("history")} className="px-5 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "history" ? 'var(--color-surface)' : 'transparent', color: activeTab === "history" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "history" ? 'var(--shadow-subtle)' : 'none' }}>Log</button>
       </div>
 
       {activeTab === "onboard" && (
@@ -272,22 +276,25 @@ export default function DashboardPage() {
                 {onStatus === "in_progress" ? ( <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold" style={{ backgroundColor: 'var(--color-progress-bg)', color: 'var(--color-progress-text)', border: '1px solid currentColor' }}><Loader2 size={16} strokeWidth={2} className="animate-spin" /><span>작업 중 30%</span></div> ) : ( <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold" style={{ backgroundColor: 'var(--color-success-bg)', color: 'var(--color-success-text)', border: '1px solid currentColor' }}><CheckCircle2 size={16} strokeWidth={2} /><span>100% 완료</span></div> )}
               </div>
               {onStatus === "completed" && (
-                <div className="mt-6 flex items-center justify-between bg-blue-50 p-4 rounded-lg border border-blue-100">
+                <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.25)' }}>
                   <div className="flex items-center gap-3">
-                    <div className="bg-blue-100 p-2 rounded-full text-blue-600">
+                    <div className="p-2.5 rounded-full text-blue-400" style={{ backgroundColor: 'rgba(59, 130, 246, 0.15)' }}>
                       <IdCard size={20} />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-blue-900">명함을 바로 만드시겠어요?</h4>
-                      <p className="text-xs text-blue-700">입력하신 정보(이름/부서/직급/발령지)가 자동 동기화된 명함 스튜디오로 이동합니다.</p>
+                      <h4 className="text-sm font-bold text-blue-300">신규 입사 준비가 완료되었습니다!</h4>
+                      <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>명함을 바로 제작하거나, 온보딩 일정 및 마일스톤 체크리스트를 관리할 수 있습니다.</p>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => { setOnStatus("idle"); setOnName(""); setOnDept(""); setOnRank(""); setOnRole(""); setOnLocation("suwon"); setOnDate(""); setOnEmail(""); }} className="px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => { setOnStatus("idle"); setOnName(""); setOnDept(""); setOnRank(""); setOnRole(""); setOnLocation("suwon"); setOnDate(""); setOnEmail(""); }} className="px-3 py-1.5 text-xs font-semibold hover:opacity-80 transition-opacity" style={{ color: 'var(--color-text-muted)' }}>
                       닫기
                     </button>
-                    <button onClick={() => setActiveTab("card")} className="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm transition-colors flex items-center gap-2">
-                      명함 제작 이동
+                    <button onClick={() => setActiveTab("journey")} className="px-3.5 py-1.5 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-md shadow-sm transition-colors flex items-center gap-1.5">
+                      <Calendar size={13} /> 온보딩 여정 이동
+                    </button>
+                    <button onClick={() => setActiveTab("card")} className="px-3.5 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm transition-colors flex items-center gap-1.5">
+                      <IdCard size={13} /> 명함 제작 이동
                     </button>
                   </div>
                 </div>
@@ -387,6 +394,17 @@ export default function DashboardPage() {
             </form>
           )}
         </div>
+      )}
+
+      {/* 온보딩 여정 관리 탭 */}
+      {activeTab === "journey" && (
+        <OnboardingJourney 
+          onSelectEmployeeForCard={(emp) => {
+            setOnName(emp.name);
+            setOnDept(emp.department);
+            setActiveTab("card");
+          }} 
+        />
       )}
 
       {activeTab === "offboard" && (
