@@ -2,28 +2,6 @@
 
 import { useEffect, useRef } from 'react';
 
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  color: string;
-  alpha: number;
-  decay: number;
-}
-
-// 구글 안티그래비티 감성의 다채로운 네온/스파크 컬러 팔레트
-const COLORS = [
-  '#4285F4', // 구글 블루
-  '#EA4335', // 구글 레드
-  '#FBBC05', // 구글 옐로우
-  '#34A853', // 구글 그린
-  '#8B5CF6', // 퍼플
-  '#EC4899', // 핑크
-  '#06B6D4', // 시안
-];
-
 export default function AntigravityCursor() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -34,69 +12,105 @@ export default function AntigravityCursor() {
     if (!ctx) return;
 
     let animationFrameId: number;
-    const particles: Particle[] = [];
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    // 마우스 위치 (부드러운 추적을 위한 lerp)
+    let targetMouse = { x: -1000, y: -1000 };
+    let mouse = { x: -1000, y: -1000 };
+    let isMoving = false;
+    let idleTimeout: NodeJS.Timeout;
 
     const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
     };
-    handleResize();
     window.addEventListener('resize', handleResize);
 
     const handleMouseMove = (e: MouseEvent) => {
-      // 마우스 움직일 때마다 3~5개의 톡톡 터지는 불꽃 파티클 생성
-      const count = Math.floor(Math.random() * 3) + 3;
-      for (let i = 0; i < count; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 2.5 + 0.8;
-        particles.push({
-          x: e.clientX,
-          y: e.clientY,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed - 0.5, // 살짝 위로 솟구치듯 퍼짐
-          size: Math.random() * 3.5 + 1.5,
-          color: COLORS[Math.floor(Math.random() * COLORS.length)],
-          alpha: 1,
-          decay: Math.random() * 0.025 + 0.02
-        });
-      }
+      targetMouse.x = e.clientX;
+      targetMouse.y = e.clientY;
+      isMoving = true;
+      clearTimeout(idleTimeout);
+      // 마우스가 멈춘 후 2.5초 뒤 렌더링 절전 모드
+      idleTimeout = setTimeout(() => {
+        isMoving = false;
+      }, 2500);
     };
+    window.addEventListener('mousemove', handleMouseMove);
+
+    // 격자 간격 (약 26px 간격으로 촘촘한 벡터 필드 형성)
+    const SPACING = 26;
+    const INFLUENCE_RADIUS = 420; // 마우스 주변 대형 원형 파동 반경
 
     const render = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // 부드러운 마우스 감속 추적
+      mouse.x += (targetMouse.x - mouse.x) * 0.12;
+      mouse.y += (targetMouse.y - mouse.y) * 0.12;
 
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.04; // 미세한 중력 효과
-        p.alpha -= p.decay;
+      ctx.clearRect(0, 0, width, height);
 
-        if (p.alpha <= 0) {
-          particles.splice(i, 1);
-          continue;
+      // 마우스가 화면 안에 있을 때 대형 파티클 필드 렌더링
+      if (mouse.x > -500) {
+        const startX = Math.max(0, Math.floor((mouse.x - INFLUENCE_RADIUS) / SPACING) * SPACING);
+        const endX = Math.min(width, Math.ceil((mouse.x + INFLUENCE_RADIUS) / SPACING) * SPACING);
+        const startY = Math.max(0, Math.floor((mouse.y - INFLUENCE_RADIUS) / SPACING) * SPACING);
+        const endY = Math.min(height, Math.ceil((mouse.y + INFLUENCE_RADIUS) / SPACING) * SPACING);
+
+        for (let gx = startX; gx <= endX; gx += SPACING) {
+          for (let gy = startY; gy <= endY; gy += SPACING) {
+            const dx = gx - mouse.x;
+            const dy = gy - mouse.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < INFLUENCE_RADIUS && dist > 15) {
+              const factor = 1 - dist / INFLUENCE_RADIUS; // 0 ~ 1
+              const theta = Math.atan2(dy, dx);
+
+              // 안티그래비티 특유의 360도 스펙트럼 색상 매핑
+              // (상단 핑크/레드, 우측 블루, 하단좌측 옐로우/오렌지)
+              const hue = (-(theta * 180 / Math.PI) + 215 + 360) % 360;
+
+              // 동심원 접선 방향 회전각 (concentric ripples) + 약간의 방사 각도
+              const angle = theta + Math.PI / 2;
+
+              // 중심부로 갈수록 커지고 밝아지는 대시 캡슐
+              const len = 3 + factor * 7;
+              const thickness = 1.5 + factor * 1.5;
+              const alpha = Math.pow(factor, 1.15) * 0.9;
+
+              // 마우스 위치 기준 약간의 탄성 밀림 효과
+              const push = factor * 10;
+              const px = gx + Math.cos(theta) * push;
+              const py = gy + Math.sin(theta) * push;
+
+              ctx.save();
+              ctx.translate(px, py);
+              ctx.rotate(angle);
+
+              ctx.beginPath();
+              ctx.strokeStyle = `hsla(${hue}, 85%, 65%, ${alpha})`;
+              ctx.lineWidth = thickness;
+              ctx.lineCap = 'round';
+              ctx.moveTo(-len / 2, 0);
+              ctx.lineTo(len / 2, 0);
+              ctx.stroke();
+
+              ctx.restore();
+            }
+          }
         }
-
-        ctx.save();
-        ctx.globalAlpha = p.alpha;
-        ctx.fillStyle = p.color;
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
       }
 
       animationFrameId = requestAnimationFrame(render);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
     render();
 
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handleMouseMove);
+      clearTimeout(idleTimeout);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
