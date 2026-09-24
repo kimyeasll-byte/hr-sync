@@ -259,6 +259,13 @@ export default function DashboardPage() {
         </div>
       )}
 
+      
+      {/* 명함 제작 탭 */}
+      {activeTab === 'card' && (
+        <BusinessCardGenerator />
+      )}
+
+
       {/* Log 탭 내용 */}
       {activeTab === "history" && (
         <div style={{ backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-6)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-subtle)' }}>
