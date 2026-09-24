@@ -35,6 +35,33 @@ export default function DashboardPage() {
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const [logSearchQuery, setLogSearchQuery] = useState("");
   const logSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [offTaskId, setOffTaskId] = useState<string | null>(null);
+  const [cancellingTaskId, setCancellingTaskId] = useState<string | null>(null);
+
+  const handleCancelTask = async (taskId: string, empName: string, taskLabel: string) => {
+    if (!confirm(`정말로 ${empName || '직원'} 님의 [${taskLabel}] 작업을 철회하시겠습니까?`)) {
+      return;
+    }
+    setCancellingTaskId(taskId);
+    try {
+      const res = await fetch('/api/tasks/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ taskId })
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || '철회 처리 중 오류가 발생했습니다.');
+        return;
+      }
+      alert(`${empName || '직원'} 님의 [${taskLabel}] 작업이 성공적으로 철회되었습니다.`);
+      fetchHistory(logSearchQuery);
+    } catch (err) {
+      alert('서버 통신 중 오류가 발생했습니다.');
+    } finally {
+      setCancellingTaskId(null);
+    }
+  };
 
   useEffect(() => {
     if (onStatus !== "in_progress" || !onTaskId) return;
@@ -160,6 +187,8 @@ export default function DashboardPage() {
     try {
       const res = await fetch('/api/offboarding', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: offName, department: offDept, targetDate: offDate }) });
       if (!res.ok) throw new Error('DB Error');
+      const data = await res.json();
+      setOffTaskId(data.taskId);
       setOffStatus("scheduled");
     } catch (error) {
       setOffStatus("error"); setOffErrorMessage("서버 통신 중 오류가 발생했습니다.");
@@ -248,8 +277,23 @@ export default function DashboardPage() {
                 <div><div className="flex items-center gap-2 mb-1"><span className="font-bold text-lg" style={{ color: 'var(--color-text-title)' }}>{offName}</span></div><p style={{ color: 'var(--color-text-muted)', fontSize: '14px' }}>{offDept} · {offDate} 퇴사 예정</p></div>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold" style={{ backgroundColor: 'var(--color-bg)', color: 'var(--color-text-title)', border: '1px solid var(--color-border)' }}><Clock size={16} strokeWidth={2} /><span>{new Date(new Date(offDate).getTime() + 86400000).toISOString().split('T')[0]} 차단 예약됨</span></div>
               </div>
-              <div className="mt-4 text-right">
-                <button onClick={() => { setOffStatus("idle"); setOffName(""); setOffDept(""); setOffDate(""); setSearchQuery(""); setShowDropdown(false); }} className="text-sm font-bold flex items-center gap-1 justify-end ml-auto hover:opacity-70 transition-opacity" style={{ color: 'var(--color-text-muted)' }}>
+              <div className="mt-4 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (offTaskId) {
+                      handleCancelTask(offTaskId, offName, '퇴사 권한 회수');
+                    }
+                    setOffStatus("idle");
+                    setOffName("");
+                    setOffDept("");
+                    setOffDate("");
+                  }}
+                  className="text-xs font-bold text-red-500 hover:text-red-400 underline transition-colors"
+                >
+                  방금 예약 즉시 철회하기
+                </button>
+                <button onClick={() => { setOffStatus("idle"); setOffName(""); setOffDept(""); setOffDate(""); setSearchQuery(""); setShowDropdown(false); }} className="text-sm font-bold flex items-center gap-1 justify-end hover:opacity-70 transition-opacity" style={{ color: 'var(--color-text-muted)' }}>
                   <RefreshCw size={14} /> 다른 직원 추가 예약하기
                 </button>
               </div>
@@ -332,33 +376,65 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-3">
-            {historyData.map((task) => (
-              <div key={task.id} className="p-4 flex items-center justify-between" style={{ backgroundColor: 'var(--color-bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-bold" style={{ color: 'var(--color-text-title)' }}>{task.employees?.name}</span>
-                    <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>({task.employees?.department})</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ 
-                      backgroundColor: task.task_type === 'ONBOARDING' ? 'var(--color-success-bg)' : 'var(--color-error-bg)',
-                      color: task.task_type === 'ONBOARDING' ? 'var(--color-success-text)' : 'var(--color-error-text)'
-                    }}>
-                      {task.task_type === 'ONBOARDING' ? '입사 세팅' : '퇴사 차단'}
-                    </span>
+            {historyData.map((task) => {
+              const latestMessage = task.logs && task.logs.length > 0 
+                ? [...task.logs].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]?.result_message 
+                : null;
+              const isCancelled = task.status === 'CANCELLED';
+
+              return (
+                <div key={task.id} className="p-4 flex items-center justify-between" style={{ backgroundColor: 'var(--color-bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', opacity: isCancelled ? 0.75 : 1 }}>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`font-bold ${isCancelled ? 'line-through text-gray-500' : ''}`} style={{ color: isCancelled ? 'var(--color-text-muted)' : 'var(--color-text-title)' }}>
+                        {task.employees?.name}
+                      </span>
+                      <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>({task.employees?.department})</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ 
+                        backgroundColor: isCancelled 
+                          ? '#374151' 
+                          : (task.task_type === 'ONBOARDING' ? 'var(--color-success-bg)' : 'var(--color-error-bg)'),
+                        color: isCancelled 
+                          ? '#9CA3AF' 
+                          : (task.task_type === 'ONBOARDING' ? 'var(--color-success-text)' : 'var(--color-error-text)')
+                      }}>
+                        {isCancelled ? '작업 철회됨' : (task.task_type === 'ONBOARDING' ? '입사 세팅' : '퇴사 차단')}
+                      </span>
+                    </div>
+                    <p className="text-sm" style={{ color: isCancelled ? 'var(--color-text-muted)' : 'var(--color-text-title)' }}>
+                      {latestMessage || (task.status === 'PENDING' ? '예약 대기 중 (D+1 실행 예정)' : '작업 진행 중')}
+                    </p>
                   </div>
-                  <p className="text-sm" style={{ color: 'var(--color-text-title)' }}>
-                    {task.logs?.[0]?.result_message || (task.status === 'PENDING' ? '예약 대기 중 (D+1 실행 예정)' : '작업 진행 중')}
-                  </p>
+                  <div className="flex items-center gap-4">
+                    {isCancelled ? (
+                      <span className="text-xs px-2.5 py-1 rounded bg-gray-800 text-gray-400 font-bold border border-gray-700">
+                        철회 완료
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => handleCancelTask(
+                          task.id, 
+                          task.employees?.name, 
+                          task.task_type === 'ONBOARDING' ? '신규 입사 세팅' : '퇴사 권한 회수'
+                        )}
+                        disabled={cancellingTaskId === task.id}
+                        className="text-xs px-2.5 py-1 rounded bg-red-950/40 text-red-400 hover:bg-red-900/60 border border-red-800/50 font-bold transition-all"
+                      >
+                        {cancellingTaskId === task.id ? '철회 중...' : '철회하기'}
+                      </button>
+                    )}
+                    <div className="text-right">
+                      <div className="text-sm font-bold" style={{ color: 'var(--color-text-title)' }}>
+                        {new Date(task.created_at).toLocaleDateString()}
+                      </div>
+                      <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                        {new Date(task.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-sm font-bold" style={{ color: 'var(--color-text-title)' }}>
-                    {new Date(task.created_at).toLocaleDateString()}
-                  </div>
-                  <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                    {new Date(task.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
             
             {historyData.length === 0 && !isHistoryLoading && (
               <div className="py-12 text-center text-sm font-bold" style={{ color: 'var(--color-text-muted)' }}>
