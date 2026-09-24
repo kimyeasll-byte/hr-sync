@@ -2,7 +2,7 @@
 import BusinessCardGenerator from "@/components/BusinessCardGenerator";
 
 import { useState, useEffect, useRef } from "react";
-import { UserPlus, UserMinus, Calendar, Briefcase, Loader2, AlertCircle, CheckCircle2, Clock, Search, RefreshCw, FileText, IdCard, LogOut } from "lucide-react";
+import { UserPlus, UserMinus, Calendar, Briefcase, Loader2, AlertCircle, CheckCircle2, Clock, Search, RefreshCw, FileText, IdCard, LogOut, Mail } from "lucide-react";
 import { supabase } from "@/utils/supabase/client";
 
 export default function DashboardPage() {
@@ -12,6 +12,7 @@ export default function DashboardPage() {
   const [onName, setOnName] = useState("");
   const [onDept, setOnDept] = useState("");
   const [onDate, setOnDate] = useState("");
+  const [onEmail, setOnEmail] = useState("");
   const [onStatus, setOnStatus] = useState<"idle" | "loading" | "in_progress" | "completed" | "error">("idle");
   const [onErrorMessage, setOnErrorMessage] = useState("");
   const [onTaskId, setOnTaskId] = useState<string | null>(null);
@@ -168,7 +169,7 @@ export default function DashboardPage() {
     
     setOnStatus("loading");
     try {
-      const res = await fetch('/api/onboarding', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: onName, department: onDept, targetDate: onDate }) });
+      const res = await fetch('/api/onboarding', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: onName, department: onDept, targetDate: onDate, email: onEmail }) });
       if (!res.ok) throw new Error('DB Error');
       const data = await res.json();
       setOnTaskId(data.taskId || data.task?.id || "fallback-id");
@@ -264,7 +265,7 @@ export default function DashboardPage() {
           {(onStatus === "in_progress" || onStatus === "completed") ? (
             <div>
               <div className="flex items-center justify-between p-4" style={{ backgroundColor: 'var(--color-bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}>
-                <div><div className="flex items-center gap-2 mb-1"><span className="font-bold text-lg" style={{ color: 'var(--color-text-title)' }}>{onName}</span></div><p style={{ color: 'var(--color-text-muted)', fontSize: '14px' }}>{onDept} · {onDate} 출근 예정</p></div>
+                <div><div className="flex items-center gap-2 mb-1"><span className="font-bold text-lg" style={{ color: 'var(--color-text-title)' }}>{onName}</span></div><p style={{ color: 'var(--color-text-muted)', fontSize: '14px' }}>{onDept} · {onDate} 출근 예정 {onEmail ? `· 📩 ${onEmail}` : ''}</p></div>
                 {onStatus === "in_progress" ? ( <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold" style={{ backgroundColor: 'var(--color-progress-bg)', color: 'var(--color-progress-text)', border: '1px solid currentColor' }}><Loader2 size={16} strokeWidth={2} className="animate-spin" /><span>작업 중 30%</span></div> ) : ( <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold" style={{ backgroundColor: 'var(--color-success-bg)', color: 'var(--color-success-text)', border: '1px solid currentColor' }}><CheckCircle2 size={16} strokeWidth={2} /><span>100% 완료</span></div> )}
               </div>
               {onStatus === "completed" && (
@@ -279,7 +280,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => { setOnStatus("idle"); setOnName(""); setOnDept(""); setOnDate(""); }} className="px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors">
+                    <button onClick={() => { setOnStatus("idle"); setOnName(""); setOnDept(""); setOnDate(""); setOnEmail(""); }} className="px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors">
                       닫기
                     </button>
                     <button onClick={() => setActiveTab("card")} className="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm transition-colors flex items-center gap-2">
@@ -291,10 +292,11 @@ export default function DashboardPage() {
             </div>
           ) : (
             <form onSubmit={handleOnboardSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="relative"><UserPlus className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-muted)' }} size={18} strokeWidth={1.5} /><input type="text" value={onName} onChange={(e) => setOnName(e.target.value)} placeholder="입사자 이름" className="w-full pl-10 pr-4 py-3 outline-none" style={{ backgroundColor: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text-title)', fontSize: '15px' }} /></div>
                 <div className="relative"><Briefcase className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-muted)' }} size={18} strokeWidth={1.5} /><input type="text" value={onDept} onChange={(e) => setOnDept(e.target.value)} placeholder="소속 팀" className="w-full pl-10 pr-4 py-3 outline-none" style={{ backgroundColor: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text-title)', fontSize: '15px' }} /></div>
                 <div className="relative"><Calendar className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-muted)' }} size={18} strokeWidth={1.5} /><input type="date" value={onDate} onChange={(e) => setOnDate(e.target.value)} className="w-full pl-10 pr-4 py-3 outline-none" style={{ backgroundColor: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text-title)', fontSize: '15px' }} /></div>
+                <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-muted)' }} size={18} strokeWidth={1.5} /><input type="email" value={onEmail} onChange={(e) => setOnEmail(e.target.value)} placeholder="개인 이메일 (온보딩 안내장 발송용)" className="w-full pl-10 pr-4 py-3 outline-none" style={{ backgroundColor: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text-title)', fontSize: '15px' }} /></div>
               </div>
               <div className="flex justify-end mt-6"><button type="submit" disabled={onStatus === "loading"} className="px-6 py-3 flex items-center justify-center gap-2" style={{ backgroundColor: onStatus === "loading" ? 'var(--color-disabled-bg)' : 'var(--color-primary-bg)', color: onStatus === "loading" ? 'var(--color-disabled-text)' : 'var(--color-primary-text)', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>{onStatus === "loading" ? <><Loader2 size={18} className="animate-spin" /> 처리 중...</> : "입사 세팅하기"}</button></div>
             </form>
