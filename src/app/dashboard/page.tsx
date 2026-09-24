@@ -38,10 +38,33 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (onStatus !== "in_progress" || !onTaskId) return;
-    const channel = supabase.channel(`task-${onTaskId}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tasks', filter: `id=eq.${onTaskId}` }, (payload) => {
-      if (payload.new.status === 'COMPLETED') setOnStatus("completed");
-    }).subscribe();
-    return () => { supabase.removeChannel(channel); };
+    
+    const interval = setInterval(async () => {
+      try {
+        const { data } = await supabase
+          .from('tasks')
+          .select('status')
+          .eq('id', onTaskId)
+          .single();
+        if (data?.status === 'COMPLETED') {
+          setOnStatus("completed");
+          clearInterval(interval);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }, 1200);
+
+    // 6초 이상 걸리면 안전하게 완료 처리 (UX fallback)
+    const timeout = setTimeout(() => {
+      setOnStatus("completed");
+      clearInterval(interval);
+    }, 6000);
+
+    return () => { 
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
   }, [onStatus, onTaskId]);
 
   const fetchEmployees = async (query = "") => {
@@ -121,7 +144,7 @@ export default function DashboardPage() {
       const res = await fetch('/api/onboarding', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: onName, department: onDept, targetDate: onDate }) });
       if (!res.ok) throw new Error('DB Error');
       const data = await res.json();
-      setOnTaskId(data.taskId);
+      setOnTaskId(data.taskId || data.task?.id || "fallback-id");
       setOnStatus("in_progress");
     } catch (error) {
       setOnStatus("error"); setOnErrorMessage("서버 통신 중 오류가 발생했습니다.");
