@@ -5,7 +5,7 @@ import { UserPlus, UserMinus, Calendar, Briefcase, Loader2, AlertCircle, CheckCi
 import { supabase } from "@/utils/supabase/client";
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState<"onboard" | "offboard" | "history">("onboard");
+  const [activeTab, setActiveTab] = useState<"onboard" | "offboard" | "history" | "card">("onboard");
 
   // Onboarding States
   const [onName, setOnName] = useState("");
