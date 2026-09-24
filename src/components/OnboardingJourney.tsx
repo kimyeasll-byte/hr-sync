@@ -626,12 +626,12 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                         borderColor: isSelected ? '#3b82f6' : 'var(--color-border)',
                       }}
                     >
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-bold text-sm" style={{ color: 'var(--color-text-title)' }}>
+                      <div className="flex items-center justify-between mb-1.5 gap-2">
+                        <span className="font-bold text-sm truncate" style={{ color: 'var(--color-text-title)' }}>
                           {emp.name}
                         </span>
                         <span 
-                          className="px-2 py-0.5 rounded text-[11px] font-bold"
+                          className="px-2 py-0.5 rounded text-[11px] font-bold whitespace-nowrap flex-shrink-0"
                           style={{ backgroundColor: dDay.bg, color: dDay.color }}
                         >
                           {dDay.text}
@@ -668,14 +668,14 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
             <div className="p-6 rounded-xl border space-y-6" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
               
               {/* 상단 프로필 헤더 */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-xl font-black" style={{ color: 'var(--color-text-title)' }}>
+              <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 pb-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                    <h2 className="text-xl font-black whitespace-nowrap" style={{ color: 'var(--color-text-title)' }}>
                       {selectedEmployee.name}
                     </h2>
                     <span 
-                      className="px-2.5 py-0.5 rounded-full text-xs font-bold"
+                      className="px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap flex-shrink-0"
                       style={{ 
                         backgroundColor: getDDayInfo(selectedEmployee.target_date).bg, 
                         color: getDDayInfo(selectedEmployee.target_date).color 
@@ -683,24 +683,24 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                     >
                       {getDDayInfo(selectedEmployee.target_date).text}
                     </span>
-                    <span className="text-xs px-2 py-0.5 rounded bg-neutral-800 text-neutral-400 border border-neutral-700">
+                    <span className="text-xs px-2.5 py-0.5 rounded bg-neutral-800 text-neutral-400 border border-neutral-700 whitespace-nowrap flex-shrink-0">
                       {getDDayInfo(selectedEmployee.target_date).phaseDesc}
                     </span>
                   </div>
-                  <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                  <p className="text-xs whitespace-nowrap truncate" style={{ color: 'var(--color-text-muted)' }}>
                     소속: {selectedEmployee.department} · 입사(예정)일: {selectedEmployee.target_date}
                   </p>
                 </div>
 
                 {/* 액션 버튼들 */}
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                   {onSelectEmployeeForCard && (
                     <button
                       onClick={() => onSelectEmployeeForCard({
                         name: selectedEmployee.name,
                         department: selectedEmployee.department
                       })}
-                      className="text-xs px-3 py-1.5 rounded-lg font-bold bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 transition-colors shadow-sm"
+                      className="text-xs px-3 py-1.5 rounded-lg font-bold bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 transition-colors shadow-sm whitespace-nowrap"
                     >
                       <IdCard size={14} /> 명함 제작 바로가기
                     </button>
@@ -718,21 +718,21 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                         location: "suwon"
                       });
                     }}
-                    className="text-xs px-2.5 py-1.5 rounded-lg border font-semibold hover:bg-neutral-800 transition-colors flex items-center gap-1.5"
+                    className="text-xs px-2.5 py-1.5 rounded-lg border font-semibold hover:bg-neutral-800 transition-colors flex items-center gap-1.5 whitespace-nowrap"
                     style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-title)' }}
                   >
                     <Printer size={13} className="text-blue-400" /> 증명서 인쇄/PDF
                   </button>
                   <button
                     onClick={() => completeAllMilestones(selectedEmployee.id)}
-                    className="text-xs px-2.5 py-1.5 rounded-lg border font-semibold hover:bg-neutral-800 transition-colors"
+                    className="text-xs px-2.5 py-1.5 rounded-lg border font-semibold hover:bg-neutral-800 transition-colors whitespace-nowrap"
                     style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
                   >
                     전체 완료
                   </button>
                   <button
                     onClick={() => resetAllMilestones(selectedEmployee.id)}
-                    className="text-xs px-2.5 py-1.5 rounded-lg border font-semibold hover:bg-neutral-800 transition-colors text-red-400"
+                    className="text-xs px-2.5 py-1.5 rounded-lg border font-semibold hover:bg-neutral-800 transition-colors text-red-400 whitespace-nowrap"
                     style={{ borderColor: 'var(--color-border)' }}
                   >
                     초기화
