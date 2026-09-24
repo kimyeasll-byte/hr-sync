@@ -293,10 +293,10 @@ export default function DashboardPage() {
                     <span className="font-bold" style={{ color: 'var(--color-text-title)' }}>{task.employees?.name}</span>
                     <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>({task.employees?.department})</span>
                     <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ 
-                      backgroundColor: task.task_type === 'CREATE_ACCOUNTS' ? 'var(--color-success-bg)' : 'var(--color-error-bg)',
-                      color: task.task_type === 'CREATE_ACCOUNTS' ? 'var(--color-success-text)' : 'var(--color-error-text)'
+                      backgroundColor: task.task_type === 'ONBOARDING' ? 'var(--color-success-bg)' : 'var(--color-error-bg)',
+                      color: task.task_type === 'ONBOARDING' ? 'var(--color-success-text)' : 'var(--color-error-text)'
                     }}>
-                      {task.task_type === 'CREATE_ACCOUNTS' ? '입사 세팅' : '퇴사 차단'}
+                      {task.task_type === 'ONBOARDING' ? '입사 세팅' : '퇴사 차단'}
                     </span>
                   </div>
                   <p className="text-sm" style={{ color: 'var(--color-text-title)' }}>

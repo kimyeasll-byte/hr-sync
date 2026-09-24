@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     // 하드코딩된 키로 무조건 발송
     await resend.emails.send({
       from: 'HR Sync <onboarding@resend.dev>',
-      to: 'yskim@gopowernet.com',
+      to: 'kimyeasll@gmail.com', // Resend 테스트 샌드박스 제한 우회를 위해 가입 이메일로 변경
       subject: `[HR Sync] ${empName}님, ${department} 입사를 환영합니다! 🎉`,
         html: `
           <div style="font-family: sans-serif; padding: 30px; border: 1px solid #eaeaea; border-radius: 12px; max-width: 500px; margin: 0 auto; background-color: #ffffff;">
