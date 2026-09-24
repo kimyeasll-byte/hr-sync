@@ -15,17 +15,17 @@ const LOCATIONS = {
   }
 };
 
-export default function BusinessCardGenerator() {
+export default function BusinessCardGenerator({ initialName = "", initialDept = "" }: { initialName?: string, initialDept?: string }) {
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
 
   const [isExporting, setIsExporting] = useState(false);
   const [formData, setFormData] = useState({
-    name: '임성호',
+    name: initialName || '임성호',
     nameEn: 'Sung Ho Lim',
     title: '전무이사 / C프로젝트 팀장',
     titleEn: 'Senior Managing Director',
-    deptEn: 'C Project Team',
+    deptEn: initialDept || 'C Project Team',
     phone: '02-3282-0700',
     mobile: '010-9626-6106',
     fax: '02-3282-0889',
@@ -208,10 +208,7 @@ export default function BusinessCardGenerator() {
 
               {/* 중앙 로고 */}
               <div className="flex justify-center items-center flex-grow">
-                <div className="text-4xl tracking-tighter" style={{ fontFamily: 'Arial, sans-serif' }}>
-                  <span className="font-black italic text-white">POWER</span>
-                  <span className="font-black italic text-[#f15a24]">NET</span>
-                </div>
+                <div className="w-[140px]"><img src="/logo.png" alt="POWER NET" className="w-full h-auto" style={{ filter: "brightness(0) invert(1)" }} /></div>
               </div>
 
               {/* 하단 우측 Team Powernet 라인 */}
