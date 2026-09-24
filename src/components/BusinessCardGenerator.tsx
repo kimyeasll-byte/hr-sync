@@ -161,9 +161,8 @@ export default function BusinessCardGenerator() {
                   <div className="text-[11px] text-gray-500 leading-tight">{formData.deptEn}</div>
                 </div>
                 {/* 로고 */}
-                <div className="text-2xl mt-1 tracking-tighter" style={{ fontFamily: 'Arial, sans-serif' }}>
-                  <span className="font-black italic text-[#083a81]">POWER</span>
-                  <span className="font-black italic text-[#f15a24]">NET</span>
+                <div className="w-[110px] mt-1">
+                  <img src="/logo.png" alt="POWER NET" className="w-full h-auto" />
                 </div>
               </div>
 
