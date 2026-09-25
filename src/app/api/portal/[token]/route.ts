@@ -78,11 +78,42 @@ export async function POST(
 
     const empName = emp ? emp.name : '신규 입사자';
     const deptName = emp ? emp.department : '';
+    const empId = emp ? emp.id : decodedToken;
 
-    // 감사 로그(Audit Log)에 신입사원 셀프 온보딩 제출 내역 영구 기록
+    // 해당 직원의 최근 ONBOARDING 태스크 조회 (감사 로그 연동)
+    const { data: task } = await supabaseAdmin
+      .from('tasks')
+      .select('id')
+      .eq('employee_id', empId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const taskId = task?.id || null;
+
+    // 1. 감사 로그(Audit Log)에 신입사원 셀프 온보딩 제출 내역 영구 기록
     await supabaseAdmin.from('logs').insert({
+      task_id: taskId,
       system_name: '신규 입사자 셀프 포털',
       result_message: `${empName} (${deptName}) 님이 모바일 셀프 온보딩 포털에서 필수 준비물 확인 (${completedCount || 0}/${totalCount || 5}) 및 사원증 사진을 접수했습니다. 입사 각오: "${welcomeNote || '첫 출근 기대됩니다!'}"`,
+      is_success: true
+    });
+
+    // 2. 관리자 대시보드 조회를 위한 상세 페이로드 보관 (사진, 세부 체크리스트, 입사 각오)
+    await supabaseAdmin.from('logs').insert({
+      task_id: taskId,
+      system_name: 'PORTAL_SUBMISSION_PAYLOAD',
+      result_message: JSON.stringify({
+        employeeId: empId,
+        employeeName: empName,
+        department: deptName,
+        checklist: checklist || {},
+        photoData: photoData || null,
+        welcomeNote: welcomeNote || '',
+        completedCount: completedCount || 0,
+        totalCount: totalCount || 5,
+        submittedAt: new Date().toISOString()
+      }),
       is_success: true
     });
 

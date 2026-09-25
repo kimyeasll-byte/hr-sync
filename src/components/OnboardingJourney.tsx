@@ -29,6 +29,8 @@ import {
   Eye,
   Loader2,
   ExternalLink,
+  Download,
+  Camera,
   X
 } from "lucide-react";
 
@@ -216,6 +218,27 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
     date: string;
   } | null>(null);
   const [sentMilestones, setSentMilestones] = useState<{ [key: string]: boolean }>({});
+  
+  // 신입사원 셀프 온보딩 포털 제출 내역: { [empId]: submissionData }
+  const [portalSubmissions, setPortalSubmissions] = useState<Record<string, any>>({});
+  const [isSubmissionsLoading, setIsSubmissionsLoading] = useState(false);
+
+  const fetchPortalSubmissions = async () => {
+    setIsSubmissionsLoading(true);
+    try {
+      const res = await fetch('/api/portal/submissions');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.submissions) {
+          setPortalSubmissions(data.submissions);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load portal submissions", e);
+    } finally {
+      setIsSubmissionsLoading(false);
+    }
+  };
 
   const fetchEmployees = async () => {
     setIsLoading(true);
@@ -237,6 +260,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
 
   useEffect(() => {
     fetchEmployees();
+    fetchPortalSubmissions();
     // Load cached checklists from localStorage
     try {
       const savedChecklists = localStorage.getItem("powernet_onboarding_checklists");
@@ -656,6 +680,18 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                           style={{ width: `${pct}%` }}
                         />
                       </div>
+
+                      {/* 셀프 포털 접수 완료 뱃지 */}
+                      {portalSubmissions[emp.id] && (
+                        <div className="mt-2 pt-1.5 border-t border-neutral-100 flex items-center justify-between text-[10px]">
+                          <span className="px-1.5 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                            <CheckCircle2 size={10} /> 포털 접수 완료
+                          </span>
+                          <span className="text-neutral-400 font-medium">
+                            {new Date(portalSubmissions[emp.id].submittedAt).toLocaleDateString([], { month: '2-digit', day: '2-digit' })}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   );
                 })
@@ -800,6 +836,174 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                   </div>
                 </div>
               </div>
+
+              {/* 신입사원 셀프 온보딩 접수 현황 카드 */}
+              {(() => {
+                const submission = portalSubmissions[selectedEmployee.id];
+                return (
+                  <div 
+                    className="p-5 rounded-2xl border space-y-4 shadow-xs transition-all"
+                    style={{ 
+                      backgroundColor: submission ? '#FFFFFF' : '#F8F9FA', 
+                      borderColor: submission ? '#0071E3' : 'var(--color-border)',
+                      borderWidth: submission ? '1.5px' : '1px'
+                    }}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
+                      <div className="flex items-center gap-2.5">
+                        <div className={`p-2 rounded-xl ${submission ? 'bg-blue-50 text-blue-600' : 'bg-neutral-100 text-neutral-500'}`}>
+                          <IdCard size={18} />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-bold text-neutral-900">
+                              신입사원 셀프 온보딩 포털 접수 현황
+                            </h3>
+                            {submission ? (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1 shadow-xs">
+                                <CheckCircle2 size={11} /> 서류/사진 접수 완료
+                              </span>
+                            ) : (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-neutral-200/70 text-neutral-600 border border-neutral-300">
+                                ⏳ 미제출 (작성 대기)
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-neutral-500">
+                            {submission 
+                              ? `입사자가 모바일 포털에서 사전 서류를 확인하고 사원증 사진을 접수했습니다. (제출일시: ${new Date(submission.submittedAt).toLocaleString()})`
+                              : "입사자가 아직 셀프 온보딩 포털에서 필수 준비물을 확인하거나 사원증 사진을 등록하지 않았습니다."
+                            }
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                        <button
+                          type="button"
+                          onClick={fetchPortalSubmissions}
+                          title="접수 내역 새로고침"
+                          className="p-1.5 rounded-lg border border-neutral-200 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 transition-colors shadow-xs"
+                        >
+                          <RefreshCw size={13} className={isSubmissionsLoading ? "animate-spin" : ""} />
+                        </button>
+                        <a
+                          href={`/onboard/portal/${selectedEmployee.id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs px-2.5 py-1.5 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold transition-colors flex items-center gap-1 shadow-xs"
+                        >
+                          <ExternalLink size={12} /> 입사자 포털 화면
+                        </a>
+                      </div>
+                    </div>
+
+                    {submission ? (
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                        {/* 1. 사원증 사진 프리뷰 & 다운로드 (4 cols) */}
+                        <div className="md:col-span-4 bg-[#F8F9FA] p-3.5 rounded-2xl border border-neutral-200 text-center space-y-2">
+                          <span className="text-[10px] font-bold text-neutral-500 block uppercase tracking-wider">
+                            사원증 / 에스원 출입증 사진
+                          </span>
+                          
+                          <div className="w-28 h-36 mx-auto rounded-xl bg-neutral-900 border-2 border-white shadow-md overflow-hidden flex items-center justify-center">
+                            {submission.photoData ? (
+                              <img src={submission.photoData} alt={`${selectedEmployee.name} 증명사진`} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="text-center p-2 text-neutral-400 text-xs">
+                                <Camera size={24} className="mx-auto mb-1 opacity-50" />
+                                사진 미등록
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="space-y-0.5">
+                            <div className="font-bold text-xs text-neutral-900">{selectedEmployee.name}</div>
+                            <div className="text-[10px] text-neutral-500">{selectedEmployee.department}</div>
+                          </div>
+
+                          {submission.photoData && (
+                            <div className="pt-1">
+                              <a
+                                href={submission.photoData}
+                                download={`${selectedEmployee.name}_사원증사진.jpg`}
+                                className="w-full py-1.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+                              >
+                                <Download size={12} /> 사진 원본 다운로드
+                              </a>
+                              <span className="text-[9px] text-neutral-400 block mt-1">에스원(S1) 출입증 발주용</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 2. 입사 각오 메시지 및 준비물 현황 (8 cols) */}
+                        <div className="md:col-span-8 space-y-3">
+                          {/* 입사자 각오 한마디 */}
+                          <div className="p-3.5 rounded-2xl bg-blue-50/50 border border-blue-100 space-y-1">
+                            <span className="text-[10px] font-bold text-blue-700 flex items-center gap-1">
+                              <Sparkles size={11} /> 신입사원 입사 소감 & 인사팀 전달 메시지
+                            </span>
+                            <p className="text-xs text-neutral-900 font-medium leading-relaxed italic bg-white p-3 rounded-xl border border-blue-100/80 shadow-xs">
+                              &ldquo;{submission.welcomeNote || "파워넷 가족이 되어 매우 기쁩니다. 첫 출근일에 뵙겠습니다!"}&rdquo;
+                            </p>
+                          </div>
+
+                          {/* 5대 서류 & 준비물 체크 상태 */}
+                          <div className="p-3.5 rounded-2xl bg-[#F8F9FA] border border-neutral-200 space-y-2">
+                            <div className="flex items-center justify-between text-xs font-bold">
+                              <span className="text-neutral-700">입사자 서류 및 사전 준비물 체크 현황</span>
+                              <span className="text-blue-600 font-bold">
+                                {submission.completedCount || Object.values(submission.checklist || {}).filter(Boolean).length} / {submission.totalCount || 5} 확인 완료
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
+                              {[
+                                { key: 'id_card', label: '본인 신분증 지참' },
+                                { key: 'bank_book', label: '급여 계좌 통장 사본' },
+                                { key: 'graduation', label: '최종 학력 증명서' },
+                                { key: 'dress_code', label: '비즈니스 캐주얼 확인' },
+                                { key: 'lunch_guide', label: '첫날 웰컴 런치 확인' },
+                              ].map((it) => {
+                                const checked = submission.checklist && submission.checklist[it.key];
+                                return (
+                                  <div key={it.key} className="flex items-center gap-1.5 p-1.5 rounded-lg bg-white border border-neutral-200 text-[11px]">
+                                    <span className={checked ? "text-emerald-600 font-bold" : "text-neutral-400"}>
+                                      {checked ? "✔" : "○"}
+                                    </span>
+                                    <span className={checked ? "font-semibold text-neutral-900" : "text-neutral-500"}>
+                                      {it.label}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-4 rounded-xl bg-white border border-dashed border-neutral-200 text-center space-y-2">
+                        <p className="text-xs text-neutral-500">
+                          아직 입사자가 셀프 온보딩 포털을 제출하지 않았습니다. 입사자에게 문자/메일로 링크를 전달하세요.
+                        </p>
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const portalUrl = `${window.location.origin}/onboard/portal/${selectedEmployee.id}`;
+                              navigator.clipboard.writeText(portalUrl);
+                              alert(`신입사원 온보딩 포털 링크가 복사되었습니다!\n\n${portalUrl}\n\n입사자에게 문자, 카카오톡 또는 이메일로 전달하세요.`);
+                            }}
+                            className="px-3 py-1.5 rounded-xl border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                          >
+                            <FileText size={12} /> 포털 링크 복사하기
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* 신입사원 자동 미션 안내 이메일 스케줄러 (입사일 기준 자동 발송) */}
               <div className="p-5 rounded-2xl border space-y-4 shadow-xs" style={{ backgroundColor: '#F8F9FA', borderColor: 'rgba(0, 113, 227, 0.2)' }}>
