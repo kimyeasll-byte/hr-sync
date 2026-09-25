@@ -10,6 +10,7 @@ import { supabase } from "@/utils/supabase/client";
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<"onboard" | "journey" | "assets" | "offboard" | "history" | "card">("onboard");
+  const isNewHireGroup = activeTab === "onboard" || activeTab === "journey" || activeTab === "card";
 
   // Onboarding States
   const [onName, setOnName] = useState("");
@@ -292,18 +293,109 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <div className="flex gap-1.5 mb-8 p-1 overflow-x-auto" style={{ backgroundColor: 'var(--color-border)', borderRadius: 'var(--radius-sm)', width: 'fit-content' }}>
-        <button onClick={() => setActiveTab("onboard")} className="px-5 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "onboard" ? 'var(--color-surface)' : 'transparent', color: activeTab === "onboard" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "onboard" ? 'var(--shadow-subtle)' : 'none' }}>신규 입사자 세팅</button>
-        <button onClick={() => setActiveTab("journey")} className="px-5 py-2 text-sm font-bold transition-all flex items-center gap-1.5" style={{ backgroundColor: activeTab === "journey" ? 'var(--color-surface)' : 'transparent', color: activeTab === "journey" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "journey" ? 'var(--shadow-subtle)' : 'none' }}>
-          <Calendar size={15} className={activeTab === "journey" ? "text-blue-400" : ""} /> 온보딩 여정 관리
+      {/* 1차 대메뉴 네비게이션 바 */}
+      <div className="flex items-center gap-2 mb-3 p-1.5 overflow-x-auto rounded-2xl border" 
+           style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)', width: 'fit-content' }}>
+        
+        {/* 대메뉴 1: 신규 입사자 관리 (그룹) */}
+        <button
+          onClick={() => {
+            if (!isNewHireGroup) setActiveTab("journey");
+          }}
+          className={`px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold transition-all rounded-xl flex items-center gap-2 ${
+            isNewHireGroup 
+              ? "bg-blue-600 text-white shadow-md shadow-blue-900/20" 
+              : "text-neutral-400 hover:text-white hover:bg-neutral-800/50"
+          }`}
+        >
+          <UserPlus size={16} />
+          <span>신규 입사자 관리</span>
+          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
+            isNewHireGroup ? "bg-blue-800 text-blue-200" : "bg-neutral-800 text-neutral-400"
+          }`}>
+            3
+          </span>
         </button>
-        <button onClick={() => setActiveTab("assets")} className="px-5 py-2 text-sm font-bold transition-all flex items-center gap-1.5" style={{ backgroundColor: activeTab === "assets" ? 'var(--color-surface)' : 'transparent', color: activeTab === "assets" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "assets" ? 'var(--shadow-subtle)' : 'none' }}>
-          <Laptop size={15} className={activeTab === "assets" ? "text-blue-400" : ""} /> IT 자산 관리
+
+        {/* 대메뉴 2: IT 자산 및 비품 관리 */}
+        <button
+          onClick={() => setActiveTab("assets")}
+          className={`px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold transition-all rounded-xl flex items-center gap-2 ${
+            activeTab === "assets" 
+              ? "bg-blue-600 text-white shadow-md shadow-blue-900/20" 
+              : "text-neutral-400 hover:text-white hover:bg-neutral-800/50"
+          }`}
+        >
+          <Laptop size={16} />
+          <span>IT 자산 관리</span>
         </button>
-        <button onClick={() => setActiveTab("offboard")} className="px-5 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "offboard" ? 'var(--color-surface)' : 'transparent', color: activeTab === "offboard" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "offboard" ? 'var(--shadow-subtle)' : 'none' }}>퇴사자 권한 회수</button>
-        <button onClick={() => setActiveTab("card")} className="px-5 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "card" ? 'var(--color-surface)' : 'transparent', color: activeTab === "card" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "card" ? 'var(--shadow-subtle)' : 'none' }}>명함 제작</button>
-        <button onClick={() => setActiveTab("history")} className="px-5 py-2 text-sm font-bold transition-all" style={{ backgroundColor: activeTab === "history" ? 'var(--color-surface)' : 'transparent', color: activeTab === "history" ? 'var(--color-text-title)' : 'var(--color-text-muted)', borderRadius: 'calc(var(--radius-sm) - 2px)', boxShadow: activeTab === "history" ? 'var(--shadow-subtle)' : 'none' }}>Log</button>
+
+        {/* 대메뉴 3: 퇴사자 권한 회수 */}
+        <button
+          onClick={() => setActiveTab("offboard")}
+          className={`px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold transition-all rounded-xl flex items-center gap-2 ${
+            activeTab === "offboard" 
+              ? "bg-blue-600 text-white shadow-md shadow-blue-900/20" 
+              : "text-neutral-400 hover:text-white hover:bg-neutral-800/50"
+          }`}
+        >
+          <UserMinus size={16} />
+          <span>퇴사자 권한 회수</span>
+        </button>
+
+        {/* 대메뉴 4: 감사 로그 */}
+        <button
+          onClick={() => setActiveTab("history")}
+          className={`px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold transition-all rounded-xl flex items-center gap-2 ${
+            activeTab === "history" 
+              ? "bg-blue-600 text-white shadow-md shadow-blue-900/20" 
+              : "text-neutral-400 hover:text-white hover:bg-neutral-800/50"
+          }`}
+        >
+          <FileText size={16} />
+          <span>감사 로그 (ITGC)</span>
+        </button>
       </div>
+
+      {/* 2차 서브메뉴: 신규 입사자 관리 전용 서브 탭 */}
+      {isNewHireGroup && (
+        <div className="flex items-center gap-1.5 mb-8 p-1.5 rounded-xl border w-fit"
+             style={{ backgroundColor: 'var(--color-bg)', borderColor: 'var(--color-border)' }}>
+          <button
+            onClick={() => setActiveTab("onboard")}
+            className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+              activeTab === "onboard"
+                ? "bg-neutral-800 text-blue-400 border border-neutral-700 shadow-sm"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <UserPlus size={13} />
+            사전 세팅 (계정 생성)
+          </button>
+          <button
+            onClick={() => setActiveTab("journey")}
+            className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+              activeTab === "journey"
+                ? "bg-neutral-800 text-blue-400 border border-neutral-700 shadow-sm"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <Calendar size={13} />
+            온보딩 여정 & 마일스톤 (D-Day)
+          </button>
+          <button
+            onClick={() => setActiveTab("card")}
+            className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+              activeTab === "card"
+                ? "bg-neutral-800 text-blue-400 border border-neutral-700 shadow-sm"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <IdCard size={13} />
+            모바일 명함 스튜디오
+          </button>
+        </div>
+      )}
 
       {activeTab === "onboard" && (
         <div style={{ backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-6)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-subtle)' }}>
