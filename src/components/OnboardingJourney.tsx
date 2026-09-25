@@ -211,7 +211,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
   // 자동 안내 이메일 발송 & 미리보기 관련 상태
   const [sendingMilestone, setSendingMilestone] = useState<string | null>(null);
   const [previewMilestone, setPreviewMilestone] = useState<{
-    type: 'DAY_1' | 'WEEK_1' | 'MONTH_1' | 'MONTH_3';
+    type: 'DAY_1' | 'WEEK_1' | 'MONTH_1' | 'MONTH_3' | 'MONTH_6' | 'YEAR_1';
     title: string;
     subtitle: string;
     items: string[];
@@ -303,7 +303,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
     }
   }, []);
 
-  const getMilestoneDetails = (type: 'DAY_1' | 'WEEK_1' | 'MONTH_1' | 'MONTH_3', emp: JourneyEmployee) => {
+  const getMilestoneDetails = (type: 'DAY_1' | 'WEEK_1' | 'MONTH_1' | 'MONTH_3' | 'MONTH_6' | 'YEAR_1', emp: JourneyEmployee) => {
     switch (type) {
       case 'DAY_1':
         return {
@@ -336,35 +336,63 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
       case 'MONTH_1':
         return {
           type,
-          title: "입사 1개월차: 온보딩 적응도 설문 및 인사팀 피드백",
-          subtitle: "파워넷의 소중한 일원으로 한 달간 함께해 주셔서 감사합니다!",
+          title: "입사 1개월차: 조직 적응도 펄스 서베이 참여 안내",
+          subtitle: "파워넷의 소중한 일원으로 한 달간 함께해 주셔서 감사합니다! 1개월차 적응도 설문에 참여해주세요.",
           items: [
-            "온보딩 1개월차 조직 적응도 자가진단 설문 참여 (약 3분 소요)",
+            "온보딩 1개월차 조직 적응도 3문항 펄스 서베이 참여 (약 3분 소요)",
             "인쇄 제작 완료된 정규 사원증 및 공식 명함 실물 수령 확인",
             "팀장님과의 1개월차 중간 업무 방향성 1:1 면담",
             "인사팀 온보딩 담당자와의 캐주얼 커피챗 (고충 및 건의사항)"
           ],
-          tip: "💡 초기 적응 과정에서 겪는 어려운 점이나 필요한 장비가 있다면 인사기획팀에 편하게 말씀해주세요.",
+          tip: "💡 초기 적응 과정에서 겪는 어려운 점이나 필요한 장비가 있다면 펄스 서베이에 솔직히 기재해주세요. AI가 분석하여 인사팀 맞춤 케어를 지원합니다.",
           date: calculateMilestoneDate(emp.target_date, 30)
         };
       case 'MONTH_3':
         return {
           type,
-          title: "입사 3개월차: 수습 기간 종료 및 정규직 전환 안내",
-          subtitle: "3개월간의 수습 온보딩 여정을 훌륭히 마쳐가고 계십니다!",
+          title: "입사 3개월차: 수습 평가 & 펄스 서베이 안내",
+          subtitle: "3개월간의 수습 온보딩 여정을 훌륭히 마쳐가고 계십니다! 수습 온보딩 평가 설문에 참여해주세요.",
           items: [
+            "수습 3개월차 온보딩 피드백 및 적응도 펄스 서베이 참여 (약 3분 소요)",
             "수습기간 직무 수행 자체 점검표 작성 및 부서장 면담",
             "인사총괄 정규직 전환 인터뷰 진행",
-            "정규직 임용 발령 및 사내 포털 인사 정보 최종 확정",
-            "수습 온보딩 최종 수료 및 축하 기념품 수령"
+            "정규직 임용 발령 및 수습 온보딩 최종 수료"
           ],
           tip: "💡 정규직 전환 인터뷰 일정은 인사기획팀에서 부서장님과 조율 후 별도 캘린더 초대를 드립니다.",
           date: calculateMilestoneDate(emp.target_date, 90)
         };
+      case 'MONTH_6':
+        return {
+          type,
+          title: "입사 6개월차: 반기 직무 몰입 & 성장 서베이 안내",
+          subtitle: "파워넷에 안착하여 의미 있는 성과를 만들어가고 계신 6개월차를 축하드립니다! 직무 몰입도 점검에 참여해주세요.",
+          items: [
+            "입사 6개월차 직무 몰입 & 조직 안착 펄스 서베이 참여 (약 3분 소요)",
+            "상반기/하반기 업무 목표 진행도 자체 점검 및 피드백",
+            "팀 멘토 및 동료들과의 반기 리프레시 티타임",
+            "직무 성장 지원 프로그램(도서/교육) 신청 검토"
+          ],
+          tip: "💡 업무 매너리즘을 예방하고 지속적인 성장을 지원하기 위해 6개월차 설문 결과를 바탕으로 부서 맞춤 케어를 진행합니다.",
+          date: calculateMilestoneDate(emp.target_date, 180)
+        };
+      case 'YEAR_1':
+        return {
+          type,
+          title: "입사 1주년: 조직 안착 & 리텐션 서베이 안내",
+          subtitle: "파워넷과 함께한 자랑스러운 1주년을 진심으로 축하드립니다! 1주년 리텐션 진단 설문에 참여해주세요.",
+          items: [
+            "입사 1주년 조직 안착 & 직무 리텐션 펄스 서베이 참여 (약 3분 소요)",
+            "입사 1주년 축하 기념품/리워드 수령",
+            "부서장과의 연간 직무 성과 리뷰 및 차기 연도 CDP(커리어 개발) 면담",
+            "차년도 연봉 계약 및 인사 평가 프로세스 안내 확인"
+          ],
+          tip: "💡 1년간의 소중한 경험과 파워넷 조직 문화에 대한 솔직한 의견은 회사의 더 나은 미래를 만드는 귀중한 밑거름이 됩니다.",
+          date: calculateMilestoneDate(emp.target_date, 365)
+        };
     }
   };
 
-  const handleSendMilestone = async (emp: JourneyEmployee, milestoneType: 'DAY_1' | 'WEEK_1' | 'MONTH_1' | 'MONTH_3') => {
+  const handleSendMilestone = async (emp: JourneyEmployee, milestoneType: 'DAY_1' | 'WEEK_1' | 'MONTH_1' | 'MONTH_3' | 'MONTH_6' | 'YEAR_1') => {
     const key = `${emp.id}_${milestoneType}`;
     setSendingMilestone(key);
     try {
@@ -865,7 +893,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                 </div>
 
                 {/* 주요 마일스톤 도달 캘린더 */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 pt-3 border-t text-[11px]" style={{ borderColor: 'var(--color-border)' }}>
+                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 mt-4 pt-3 border-t text-[11px]" style={{ borderColor: 'var(--color-border)' }}>
                   <div>
                     <span className="text-neutral-500 block">입사일 (D-Day)</span>
                     <span className="font-bold text-neutral-900">{selectedEmployee.target_date || '-'}</span>
@@ -875,12 +903,20 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                     <span className="font-bold text-neutral-900">{calculateMilestoneDate(selectedEmployee.target_date, 7)}</span>
                   </div>
                   <div>
-                    <span className="text-neutral-500 block">1개월 면담 (D+30)</span>
+                    <span className="text-neutral-500 block">1개월 설문 (D+30)</span>
                     <span className="font-bold text-neutral-900">{calculateMilestoneDate(selectedEmployee.target_date, 30)}</span>
                   </div>
                   <div>
-                    <span className="text-neutral-500 block">수습 평가 (D+90)</span>
+                    <span className="text-neutral-500 block">3개월 수습 (D+90)</span>
                     <span className="font-bold text-neutral-900">{calculateMilestoneDate(selectedEmployee.target_date, 90)}</span>
+                  </div>
+                  <div>
+                    <span className="text-neutral-500 block">6개월 몰입 (D+180)</span>
+                    <span className="font-bold text-neutral-900">{calculateMilestoneDate(selectedEmployee.target_date, 180)}</span>
+                  </div>
+                  <div>
+                    <span className="text-neutral-500 block">1년차 안착 (D+365)</span>
+                    <span className="font-bold text-neutral-900">{calculateMilestoneDate(selectedEmployee.target_date, 365)}</span>
                   </div>
                 </div>
               </div>
@@ -933,7 +969,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                             )}
                           </div>
                           <p className="text-[11px] text-neutral-500 mt-0.5">
-                            D+30일(1개월) 및 D+90일(3개월 수습) 펄스 서베이 데이터를 분석하여 이탈 징후를 선제 포착합니다.
+                            입사 1개월, 3개월, 6개월, 1년차 자동 발송 펄스 서베이 데이터를 기반으로 조기 이탈 위험을 선제 포착합니다.
                           </p>
                         </div>
                       </div>
@@ -989,7 +1025,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                               <span className="text-xs text-neutral-500">/ 15점 만점</span>
                             </div>
                             <span className="text-[11px] font-bold text-neutral-700 mt-1">
-                              {survey.stage === 'D_90' ? '수습 3개월차 최종 평가' : '입사 1개월차 안착 점검'}
+                              {survey.stage === 'YEAR_1' ? '입사 1주년 안착 진단' : survey.stage === 'MONTH_6' ? '6개월차 직무 몰입 점검' : survey.stage === 'MONTH_3' || survey.stage === 'D_90' ? '수습 3개월차 최종 평가' : '입사 1개월차 안착 점검'}
                             </span>
                           </div>
 
@@ -1088,12 +1124,12 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                           </button>
 
                           <a
-                            href={`/onboard/portal/${selectedEmployee.id}`}
+                            href={`/onboard/survey/${selectedEmployee.id}`}
                             target="_blank"
                             rel="noreferrer"
                             className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-800 transition-all shadow-xs flex items-center gap-1.5 ml-auto"
                           >
-                            <ExternalLink size={13} /> 신입사원 포털에서 설문 확인
+                            <ExternalLink size={13} /> 모바일 펄스 서베이 열기
                           </a>
                         </div>
                       </div>
@@ -1101,27 +1137,27 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                       /* 설문 미응답 대기 상태 안내 */
                       <div className="p-4 rounded-xl bg-white border border-dashed border-neutral-200 text-center space-y-2">
                         <p className="text-xs text-neutral-500">
-                          아직 {selectedEmployee.name} 님의 D+30 / D+90 조직 적응도 펄스 서베이가 접수되지 않았습니다.
+                          아직 {selectedEmployee.name} 님의 정기(1개월, 3개월, 6개월, 1년) 조직 적응도 펄스 서베이가 접수되지 않았습니다. 입사일 기준 해당 시점에 자동 이메일이 발송됩니다.
                         </p>
                         <div className="flex items-center justify-center gap-2">
                           <button
                             type="button"
                             onClick={() => {
-                              const portalUrl = `${window.location.origin}/onboard/portal/${selectedEmployee.id}`;
-                              navigator.clipboard.writeText(portalUrl);
-                              alert(`신입사원 온보딩 포털(펄스 서베이) 링크가 복사되었습니다!\n\n${portalUrl}\n\n입사자에게 전달하여 3문항 설문 참여를 안내하세요.`);
+                              const surveyUrl = `${window.location.origin}/onboard/survey/${selectedEmployee.id}`;
+                              navigator.clipboard.writeText(surveyUrl);
+                              alert(`신입사원 펄스 서베이 링크가 복사되었습니다!\n\n${surveyUrl}\n\n입사자에게 전달하여 3문항 설문 참여를 안내하세요.`);
                             }}
                             className="px-3 py-1.5 rounded-xl border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
                           >
                             <FileText size={12} /> 설문 참여 링크 복사하기
                           </button>
                           <a
-                            href={`/onboard/portal/${selectedEmployee.id}`}
+                            href={`/onboard/survey/${selectedEmployee.id}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                            className="px-3 py-1.5 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
                           >
-                            <ExternalLink size={12} /> 모바일 설문 포털 바로가기
+                            <ExternalLink size={12} /> 모바일 설문 페이지 바로가기
                           </a>
                         </div>
                       </div>
@@ -1304,10 +1340,10 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                   <div>
                     <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--color-text-title)' }}>
                       <Mail size={16} className="text-blue-600" />
-                      입사일 기준 신입사원 자동 미션 안내 스케줄러
+                      입사일 기준 신입사원 자동 미션 & 정기 펄스 서베이 스케줄러
                     </h3>
                     <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-                      인사팀이 수동으로 챙길 필요 없이, 입사일({selectedEmployee.target_date}) 기준으로 1일차/1주차/1개월차/3개월차 미션을 신입사원 이메일로 자동 전송합니다.
+                      입사일({selectedEmployee.target_date}) 기준으로 출근 1일차/1주차 미션 및 1개월/3개월/6개월/1년차 정기 펄스 서베이를 신입사원 이메일로 자동 스케줄링 발송합니다.
                     </p>
                   </div>
                   <span className="text-[11px] px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-bold self-start sm:self-auto flex items-center gap-1.5 shadow-xs">
@@ -1315,12 +1351,14 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                   {[
-                    { type: 'DAY_1' as const, label: '출근 1일차 웰컴 안내', phase: 'D-Day', date: selectedEmployee.target_date, summary: '웰컴 키트 수령, PC 초기화, 제휴 사진관(패밀리포토하우스) 촬영 안내 (제작 약 2주 소요)' },
-                    { type: 'WEEK_1' as const, label: '1주차 멘토링 & 런치', phase: 'D+7', date: calculateMilestoneDate(selectedEmployee.target_date, 7), summary: '멘토 1:1 티타임, 사내 프로필 사진 등록, 전자결재 가이드' },
-                    { type: 'MONTH_1' as const, label: '1개월차 적응도 설문', phase: 'D+30', date: calculateMilestoneDate(selectedEmployee.target_date, 30), summary: '조직 적응도 자가진단(3분), 정규 사원증/명함 수령 확인' },
-                    { type: 'MONTH_3' as const, label: '3개월차 수습 평가', phase: 'D+90', date: calculateMilestoneDate(selectedEmployee.target_date, 90), summary: '수습기간 직무 수행 자체 점검표 작성, 정규직 전환 인터뷰' },
+                    { type: 'DAY_1' as const, label: '1일차 웰컴 안내', phase: 'D-Day', isSurvey: false, date: selectedEmployee.target_date, summary: '웰컴 키트 수령, PC 초기화, 제휴 사진관(패밀리포토하우스) 촬영 안내 (제작 약 2주 소요)' },
+                    { type: 'WEEK_1' as const, label: '1주차 멘토링 & 런치', phase: 'D+7', isSurvey: false, date: calculateMilestoneDate(selectedEmployee.target_date, 7), summary: '멘토 1:1 티타임, 사내 프로필 사진 등록, 전자결재 가이드' },
+                    { type: 'MONTH_1' as const, label: '1개월차 적응도 설문', phase: 'D+30', isSurvey: true, date: calculateMilestoneDate(selectedEmployee.target_date, 30), summary: '📊 조직 적응도 자가진단(3분), 정규 사원증/명함 수령 확인' },
+                    { type: 'MONTH_3' as const, label: '3개월차 수습 평가', phase: 'D+90', isSurvey: true, date: calculateMilestoneDate(selectedEmployee.target_date, 90), summary: '📊 수습 3개월차 온보딩 피드백(3분), 정규직 전환 인터뷰' },
+                    { type: 'MONTH_6' as const, label: '6개월차 직무 몰입 설문', phase: 'D+180', isSurvey: true, date: calculateMilestoneDate(selectedEmployee.target_date, 180), summary: '📊 반기 직무 몰입도 & 성장 점검(3분), 목표 달성도 피드백' },
+                    { type: 'YEAR_1' as const, label: '1년차 안착 & 리텐션 설문', phase: 'D+365', isSurvey: true, date: calculateMilestoneDate(selectedEmployee.target_date, 365), summary: '📊 입사 1주년 안착 & 리텐션 진단(3분), 연간 성과 리뷰 & CDP' },
                   ].map((m) => {
                     const key = `${selectedEmployee.id}_${m.type}`;
                     const isSent = !!sentMilestones[key];
@@ -1606,12 +1644,21 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
               </div>
 
               <div className="text-center pt-2">
-                <button
-                  type="button"
-                  className="px-4 py-2 rounded-lg bg-blue-700 text-white font-bold text-xs shadow-sm hover:bg-blue-800 transition-colors"
-                >
-                  신입사원 온보딩 로드맵 확인하기 →
-                </button>
+                {['MONTH_1', 'MONTH_3', 'MONTH_6', 'YEAR_1'].includes(previewMilestone.type) ? (
+                  <button
+                    type="button"
+                    className="px-5 py-2.5 rounded-xl bg-purple-700 text-white font-bold text-xs shadow-sm hover:bg-purple-800 transition-colors"
+                  >
+                    📊 펄스 서베이 참여하기 (소요시간 약 3분) →
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="px-4 py-2 rounded-lg bg-blue-700 text-white font-bold text-xs shadow-sm hover:bg-blue-800 transition-colors"
+                  >
+                    신입사원 온보딩 전용 포털 바로가기 →
+                  </button>
+                )}
               </div>
             </div>
 

@@ -46,27 +46,51 @@ export async function POST(request: Request) {
         break;
 
       case 'MONTH_1':
-        milestoneTitle = "입사 1개월차: 온보딩 적응도 설문 및 인사팀 피드백";
-        milestoneSubtitle = "파워넷의 소중한 일원으로 한 달간 함께해 주셔서 감사합니다!";
+        milestoneTitle = "입사 1개월차: 조직 적응도 펄스 서베이 참여 안내";
+        milestoneSubtitle = "파워넷의 소중한 일원으로 한 달간 함께해 주셔서 감사합니다! 1개월차 적응도 설문에 참여해주세요.";
         checklistItems = [
-          "온보딩 1개월차 조직 적응도 자가진단 설문 참여 (약 3분 소요)",
+          "온보딩 1개월차 조직 적응도 3문항 펄스 서베이 참여 (약 3분 소요)",
           "인쇄 제작 완료된 정규 사원증 및 공식 명함 실물 수령 확인",
           "팀장님과의 1개월차 중간 업무 방향성 1:1 면담",
           "인사팀 온보딩 담당자와의 캐주얼 커피챗 (고충 및 건의사항)"
         ];
-        tipContent = "💡 초기 적응 과정에서 겪는 어려운 점이나 필요한 장비가 있다면 인사기획팀에 편하게 말씀해주세요.";
+        tipContent = "💡 초기 적응 과정에서 겪는 어려운 점이나 필요한 장비가 있다면 펄스 서베이에 솔직히 기재해주세요. AI가 분석하여 인사팀 맞춤 케어를 지원합니다.";
         break;
 
       case 'MONTH_3':
-        milestoneTitle = "입사 3개월차: 수습 기간 종료 및 정규직 전환 안내";
-        milestoneSubtitle = "3개월간의 수습 온보딩 여정을 훌륭히 마쳐가고 계십니다!";
+        milestoneTitle = "입사 3개월차: 수습 평가 & 펄스 서베이 안내";
+        milestoneSubtitle = "3개월간의 수습 온보딩 여정을 훌륭히 마쳐가고 계십니다! 수습 온보딩 평가 설문에 참여해주세요.";
         checklistItems = [
+          "수습 3개월차 온보딩 피드백 및 적응도 펄스 서베이 참여 (약 3분 소요)",
           "수습기간 직무 수행 자체 점검표 작성 및 부서장 면담",
           "인사총괄 정규직 전환 인터뷰 진행",
-          "정규직 임용 발령 및 사내 포털 인사 정보 최종 확정",
-          "수습 온보딩 최종 수료 및 축하 기념품 수령"
+          "정규직 임용 발령 및 수습 온보딩 최종 수료"
         ];
         tipContent = "💡 정규직 전환 인터뷰 일정은 인사기획팀에서 부서장님과 조율 후 별도 캘린더 초대를 드립니다.";
+        break;
+
+      case 'MONTH_6':
+        milestoneTitle = "입사 6개월차: 반기 직무 몰입 & 성장 서베이 안내";
+        milestoneSubtitle = "파워넷에 안착하여 의미 있는 성과를 만들어가고 계신 6개월차를 축하드립니다! 직무 몰입도 점검에 참여해주세요.";
+        checklistItems = [
+          "입사 6개월차 직무 몰입 & 조직 안착 펄스 서베이 참여 (약 3분 소요)",
+          "상반기/하반기 업무 목표 진행도 자체 점검 및 피드백",
+          "팀 멘토 및 동료들과의 반기 리프레시 티타임",
+          "직무 성장 지원 프로그램(도서/교육) 신청 검토"
+        ];
+        tipContent = "💡 업무 매너리즘을 예방하고 지속적인 성장을 지원하기 위해 6개월차 설문 결과를 바탕으로 부서 맞춤 케어를 진행합니다.";
+        break;
+
+      case 'YEAR_1':
+        milestoneTitle = "입사 1주년: 조직 안착 & 리텐션 서베이 안내";
+        milestoneSubtitle = "파워넷과 함께한 자랑스러운 1주년을 진심으로 축하드립니다! 1주년 리텐션 진단 설문에 참여해주세요.";
+        checklistItems = [
+          "입사 1주년 조직 안착 & 직무 리텐션 펄스 서베이 참여 (약 3분 소요)",
+          "입사 1주년 축하 기념품/리워드 수령",
+          "부서장과의 연간 직무 성과 리뷰 및 차기 연도 CDP(커리어 개발) 면담",
+          "차년도 연봉 계약 및 인사 평가 프로세스 안내 확인"
+        ];
+        tipContent = "💡 1년간의 소중한 경험과 파워넷 조직 문화에 대한 솔직한 의견은 회사의 더 나은 미래를 만드는 귀중한 밑거름이 됩니다.";
         break;
 
       default:
@@ -75,6 +99,10 @@ export async function POST(request: Request) {
         checklistItems = ["사내 규정 확인", "업무 인수인계 확인"];
         tipContent = "💡 문의사항은 인사팀으로 연락주세요.";
     }
+
+    const isSurveyMilestone = ['MONTH_1', 'MONTH_3', 'MONTH_6', 'YEAR_1'].includes(milestoneType);
+    const surveyUrl = `https://hr-sync-delta.vercel.app/onboard/survey/${empId || empName}?stage=${milestoneType}`;
+    const portalUrl = `https://hr-sync-delta.vercel.app/onboard/portal/${empId || empName}`;
 
     const emailHtml = (targetRecipient: string, isForwarded: boolean) => `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 36px; border: 1px solid #e2e8f0; border-radius: 14px; max-width: 560px; margin: 0 auto; background-color: #ffffff;">
@@ -109,11 +137,25 @@ export async function POST(request: Request) {
           ${tipContent}
         </div>
 
-        <div style="margin-top: 32px; text-align: center;">
-          <a href="https://hr-sync-delta.vercel.app/onboard/portal/${empId || empName}" style="display: inline-block; background-color: #0071E3; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 700; font-size: 13px;">
-            신입사원 온보딩 전용 포털 바로가기 →
-          </a>
-        </div>
+        ${isSurveyMilestone ? `
+          <div style="margin: 28px 0; padding: 20px; background-color: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 12px; text-align: center;">
+            <div style="font-size: 13px; font-weight: 800; color: #6d28d9; margin-bottom: 6px;">
+              📊 초간단 3문항 펄스 서베이 (소요시간 약 3분)
+            </div>
+            <p style="font-size: 12px; color: #5b21b6; margin-top: 0; margin-bottom: 16px; line-height: 1.5;">
+              업무 난이도, 팀 분위기, 필요 장비에 대한 생각을 들려주시면 AI가 분석하여 더 나은 근무 환경을 만들어 드립니다.
+            </p>
+            <a href="${surveyUrl}" style="display: inline-block; background-color: #7c3aed; color: #ffffff; text-decoration: none; padding: 13px 32px; border-radius: 10px; font-weight: 800; font-size: 14px; box-shadow: 0 2px 4px rgba(124, 58, 237, 0.3);">
+              펄스 서베이 참여하기 (3분 소요) →
+            </a>
+          </div>
+        ` : `
+          <div style="margin-top: 32px; text-align: center;">
+            <a href="${portalUrl}" style="display: inline-block; background-color: #0071E3; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 700; font-size: 13px;">
+              신입사원 온보딩 전용 포털 바로가기 →
+            </a>
+          </div>
+        `}
 
         <div style="border-top: 1px solid #e2e8f0; margin-top: 32px; padding-top: 16px; text-align: center; font-size: 11px; color: #94a3b8;">
           (주)파워넷 인사기획팀 & 전산총무팀 · 본 메일은 출근일(${targetDate || '입사일'}) 기준 온보딩 캘린더에 의해 자동 스케줄링 발송되었습니다.

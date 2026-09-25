@@ -80,16 +80,29 @@ export function analyzePulseSurvey(params: {
   }
 
   if (flag === 'GREEN') {
-    if (riskFactors.length === 0) riskFactors.push('특이 위험 요인 없음 (정상 범위)');
-    actionItems.push('현재 업무 성과에 대한 따뜻한 피드백과 격려 메시지 전달');
-    actionItems.push('차주 예정된 팀 런치 및 멘토링 프로그램 정상 가동');
+    if (riskFactors.length === 0) riskFactors.push('특이 위험 요인 없음 (안정적 안착)');
+    if (stage === 'MONTH_6') {
+      actionItems.push('반기 직무 몰입도 우수 임직원 대상 성장 지원 프로그램(도서/교육) 적극 권장');
+    } else if (stage === 'YEAR_1') {
+      actionItems.push('입사 1주년 축하 리워드 지급 및 차기 연도 개인 커리어 개발 플랜(CDP) 수립 지원');
+    } else {
+      actionItems.push('현재 업무 성과에 대한 따뜻한 피드백과 격려 메시지 전달');
+      actionItems.push('차주 예정된 팀 런치 및 멘토링 프로그램 정상 가동');
+    }
   }
 
-  const stageLabel = stage === 'D_90' ? '3개월차 수습 평가' : '1개월차 온보딩';
+  let stageLabel = '1개월차 조직 적응 점검';
+  if (stage === 'MONTH_3' || stage === 'D_90') {
+    stageLabel = '3개월차 수습 평가';
+  } else if (stage === 'MONTH_6') {
+    stageLabel = '6개월차 직무 몰입 & 성장 점검';
+  } else if (stage === 'YEAR_1') {
+    stageLabel = '1년차 안착 & 리텐션 진단';
+  }
 
   const aiDiagnosis = `${empName} 님(${department}, ${stageLabel})의 설문 분석 결과, 총점 ${totalScore}/15점(조기퇴사 위험지수 ${riskScore}점)으로 [${flag}] 상태로 진단되었습니다. ` +
     (flag === 'RED' 
-      ? `특히 ${riskFactors[0] || '전반적인 만족도 저하'} 문제가 심각하여 조기 퇴사로 이어질 가능성이 감지됩니다. `
+      ? `특히 ${riskFactors[0] || '전반적인 만족도 저하'} 문제가 심각하여 조기 퇴사 및 이탈로 이어질 가능성이 감지됩니다. `
       : flag === 'YELLOW'
       ? `업무 수행 중 ${riskFactors[0] || '일부 애로사항'}이 관찰되어 가벼운 부서 차원의 조율이 권장됩니다. `
       : `전반적인 직무 만족도와 팀 친밀도가 매우 우수하여 모범적으로 안착하고 있습니다. `) +
