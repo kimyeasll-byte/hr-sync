@@ -25,7 +25,9 @@
 
 | 문서명 | 주요 내용 | 링크 |
 | :--- | :--- | :---: |
-| **🎤 [신규] 90분 참여형 워크숍 슬라이드 & 강사 대본** | 슬라이드 1~15장 상세 화면안 + 강사 발화 대본(Script) + 실습 가이드 | [docs/WORKSHOP_SLIDES_AND_SCRIPT.md](./docs/WORKSHOP_SLIDES_AND_SCRIPT.md) |
+| **🖥️ [웹 슬라이드] 15장 인터랙티브 발표 덱** | 브라우저 즉시 발표 (`←`/`→` 이동, `S`키 강사 대본 서랍, 전체화면) | [hr-sync-delta.vercel.app/workshop/slides](https://hr-sync-delta.vercel.app/workshop/slides) |
+| **📥 [파워포인트 원본] .pptx 발표자료 다운로드** | 16:9 와이드스크린, Apple 미니멀 카드 디자인, 슬라이드별 강사 노트 포함 | [AI_Web_Service_Workshop.pptx 직접 다운로드](https://hr-sync-delta.vercel.app/AI_Web_Service_Workshop.pptx) |
+| **🎤 [강사 교안] 90분 워크숍 슬라이드 & 강사 대본** | 슬라이드 1~15장 상세 화면안 + 강사 발화 대본(Script) + 실습 가이드 | [docs/WORKSHOP_SLIDES_AND_SCRIPT.md](./docs/WORKSHOP_SLIDES_AND_SCRIPT.md) |
 | **🚀 비개발자를 위한 AI 웹서비스 제작 바이블** | 아이디어 인터뷰부터 PRD, 개발, 배포까지 범용 6단계 프레임워크 | [docs/UNIVERSAL_WEB_BUILDER_GUIDE.md](./docs/UNIVERSAL_WEB_BUILDER_GUIDE.md) |
 | **🎓 팀내 교육용 교안 & 워크숍 가이드** | AI 페어 프로그래밍 실전, 5단계 커리큘럼, 30분 팀원 핸즈온 실습 | [docs/TRAINING_GUIDE.md](./docs/TRAINING_GUIDE.md) |
 | **📖 사용자 & 관리자 운영 매뉴얼** | 원터치 입사/퇴사, 모바일 포털, AI 서베이, IT 자산 관리 상세 가이드 | [docs/MANUAL.md](./docs/MANUAL.md) |
