@@ -31,7 +31,8 @@ import {
   ExternalLink,
   Download,
   Camera,
-  X
+  X,
+  HeartPulse
 } from "lucide-react";
 
 export interface JourneyEmployee {
@@ -223,6 +224,10 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
   const [portalSubmissions, setPortalSubmissions] = useState<Record<string, any>>({});
   const [isSubmissionsLoading, setIsSubmissionsLoading] = useState(false);
 
+  // 신입사원 펄스 서베이 & AI 적응도 진단 내역: { [empId]: surveyData }
+  const [pulseSurveys, setPulseSurveys] = useState<Record<string, any>>({});
+  const [isSurveysLoading, setIsSurveysLoading] = useState(false);
+
   const fetchPortalSubmissions = async () => {
     setIsSubmissionsLoading(true);
     try {
@@ -237,6 +242,23 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
       console.error("Failed to load portal submissions", e);
     } finally {
       setIsSubmissionsLoading(false);
+    }
+  };
+
+  const fetchPulseSurveys = async () => {
+    setIsSurveysLoading(true);
+    try {
+      const res = await fetch('/api/onboarding/survey');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.surveys) {
+          setPulseSurveys(data.surveys);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load pulse surveys", e);
+    } finally {
+      setIsSurveysLoading(false);
     }
   };
 
@@ -261,6 +283,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
   useEffect(() => {
     fetchEmployees();
     fetchPortalSubmissions();
+    fetchPulseSurveys();
     // Load cached checklists from localStorage
     try {
       const savedChecklists = localStorage.getItem("powernet_onboarding_checklists");
@@ -684,7 +707,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                       {/* 셀프 포털 접수 완료 뱃지 */}
                       {portalSubmissions[emp.id] && (
                         <div className="mt-2 pt-1.5 border-t border-neutral-100 flex items-center justify-between text-[10px]">
-                          <span className="px-1.5 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                          <span className="px-1.5 py-0.5 rounded-full font-bold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1">
                             <CheckCircle2 size={10} /> 포털 접수 완료
                           </span>
                           <span className="text-neutral-400 font-medium">
@@ -692,6 +715,31 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                           </span>
                         </div>
                       )}
+
+                      {/* AI 조직 적응도 펄스 서베이 위험 신호 뱃지 */}
+                      {pulseSurveys[emp.id] && (() => {
+                        const s = pulseSurveys[emp.id];
+                        const flag = s.analysis?.flag || 'GREEN';
+                        return (
+                          <div className="mt-1 pt-1.5 border-t border-neutral-100 flex items-center justify-between text-[10px]">
+                            <span className={`px-2 py-0.5 rounded-full font-extrabold flex items-center gap-1 ${
+                              flag === 'RED'
+                                ? 'bg-red-50 text-red-700 border border-red-200'
+                                : flag === 'YELLOW'
+                                ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                                : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                            }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${
+                                flag === 'RED' ? 'bg-red-500 animate-ping' : flag === 'YELLOW' ? 'bg-amber-500' : 'bg-emerald-500'
+                              }`} />
+                              {flag === 'RED' ? '🚨 Red Flag' : flag === 'YELLOW' ? '⚠️ Yellow Flag' : '✨ Green Flag'}
+                            </span>
+                            <span className="text-neutral-500 font-medium">
+                              위험도 {s.analysis?.riskScore ?? 0}%
+                            </span>
+                          </div>
+                        );
+                      })()}
                     </div>
                   );
                 })
@@ -836,6 +884,251 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                   </div>
                 </div>
               </div>
+
+              {/* 🤖 피플 애널리틱스: AI 신입사원 조직 적응도 & 조기퇴사 위험 신호 진단 리포트 */}
+              {(() => {
+                const survey = pulseSurveys[selectedEmployee.id];
+                const analysis = survey?.analysis;
+                const flag = analysis?.flag || 'NONE';
+                const riskScore = analysis?.riskScore ?? 0;
+                const totalScore = analysis?.totalScore ?? 0;
+
+                return (
+                  <div 
+                    className="p-5 rounded-2xl border space-y-4 shadow-xs transition-all"
+                    style={{ 
+                      backgroundColor: survey ? '#FFFFFF' : '#F8F9FA',
+                      borderColor: flag === 'RED' ? '#EF4444' : flag === 'YELLOW' ? '#F59E0B' : flag === 'GREEN' ? '#10B981' : 'var(--color-border)',
+                      borderWidth: survey ? '1.5px' : '1px'
+                    }}
+                  >
+                    {/* 카드 헤더 */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
+                      <div className="flex items-center gap-2.5">
+                        <div className={`p-2 rounded-xl ${
+                          flag === 'RED' ? 'bg-red-50 text-red-600' : flag === 'YELLOW' ? 'bg-amber-50 text-amber-600' : flag === 'GREEN' ? 'bg-emerald-50 text-emerald-600' : 'bg-neutral-100 text-neutral-500'
+                        }`}>
+                          <HeartPulse size={18} />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-bold text-neutral-900">
+                              피플 애널리틱스: AI 조직 적응도 & 조기퇴사 위험 신호 진단
+                            </h3>
+                            {survey ? (
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold border flex items-center gap-1 shadow-xs ${
+                                flag === 'RED' 
+                                  ? 'bg-red-50 text-red-700 border-red-200' 
+                                  : flag === 'YELLOW' 
+                                  ? 'bg-amber-50 text-amber-800 border-amber-200' 
+                                  : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                              }`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${flag === 'RED' ? 'bg-red-500 animate-ping' : flag === 'YELLOW' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                                {analysis.flagTitle}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-neutral-100 text-neutral-500 border border-neutral-200">
+                                설문 미응답 (진단 대기)
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-neutral-500 mt-0.5">
+                            D+30일(1개월) 및 D+90일(3개월 수습) 펄스 서베이 데이터를 분석하여 이탈 징후를 선제 포착합니다.
+                          </p>
+                        </div>
+                      </div>
+
+                      {survey && (
+                        <button
+                          onClick={fetchPulseSurveys}
+                          disabled={isSurveysLoading}
+                          className="text-xs px-2.5 py-1 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 flex items-center gap-1 self-start sm:self-auto transition-colors"
+                        >
+                          <RefreshCw size={12} className={isSurveysLoading ? 'animate-spin' : ''} /> AI 재진단
+                        </button>
+                      )}
+                    </div>
+
+                    {survey && analysis ? (
+                      <div className="space-y-4">
+                        {/* 1. 위험도 게이지 및 종합 지표 */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          
+                          {/* 위험도 게이지 박스 */}
+                          <div className={`p-3.5 rounded-2xl border ${
+                            flag === 'RED' ? 'bg-red-50/50 border-red-200' : flag === 'YELLOW' ? 'bg-amber-50/50 border-amber-200' : 'bg-emerald-50/50 border-emerald-200'
+                          }`}>
+                            <div className="flex items-center justify-between text-xs font-bold mb-1">
+                              <span className="text-neutral-700">조기퇴사 위험 지수</span>
+                              <span className={`text-sm font-black ${
+                                flag === 'RED' ? 'text-red-600' : flag === 'YELLOW' ? 'text-amber-600' : 'text-emerald-600'
+                              }`}>
+                                {riskScore}%
+                              </span>
+                            </div>
+                            <div className="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full transition-all duration-500 rounded-full ${
+                                  flag === 'RED' ? 'bg-red-500' : flag === 'YELLOW' ? 'bg-amber-500' : 'bg-emerald-500'
+                                }`}
+                                style={{ width: `${riskScore}%` }}
+                              />
+                            </div>
+                            <div className="text-[10px] text-neutral-500 mt-1.5 flex justify-between font-medium">
+                              <span>0% (안정)</span>
+                              <span>50% (주의)</span>
+                              <span>100% (위험)</span>
+                            </div>
+                          </div>
+
+                          {/* 총점 및 평가 회차 */}
+                          <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 flex flex-col justify-between">
+                            <span className="text-[11px] text-neutral-500 font-medium">서베이 회차 및 총점</span>
+                            <div className="flex items-baseline gap-2 mt-1">
+                              <span className="text-xl font-black text-neutral-900">{totalScore}</span>
+                              <span className="text-xs text-neutral-500">/ 15점 만점</span>
+                            </div>
+                            <span className="text-[11px] font-bold text-neutral-700 mt-1">
+                              {survey.stage === 'D_90' ? '수습 3개월차 최종 평가' : '입사 1개월차 안착 점검'}
+                            </span>
+                          </div>
+
+                          {/* 3문항 세부 점수 */}
+                          <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-1.5 text-xs">
+                            <div className="flex justify-between items-center text-[11px]">
+                              <span className="text-neutral-600">💼 업무 난이도</span>
+                              <span className="font-bold text-neutral-900">{analysis.scores?.workScore ?? 0} / 5</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[11px]">
+                              <span className="text-neutral-600">🤝 팀 분위기·소통</span>
+                              <span className="font-bold text-neutral-900">{analysis.scores?.teamScore ?? 0} / 5</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[11px]">
+                              <span className="text-neutral-600">💻 인프라·장비</span>
+                              <span className="font-bold text-neutral-900">{analysis.scores?.equipScore ?? 0} / 5</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 2. AI 심층 진단 브리핑 (Apple-style Highlight Quote Card) */}
+                        <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50/60 via-indigo-50/40 to-white border border-blue-100 space-y-2">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-blue-700">
+                            <Sparkles size={14} />
+                            <span>AI 피플 애널리틱스 종합 진단 소견</span>
+                          </div>
+                          <p className="text-xs text-neutral-800 leading-relaxed font-normal">
+                            {analysis.aiDiagnosis}
+                          </p>
+                          {survey.feedbackText && (
+                            <div className="pt-1 mt-2 border-t border-blue-100 text-[11px] text-neutral-600">
+                              <strong className="text-neutral-800">입사자 전달 메시지:</strong> &ldquo;{survey.feedbackText}&rdquo;
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 3. 위험 징후 및 추천 HR 액션 플랜 */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                          {/* 위험/주의 요인 */}
+                          <div className="p-3.5 rounded-2xl bg-[#F8F9FA] border border-neutral-200 space-y-2">
+                            <span className="font-bold text-neutral-800 flex items-center gap-1.5 text-[11px]">
+                              <AlertCircle size={13} className={flag === 'RED' ? 'text-red-500' : 'text-amber-500'} />
+                              주요 관찰 징후 & 요인
+                            </span>
+                            <ul className="space-y-1 text-[11px] text-neutral-600">
+                              {(analysis.riskFactors || []).map((factor: string, idx: number) => (
+                                <li key={idx} className="flex items-start gap-1.5">
+                                  <span className="text-neutral-400 mt-0.5">•</span>
+                                  <span>{factor}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* 추천 액션 플랜 */}
+                          <div className="p-3.5 rounded-2xl bg-[#F8F9FA] border border-neutral-200 space-y-2">
+                            <span className="font-bold text-neutral-800 flex items-center gap-1.5 text-[11px]">
+                              <CheckCircle2 size={13} className="text-blue-600" />
+                              인사팀 추천 즉각 실행 플랜
+                            </span>
+                            <ul className="space-y-1 text-[11px] text-neutral-600">
+                              {(analysis.actionItems || []).map((action: string, idx: number) => (
+                                <li key={idx} className="flex items-start gap-1.5">
+                                  <span className="text-blue-500 mt-0.5">✔</span>
+                                  <span>{action}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+
+                        {/* 4. 빠른 조치 버튼 바 */}
+                        <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-neutral-100">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              alert(`[1:1 긴급 케어 면담 예약]\n\n대상자: ${selectedEmployee.name} (${selectedEmployee.department})\n진단 신호: ${analysis.flagTitle}\n\n사내 그룹웨어 캘린더에 인사기획팀 1:1 케어 미팅 일정이 예약 요청되었습니다.`);
+                            }}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 ${
+                              flag === 'RED'
+                                ? 'bg-red-600 hover:bg-red-700 text-white animate-pulse'
+                                : 'bg-[#0071E3] hover:bg-blue-600 text-white'
+                            }`}
+                          >
+                            <UserCheck size={13} /> 1:1 긴급 케어 면담 예약
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              alert(`[멘토(사수) 티타임 알림 발송]\n\n대상자: ${selectedEmployee.name}\n멘토에게 사내 메신저로 1:1 커피챗 지원 및 애로사항 청취 요청이 전송되었습니다.`);
+                            }}
+                            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-800 transition-all shadow-xs flex items-center gap-1.5"
+                          >
+                            <HeartHandshake size={13} /> 멘토 커피챗 알림
+                          </button>
+
+                          <a
+                            href={`/onboard/portal/${selectedEmployee.id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-800 transition-all shadow-xs flex items-center gap-1.5 ml-auto"
+                          >
+                            <ExternalLink size={13} /> 신입사원 포털에서 설문 확인
+                          </a>
+                        </div>
+                      </div>
+                    ) : (
+                      /* 설문 미응답 대기 상태 안내 */
+                      <div className="p-4 rounded-xl bg-white border border-dashed border-neutral-200 text-center space-y-2">
+                        <p className="text-xs text-neutral-500">
+                          아직 {selectedEmployee.name} 님의 D+30 / D+90 조직 적응도 펄스 서베이가 접수되지 않았습니다.
+                        </p>
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const portalUrl = `${window.location.origin}/onboard/portal/${selectedEmployee.id}`;
+                              navigator.clipboard.writeText(portalUrl);
+                              alert(`신입사원 온보딩 포털(펄스 서베이) 링크가 복사되었습니다!\n\n${portalUrl}\n\n입사자에게 전달하여 3문항 설문 참여를 안내하세요.`);
+                            }}
+                            className="px-3 py-1.5 rounded-xl border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                          >
+                            <FileText size={12} /> 설문 참여 링크 복사하기
+                          </button>
+                          <a
+                            href={`/onboard/portal/${selectedEmployee.id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                          >
+                            <ExternalLink size={12} /> 모바일 설문 포털 바로가기
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* 신입사원 셀프 온보딩 접수 현황 카드 */}
               {(() => {
