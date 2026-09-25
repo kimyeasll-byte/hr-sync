@@ -23,7 +23,12 @@ import {
   Coffee,
   Heart,
   Briefcase,
-  Laptop
+  Laptop,
+  Gift,
+  Utensils,
+  Award,
+  HeartPulse,
+  GraduationCap
 } from "lucide-react";
 
 interface EmployeeInfo {
@@ -68,6 +73,130 @@ const CHECKLIST_ITEMS = [
   }
 ];
 
+// (주)파워넷 임직원 복리후생 항목
+interface BenefitItem {
+  id: string;
+  category: "ALL" | "WORK_LIFE" | "MEALS" | "HEALTH" | "GROWTH";
+  title: string;
+  desc: string;
+  badge: string;
+  icon: any;
+}
+
+const POWERNET_BENEFITS: BenefitItem[] = [
+  // 1. 근무 환경 & 리프레시
+  {
+    id: "leave",
+    category: "WORK_LIFE",
+    title: "사유 없는 자율 휴가 (연차 / 반차 / 반반차)",
+    desc: "사유 기재 없이 결재선 통과! 2시간 단위 반반차까지 자유롭고 눈치 보지 않는 휴가 문화",
+    badge: "워라밸",
+    icon: Coffee
+  },
+  {
+    id: "dress",
+    category: "WORK_LIFE",
+    title: "자율 비즈니스 캐주얼 근무",
+    desc: "단정하고 편안한 비즈니스 캐주얼 및 자율 복장으로 쾌적한 업무 몰입 환경 제공",
+    badge: "근무환경",
+    icon: Sparkles
+  },
+  {
+    id: "snack",
+    category: "WORK_LIFE",
+    title: "사내 카페테리아 & 무제한 고급 커피/간식",
+    desc: "사업장 라운지 내 에스프레소 머신, 고급 티백, 상시 리필되는 스낵바 운영",
+    badge: "휴식공간",
+    icon: Coffee
+  },
+  {
+    id: "birthday",
+    category: "WORK_LIFE",
+    title: "생일 축하 상품권 & 생일 조기 퇴근 제도",
+    desc: "임직원의 특별한 날을 축하하는 모바일 상품권 지급 및 2시간 조기 퇴근 지원",
+    badge: "축하선물",
+    icon: Gift
+  },
+
+  // 2. 식대 및 생활 지원
+  {
+    id: "lunch",
+    category: "MEALS",
+    title: "든든한 중식 식대 전액 지원",
+    desc: "사내 구내식당 또는 사업장 인근 엄선된 제휴 식당에서 맛있는 점심 식대 지원",
+    badge: "식대지원",
+    icon: Utensils
+  },
+  {
+    id: "dinner",
+    category: "MEALS",
+    title: "야근 석식비 및 안심 야간 교통비 실비 지원",
+    desc: "업무상 부득이한 잔업 시 저녁 식대 및 안전한 귀가를 위한 택시비 실비 정산",
+    badge: "야간지원",
+    icon: Briefcase
+  },
+  {
+    id: "holiday",
+    category: "MEALS",
+    title: "명절(설/추석) 귀향비 & 풍성한 선물 세트",
+    desc: "민족 대명절 설과 추석에 지급되는 든든한 효도 귀향비와 프리미엄 명절 선물 세트",
+    badge: "명절복지",
+    icon: Gift
+  },
+
+  // 3. 건강 및 의료 복지
+  {
+    id: "checkup",
+    category: "HEALTH",
+    title: "연 1회 프리미엄 종합 건강검진 무료 지원",
+    desc: "국내 유수 대학병원 및 전문 종합검진센터 제휴를 통한 정밀 종합 건강검진 전액 지원",
+    badge: "의료지원",
+    icon: HeartPulse
+  },
+  {
+    id: "insurance",
+    category: "HEALTH",
+    title: "임직원 단체 상해보험 가입",
+    desc: "불의의 사고나 질병, 입원 및 수술비에 대해 든든하게 실손 보장하는 단체 보험 전액 회사 부담",
+    badge: "안전보장",
+    icon: ShieldCheck
+  },
+  {
+    id: "vaccine",
+    category: "HEALTH",
+    title: "독감 예방접종 시즌 무료 지원",
+    desc: "환절기 건강 관리를 위해 매년 가을 전 임직원 대상 독감 백신 접종 비용 지원",
+    badge: "건강예방",
+    icon: Heart
+  },
+
+  // 4. 성장 및 가족/경조사
+  {
+    id: "mentor",
+    category: "GROWTH",
+    title: "1:1 사수 멘토링 & 웰컴 런치비 지원",
+    desc: "신규 입사자의 빠른 업무 적응을 돕는 전담 멘토 배정 및 정기 티타임/식사비 별도 지원",
+    badge: "온보딩",
+    icon: Award
+  },
+  {
+    id: "education",
+    category: "GROWTH",
+    title: "직무 도서 구입비 & 외부 전문 교육 전액 지원",
+    desc: "역량 강화를 위한 직무 서적 무제한 지원 및 세미나, 컨퍼런스, 자격증 취득 지원",
+    badge: "자기계발",
+    icon: GraduationCap
+  },
+  {
+    id: "family",
+    category: "GROWTH",
+    title: "경조사 휴가, 경조금, 화환 및 상조 용품 지원",
+    desc: "결혼, 출산, 칠순, 조사 등 기쁜 일과 슬픈 일을 함께 나누는 경조금 및 최고급 상조 물품 지원",
+    badge: "가족복지",
+    icon: Gift
+  }
+];
+
 export default function NewHirePortalPage() {
   const params = useParams();
   const token = params?.token as string;
@@ -85,6 +214,9 @@ export default function NewHirePortalPage() {
 
   // 근무 사업장 선택 (수원 / 서울)
   const [selectedLocation, setSelectedLocation] = useState<"suwon" | "seoul">("suwon");
+
+  // 복리후생 필터 카테고리
+  const [selectedBenefitCategory, setSelectedBenefitCategory] = useState<"ALL" | "WORK_LIFE" | "MEALS" | "HEALTH" | "GROWTH">("ALL");
 
   // 입사 한마디 / 메모
   const [welcomeNote, setWelcomeNote] = useState("");
@@ -216,6 +348,12 @@ export default function NewHirePortalPage() {
   const dDay = getDDay();
   const completedCheckCount = Object.values(checklist).filter(Boolean).length;
   const progressPercent = Math.round((completedCheckCount / CHECKLIST_ITEMS.length) * 100);
+
+  // 복리후생 필터링
+  const filteredBenefits = POWERNET_BENEFITS.filter(item => {
+    if (selectedBenefitCategory === "ALL") return true;
+    return item.category === selectedBenefitCategory;
+  });
 
   if (loading) {
     return (
@@ -414,7 +552,7 @@ export default function NewHirePortalPage() {
                     href="https://map.kakao.com/?q=현대테라타워영통"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 py-2 text-center rounded-xl bg-yellow-400 text-neutral-900 font-bold hover:bg-yellow-500 transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 py-2 text-center rounded-xl bg-yellow-400 text-neutral-900 font-bold hover:bg-yellow-500 transition-colors flex items-center justify-center gap-1 shadow-xs"
                   >
                     카카오맵 길찾기 <ExternalLink size={12} />
                   </a>
@@ -422,7 +560,7 @@ export default function NewHirePortalPage() {
                     href="https://map.naver.com/v5/search/현대테라타워영통"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 py-2 text-center rounded-xl bg-[#03C75A] text-white font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-1"
+                    className="flex-1 py-2 text-center rounded-xl bg-[#03C75A] text-white font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-1 shadow-xs"
                   >
                     네이버지도 길찾기 <ExternalLink size={12} />
                   </a>
@@ -446,7 +584,7 @@ export default function NewHirePortalPage() {
                     href="https://map.kakao.com/?q=서울시+금천구+두산로+70"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 py-2 text-center rounded-xl bg-yellow-400 text-neutral-900 font-bold hover:bg-yellow-500 transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 py-2 text-center rounded-xl bg-yellow-400 text-neutral-900 font-bold hover:bg-yellow-500 transition-colors flex items-center justify-center gap-1 shadow-xs"
                   >
                     카카오맵 길찾기 <ExternalLink size={12} />
                   </a>
@@ -454,7 +592,7 @@ export default function NewHirePortalPage() {
                     href="https://map.naver.com/v5/search/서울시+금천구+두산로+70"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 py-2 text-center rounded-xl bg-[#03C75A] text-white font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-1"
+                    className="flex-1 py-2 text-center rounded-xl bg-[#03C75A] text-white font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-1 shadow-xs"
                   >
                     네이버지도 길찾기 <ExternalLink size={12} />
                   </a>
@@ -517,7 +655,7 @@ export default function NewHirePortalPage() {
           </div>
         </section>
 
-        {/* 5. 사원증 & 스마트 보안 출입카드 사진 제출 */}
+        {/* 5. 사원증 & 스마트 보안 출입카드 사진 등록 + 지정 사진관 안내 */}
         <section className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E5E5EA] shadow-card space-y-4">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-xl bg-purple-50 text-purple-600">
@@ -529,7 +667,47 @@ export default function NewHirePortalPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+          {/* 지정 사진관(패밀리포토하우스) 및 제작 소요 기간(2주) 안내 배너 */}
+          <div className="p-4 rounded-2xl bg-[#F8F9FA] border border-[#E5E5EA] space-y-3 text-xs">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-xl bg-blue-50 text-[#0071E3] shrink-0 mt-0.5">
+                <Camera size={16} />
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-[#1D1D1F]">파워넷 지정 사진관: 패밀리포토하우스</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-bold">공식 제휴</span>
+                </div>
+                <p className="text-[11px] text-[#86868B] leading-relaxed">
+                  사원증 규격 증명사진이 없으신 경우, 파워넷 지정 스튜디오인 <strong>패밀리포토하우스</strong>에 방문하여 사원증 프로필 사진을 촬영하실 수 있습니다.
+                </p>
+                <div className="pt-0.5">
+                  <a
+                    href="https://map.naver.com/p/search/%ED%8C%A8%EB%B0%80%EB%A6%AC%ED%8F%AC%ED%86%A0%ED%95%98%EC%9A%B0%EC%8A%A4/place/11833665?c=15.00,0,0,0,dh&placePath=%3Fbk_query%253D%2525ED%25258C%2525A8%2525EB%2525B0%252580%2525EB%2525A6%2525AC%2525ED%25258F%2525AC%2525ED%252586%2525A0%2525ED%252595%252598%2525EC%25259A%2525B0%2525EC%25258A%2525A4%2526entry%253Dbmp"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#03C75A] text-white font-bold text-[11px] hover:opacity-90 transition-opacity shadow-xs"
+                  >
+                    네이버지도로 패밀리포토하우스 위치 확인하기 <ExternalLink size={12} />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* 제작 소요 기간 (2주) 강조 박스 */}
+            <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200/80 text-amber-950 text-[11px] flex items-start gap-2">
+              <Clock size={15} className="text-amber-600 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <strong className="text-amber-900 font-bold">⏱️ 사원증/에스원 출입증 실물 제작 소요 기간: 약 2주</strong>
+                <p className="text-amber-800 leading-relaxed text-[11px]">
+                  사진 촬영 및 파일 접수 후 에스원(S1) 정규 보안 출입증 및 사원증 실물 제작 완료까지 <strong>약 2주</strong>가 소요됩니다. 
+                  정규 사원증 수령 전까지는 총무팀에서 지급하는 <strong>임시 출입증</strong>을 통해 사옥 출입이 가능하니 안심하세요!
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center pt-2">
             {/* 사원증 카드 시뮬레이터 */}
             <div className="w-full max-w-[240px] mx-auto bg-gradient-to-b from-[#0A192F] to-[#172A45] rounded-2xl p-4 text-white shadow-lg border border-neutral-700 text-center relative overflow-hidden">
               <div className="flex justify-between items-center mb-3">
@@ -569,12 +747,12 @@ export default function NewHirePortalPage() {
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full py-3 rounded-2xl border border-dashed border-[#0071E3] bg-[#EBF5FF] text-[#0071E3] font-bold text-xs flex items-center justify-center gap-2 hover:bg-blue-100 transition-colors shadow-xs"
               >
-                <Upload size={16} /> 사진 선택 또는 카메라 촬영
+                <Upload size={16} /> 보유 중인 증명사진 업로드
               </button>
 
               <div className="text-[11px] text-[#86868B] leading-relaxed space-y-1">
-                <div>• 여권용/반명함판 규격 증명사진 권장</div>
-                <div>• 깔끔한 배경의 정면 상반신 셀카도 가능</div>
+                <div>• 여권용/반명함판 규격 증명사진 권장 (또는 단정한 셀카)</div>
+                <div>• 스튜디오 촬영본 파일이 있다면 직접 등록 가능</div>
                 <div>• 등록 즉시 인사기획팀 사원증 발주 시스템에 전달됩니다.</div>
               </div>
 
@@ -617,7 +795,77 @@ export default function NewHirePortalPage() {
           </div>
         </section>
 
-        {/* 7. 입사 소감 작성 & 최종 제출 폼 */}
+        {/* 7. (주)파워넷 임직원 복리후생 가이드 (Welfare & Benefits) */}
+        <section className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E5E5EA] shadow-card space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-xl bg-pink-50 text-pink-600">
+                <Gift size={18} />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-[#1D1D1F]">파워넷 임직원 복리후생 가이드 🎁</h2>
+                <p className="text-[11px] text-[#86868B]">파워넷 가족 여러분을 위해 준비된 다채로운 복지 혜택입니다.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 복리후생 카테고리 필터 탭 */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-bold">
+            {[
+              { key: "ALL" as const, label: "전체 보기" },
+              { key: "WORK_LIFE" as const, label: "☕ 워라밸/근무" },
+              { key: "MEALS" as const, label: "🍽️ 식대/생활" },
+              { key: "HEALTH" as const, label: "🏥 건강/의료" },
+              { key: "GROWTH" as const, label: "🎓 성장/가족" }
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setSelectedBenefitCategory(tab.key)}
+                className={`px-3 py-1.5 rounded-xl transition-all shrink-0 ${
+                  selectedBenefitCategory === tab.key
+                    ? "bg-[#0071E3] text-white shadow-xs font-bold"
+                    : "bg-[#F5F5F7] text-[#86868B] hover:text-[#1D1D1F] hover:bg-[#EBEBED]"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* 복리후생 카드 그리드 */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            {filteredBenefits.map((benefit) => {
+              const IconComp = benefit.icon;
+              return (
+                <div
+                  key={benefit.id}
+                  className="p-4 rounded-2xl border border-[#E5E5EA] bg-[#F8F9FA] hover:bg-white hover:border-neutral-300 transition-all space-y-2 shadow-xs group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="p-2 rounded-xl bg-white border border-[#E5E5EA] text-[#0071E3] shadow-xs group-hover:scale-105 transition-transform">
+                      <IconComp size={16} />
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-blue-50 text-[#0071E3] border border-blue-100">
+                      {benefit.badge}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h4 className="text-xs font-bold text-[#1D1D1F] mb-1">
+                      {benefit.title}
+                    </h4>
+                    <p className="text-[11px] text-[#86868B] leading-relaxed">
+                      {benefit.desc}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* 8. 입사 소감 작성 & 최종 제출 폼 */}
         <form onSubmit={handleSubmitPortal} className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E5E5EA] shadow-card space-y-4">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-xl bg-blue-50 text-[#0071E3]">
@@ -664,7 +912,7 @@ export default function NewHirePortalPage() {
           </div>
         </form>
 
-        {/* 8. 푸터 정보 */}
+        {/* 9. 푸터 정보 */}
         <footer className="text-center pt-6 space-y-1.5 text-xs text-[#86868B]">
           <div className="font-bold text-[#1D1D1F]">(주)파워넷 경영지원실 인사기획팀</div>
           <div>대표전화: 02-3282-0700 · 수원: 02-3282-0700 · 서울: 02-3282-0752</div>

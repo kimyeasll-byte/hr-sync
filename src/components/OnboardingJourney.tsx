@@ -106,7 +106,7 @@ const MILESTONES: JourneyMilestone[] = [
     phaseTitle: '2단계: 첫 출근 & 웰컴 데이 (D-Day)',
     phaseBadge: '출근 D-Day',
     title: '사원증 사진 촬영 안내 및 에스원(S1) 출입증 발주',
-    description: '규격 사진 촬영 확인 및 에스원 정규 출입증 신청 접수 (약 2주 소요)',
+    description: '제휴 사진관(패밀리포토하우스) 촬영 및 에스원 정규 출입증 신청 접수 (제작 약 2주 소요)',
     category: '총무/복지',
   },
   {
@@ -266,7 +266,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
           items: [
             "경영지원실 총무팀에서 웰컴 키트 및 다이어리 수령",
             "배정된 자리에서 업무용 PC 부팅 및 초기 임시 비밀번호 변경",
-            "에스원 출입증 발급용 증명사진 제출 또는 촬영 안내 확인",
+            "에스원 출입증 발급용 증명사진 제출 또는 제휴 사진관(패밀리포토하우스) 촬영 안내 (제작 약 2주 소요)",
             "부서 멘토(사수) 및 팀원들과 첫 대면 인사"
           ],
           tip: "💡 사내 그룹웨어 접속 주소 및 초기 접속 비밀번호는 사전 발송된 메일을 확인해주세요.",
@@ -820,7 +820,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
 
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
                   {[
-                    { type: 'DAY_1' as const, label: '출근 1일차 웰컴 안내', phase: 'D-Day', date: selectedEmployee.target_date, summary: '웰컴 키트 수령, PC 초기 비밀번호 변경, 사원증 사진 제출 안내' },
+                    { type: 'DAY_1' as const, label: '출근 1일차 웰컴 안내', phase: 'D-Day', date: selectedEmployee.target_date, summary: '웰컴 키트 수령, PC 초기화, 제휴 사진관(패밀리포토하우스) 촬영 안내 (제작 약 2주 소요)' },
                     { type: 'WEEK_1' as const, label: '1주차 멘토링 & 런치', phase: 'D+7', date: calculateMilestoneDate(selectedEmployee.target_date, 7), summary: '멘토 1:1 티타임, 사내 프로필 사진 등록, 전자결재 가이드' },
                     { type: 'MONTH_1' as const, label: '1개월차 적응도 설문', phase: 'D+30', date: calculateMilestoneDate(selectedEmployee.target_date, 30), summary: '조직 적응도 자가진단(3분), 정규 사원증/명함 수령 확인' },
                     { type: 'MONTH_3' as const, label: '3개월차 수습 평가', phase: 'D+90', date: calculateMilestoneDate(selectedEmployee.target_date, 90), summary: '수습기간 직무 수행 자체 점검표 작성, 정규직 전환 인터뷰' },
