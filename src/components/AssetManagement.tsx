@@ -22,8 +22,27 @@ import {
   ArrowRightLeft,
   X,
   Save,
-  Check
+  Check,
+  Download,
+  Upload,
+  FileSpreadsheet,
+  FileUp,
+  Sparkles
 } from "lucide-react";
+
+export interface ParsedAssetRow {
+  empName: string;
+  department: string;
+  category: ITAsset["category"];
+  modelName: string;
+  serialNumber: string;
+  assignedDate: string;
+  fixedIp?: string;
+  macAddress?: string;
+  notes?: string;
+  isValid: boolean;
+  errorMessage?: string;
+}
 
 export interface ITAsset {
   id: string;
@@ -140,6 +159,12 @@ export default function AssetManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAssetId, setEditingAssetId] = useState<string | null>(null);
 
+  // 엑셀 일괄 등록 모달 상태
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [parsedRows, setParsedRows] = useState<ParsedAssetRow[]>([]);
+  const [importFileName, setImportFileName] = useState("");
+  const [isImporting, setIsImporting] = useState(false);
+
   // Form inputs
   const [formEmpName, setFormEmpName] = useState("");
   const [formDept, setFormDept] = useState("");
@@ -172,6 +197,214 @@ export default function AssetManagement() {
       localStorage.setItem("powernet_it_assets", JSON.stringify(updated));
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  // 1. 표준 등록 양식 CSV 다운로드 (UTF-8 BOM)
+  const handleDownloadTemplate = () => {
+    const headers = ["사용자명", "소속부서", "자산분류", "모델명", "시리얼번호", "지급일자", "고정IP", "MAC주소", "비고"];
+    const samples = [
+      ["홍길동", "전력전자연구소 HW1팀", "LAPTOP", "삼성 갤럭시북4 Pro 16인치", "SN-PWN-2026-1001", "2026-09-01", "192.168.10.150", "00:E0:4C:12:34:56", "신규 입사자 업무용 지급"],
+      ["김철수", "경영지원실 인사기획팀", "MONITOR", "삼성 27인치 FHD 듀얼", "SN-MON-27-8821", "2026-09-01", "", "", "HDMI 듀얼 연결"],
+      ["이영희", "글로벌영업본부 해외영업팀", "SECURITY_CARD", "에스원 보안 출입카드", "S1-KEY-77123", "2026-09-01", "", "", "수원/서울 출입증"],
+      ["박수석", "생산기술센터 제조기획팀", "DESKTOP", "HP Z4 Workstation G5", "SN-WS-2026-3001", "2026-09-01", "192.168.20.105", "B4:2E:99:A1:33:09", "회로 시뮬레이션용"]
+    ];
+
+    const csvContent = "\uFEFF" + [
+      headers.join(","),
+      ...samples.map(row => row.map(cell => `"${(cell || "").replace(/"/g, '""')}"`).join(","))
+    ].join("\r\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `파워넷_IT자산_표준등록양식_${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // 2. 현재 IT 자산 대장 엑셀(CSV) 내보내기 (UTF-8 BOM)
+  const handleExportAssets = () => {
+    if (assets.length === 0) {
+      alert("다운로드할 자산 데이터가 없습니다.");
+      return;
+    }
+
+    const headers = ["자산ID", "사용자명", "소속부서", "자산분류", "모델명", "시리얼번호", "지급일자", "고정IP", "MAC주소", "운용상태", "반납일자", "특이사항"];
+    const rows = assets.map(a => [
+      a.id,
+      a.empName,
+      a.department,
+      a.category,
+      a.modelName,
+      a.serialNumber,
+      a.assignedDate,
+      a.fixedIp || "",
+      a.macAddress || "",
+      a.status === "ACTIVE" ? "운용 중" : a.status === "PENDING_RETURN" ? "반납 대기" : "반납 완료",
+      a.returnDate || "",
+      a.notes || ""
+    ]);
+
+    const csvContent = "\uFEFF" + [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${(cell || "").replace(/"/g, '""')}"`).join(","))
+    ].join("\r\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `파워넷_IT자산대장_${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // 3. CSV 라인 파서
+  const parseCsvLine = (text: string): string[] => {
+    const result: string[] = [];
+    let cur = "";
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      if (char === '"') {
+        if (inQuotes && text[i + 1] === '"') {
+          cur += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(cur.trim());
+        cur = "";
+      } else {
+        cur += char;
+      }
+    }
+    result.push(cur.trim());
+    return result;
+  };
+
+  // 4. 자산 분류 정규화
+  const normalizeCategory = (catStr: string): ITAsset["category"] => {
+    const c = (catStr || "").toUpperCase().trim();
+    if (c.includes("LAPTOP") || c.includes("노트북") || c.includes("그램") || c.includes("북")) return "LAPTOP";
+    if (c.includes("DESKTOP") || c.includes("데스크탑") || c.includes("워크스테이션") || c.includes("PC")) return "DESKTOP";
+    if (c.includes("MONITOR") || c.includes("모니터")) return "MONITOR";
+    if (c.includes("SECURITY") || c.includes("카드") || c.includes("출입") || c.includes("에스원") || c.includes("S1")) return "SECURITY_CARD";
+    if (c.includes("NETWORK") || c.includes("네트워크") || c.includes("IP")) return "NETWORK";
+    return "LAPTOP";
+  };
+
+  // 5. 엑셀/CSV 파일 파싱 및 유효성 검사
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImportFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      if (!text) return;
+
+      const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+      if (lines.length <= 1) {
+        alert("업로드된 파일에 등록할 데이터 행이 존재하지 않습니다.");
+        return;
+      }
+
+      // 1행 헤더 스킵
+      const dataLines = lines.slice(1);
+      const parsed: ParsedAssetRow[] = [];
+
+      dataLines.forEach((line) => {
+        const cols = parseCsvLine(line);
+        if (cols.length < 4) return;
+
+        const empName = cols[0]?.trim();
+        const department = cols[1]?.trim() || "부서 미지정";
+        const catRaw = cols[2]?.trim();
+        const modelName = cols[3]?.trim();
+        const serialNumber = cols[4]?.trim() || `SN-PWN-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+        const assignedDate = cols[5]?.trim() || new Date().toISOString().split("T")[0];
+        const fixedIp = cols[6]?.trim() || undefined;
+        const macAddress = cols[7]?.trim() || undefined;
+        const notes = cols[8]?.trim() || undefined;
+
+        let isValid = true;
+        let errorMessage = "";
+
+        if (!empName) {
+          isValid = false;
+          errorMessage = "사용자명 누락";
+        } else if (!modelName) {
+          isValid = false;
+          errorMessage = "모델명 누락";
+        }
+
+        parsed.push({
+          empName,
+          department,
+          category: normalizeCategory(catRaw),
+          modelName,
+          serialNumber,
+          assignedDate,
+          fixedIp,
+          macAddress,
+          notes,
+          isValid,
+          errorMessage: errorMessage || undefined
+        });
+      });
+
+      setParsedRows(parsed);
+      setIsImportModalOpen(true);
+    };
+
+    reader.readAsText(file, "UTF-8");
+  };
+
+  // 6. 일괄 등록 확정 실행
+  const handleExecuteImport = () => {
+    const validRows = parsedRows.filter(r => r.isValid);
+    if (validRows.length === 0) {
+      alert("등록 가능한 정상 데이터가 없습니다. 오류 항목을 확인해주세요.");
+      return;
+    }
+
+    setIsImporting(true);
+
+    try {
+      const newAssets: ITAsset[] = validRows.map((r, idx) => ({
+        id: `ast-${Date.now()}-${idx}`,
+        empName: r.empName,
+        department: r.department,
+        category: r.category,
+        modelName: r.modelName,
+        serialNumber: r.serialNumber,
+        assignedDate: r.assignedDate,
+        fixedIp: r.fixedIp,
+        macAddress: r.macAddress,
+        notes: r.notes,
+        status: "ACTIVE"
+      }));
+
+      const updated = [...newAssets, ...assets];
+      saveAssets(updated);
+
+      alert(`총 ${validRows.length}건의 IT 자산이 성공적으로 일괄 등록되었습니다.`);
+      setIsImportModalOpen(false);
+      setParsedRows([]);
+      setImportFileName("");
+    } catch (err: any) {
+      alert("일괄 등록 중 오류가 발생했습니다: " + err.message);
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -485,13 +718,43 @@ export default function AssetManagement() {
           </select>
         </div>
 
-        {/* 신규 자산 지급 등록 버튼 */}
-        <button
-          onClick={handleOpenCreate}
-          className="px-4 py-2 text-xs font-bold rounded-xl bg-[#0071E3] hover:bg-blue-600 text-white transition-colors flex items-center gap-1.5 shadow-xs self-end sm:self-auto"
-        >
-          <Plus size={15} /> 신규 자산 지급 등록
-        </button>
+        {/* 우측 액션 버튼 그룹 (양식 다운로드, 일괄 등록, 대장 다운로드, 신규 등록) */}
+        <div className="flex flex-wrap items-center gap-2 self-end sm:self-auto">
+          <button
+            onClick={handleDownloadTemplate}
+            title="엑셀 일괄 등록용 표준 CSV 양식 다운로드"
+            className="px-3 py-2 text-xs font-semibold rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 transition-colors flex items-center gap-1.5 shadow-xs"
+          >
+            <FileSpreadsheet size={14} className="text-emerald-600" /> 표준 양식
+          </button>
+
+          <button
+            onClick={handleExportAssets}
+            title="현재 등록된 IT 자산 대장을 엑셀(CSV) 파일로 다운로드 (UTF-8 BOM)"
+            className="px-3 py-2 text-xs font-semibold rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 transition-colors flex items-center gap-1.5 shadow-xs"
+          >
+            <Download size={14} className="text-blue-600" /> 대장 다운로드
+          </button>
+
+          <button
+            onClick={() => {
+              setParsedRows([]);
+              setImportFileName("");
+              setIsImportModalOpen(true);
+            }}
+            title="CSV 엑셀 파일을 통한 자산 대량 일괄 등록"
+            className="px-3.5 py-2 text-xs font-bold rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 transition-colors flex items-center gap-1.5 shadow-xs"
+          >
+            <Upload size={14} /> 엑셀 일괄 등록
+          </button>
+
+          <button
+            onClick={handleOpenCreate}
+            className="px-4 py-2 text-xs font-bold rounded-xl bg-[#0071E3] hover:bg-blue-600 text-white transition-colors flex items-center gap-1.5 shadow-xs"
+          >
+            <Plus size={15} /> 신규 자산 등록
+          </button>
+        </div>
       </div>
 
       {/* 4. 자산 목록 테이블 */}
@@ -889,6 +1152,178 @@ export default function AssetManagement() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 엑셀 일괄 등록 모달 */}
+      {isImportModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150">
+          <div 
+            className="w-full max-w-4xl max-h-[90vh] flex flex-col rounded-3xl border shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150"
+            style={{ backgroundColor: '#FFFFFF', borderColor: 'var(--color-border)' }}
+          >
+            {/* 모달 헤더 */}
+            <div className="flex items-center justify-between px-6 py-4 border-b shrink-0" style={{ borderColor: 'var(--color-border)', backgroundColor: '#F8F9FA' }}>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-indigo-50 text-indigo-700">
+                  <FileSpreadsheet size={18} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-neutral-900">
+                    IT 자산 엑셀(CSV) 일괄 등록
+                  </h3>
+                  <p className="text-[11px] text-neutral-500">
+                    표준 CSV 양식에 작성된 대량의 자산 목록을 한 번에 등록합니다.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsImportModalOpen(false)}
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/50 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* 모달 본문 */}
+            <div className="p-6 overflow-y-auto space-y-4 flex-1">
+              {/* 1. 파일 업로드 박스 */}
+              <div className="p-5 rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 text-center space-y-3">
+                <div className="w-12 h-12 mx-auto rounded-full bg-white shadow-xs flex items-center justify-center text-indigo-600">
+                  <FileUp size={24} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-neutral-800">
+                    {importFileName ? `선택된 파일: ${importFileName}` : "CSV 엑셀 파일을 선택하거나 업로드하세요"}
+                  </h4>
+                  <p className="text-[11px] text-neutral-500 mt-0.5">
+                    UTF-8 형식의 .csv 파일만 지원합니다. (작성 양식이 없으시면 아래 표준 양식을 먼저 다운로드하세요)
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                  <label className="px-4 py-2 text-xs font-bold rounded-xl bg-[#5856D6] hover:bg-[#4745C4] text-white cursor-pointer transition-colors shadow-xs flex items-center gap-1.5">
+                    <Upload size={14} /> CSV 파일 선택
+                    <input
+                      type="file"
+                      accept=".csv,text/csv"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleDownloadTemplate}
+                    className="px-3.5 py-2 text-xs font-semibold rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 transition-colors flex items-center gap-1.5 shadow-xs"
+                  >
+                    <Download size={14} className="text-emerald-600" /> 표준 양식 받기
+                  </button>
+                </div>
+              </div>
+
+              {/* 2. 파싱 결과 미리보기 */}
+              {parsedRows.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-neutral-800 flex items-center gap-1.5">
+                      <Sparkles size={14} className="text-indigo-600" />
+                      등록 예정 자산 미리보기 (총 {parsedRows.length}건)
+                    </span>
+                    <div className="flex items-center gap-2 text-[11px]">
+                      <span className="px-2 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        정상: {parsedRows.filter(r => r.isValid).length}건
+                      </span>
+                      {parsedRows.filter(r => !r.isValid).length > 0 && (
+                        <span className="px-2 py-0.5 rounded-full font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                          오류: {parsedRows.filter(r => !r.isValid).length}건 (제외됨)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="border rounded-2xl overflow-hidden max-h-[260px] overflow-y-auto">
+                    <table className="w-full text-left text-[11px] border-collapse">
+                      <thead className="sticky top-0 bg-[#F8F9FA] border-b text-neutral-500 font-semibold">
+                        <tr>
+                          <th className="py-2.5 px-3">상태</th>
+                          <th className="py-2.5 px-3">사용자</th>
+                          <th className="py-2.5 px-3">부서</th>
+                          <th className="py-2.5 px-3">분류</th>
+                          <th className="py-2.5 px-3">모델명</th>
+                          <th className="py-2.5 px-3">시리얼 (S/N)</th>
+                          <th className="py-2.5 px-3">IP / MAC</th>
+                          <th className="py-2.5 px-3">비고</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-100">
+                        {parsedRows.map((r, idx) => (
+                          <tr key={idx} className={r.isValid ? "hover:bg-neutral-50" : "bg-rose-50/40"}>
+                            <td className="py-2 px-3">
+                              {r.isValid ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700">
+                                  <Check size={12} className="text-emerald-600" /> 정상
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700" title={r.errorMessage}>
+                                  <AlertTriangle size={12} className="text-rose-600" /> {r.errorMessage}
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2 px-3 font-bold text-neutral-900">{r.empName || "-"}</td>
+                            <td className="py-2 px-3 text-neutral-600">{r.department || "-"}</td>
+                            <td className="py-2 px-3">
+                              <span className="px-1.5 py-0.5 rounded font-bold text-[10px] bg-neutral-100 text-neutral-700">
+                                {r.category}
+                              </span>
+                            </td>
+                            <td className="py-2 px-3 font-semibold text-neutral-800">{r.modelName || "-"}</td>
+                            <td className="py-2 px-3 font-mono text-[10px] text-neutral-600">{r.serialNumber}</td>
+                            <td className="py-2 px-3 font-mono text-[10px] text-neutral-500">
+                              {r.fixedIp || r.macAddress ? `${r.fixedIp || ""}${r.macAddress ? ` (${r.macAddress})` : ""}` : "-"}
+                            </td>
+                            <td className="py-2 px-3 text-neutral-500 max-w-[120px] truncate">{r.notes || "-"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 모달 푸터 */}
+            <div className="flex items-center justify-between px-6 py-3.5 border-t shrink-0 bg-[#F8F9FA]" style={{ borderColor: 'var(--color-border)' }}>
+              <div className="text-[11px] text-neutral-500">
+                {parsedRows.length > 0 ? (
+                  <span>
+                    등록 확정 시 사내 IT 자산 대장에 즉시 반영되며 로컬에 영구 보존됩니다.
+                  </span>
+                ) : (
+                  <span>양식 파일을 내려받아 작성 후 업로드하세요.</span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsImportModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-600 hover:bg-neutral-200/50 transition-colors"
+                >
+                  닫기
+                </button>
+                <button
+                  type="button"
+                  disabled={parsedRows.filter(r => r.isValid).length === 0 || isImporting}
+                  onClick={handleExecuteImport}
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-[#0071E3] hover:bg-blue-600 disabled:opacity-40 text-white transition-all shadow-xs flex items-center gap-1.5"
+                >
+                  <Save size={14} /> 
+                  {isImporting ? "등록 처리 중..." : `정상 ${parsedRows.filter(r => r.isValid).length}건 일괄 등록 실행`}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

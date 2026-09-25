@@ -32,7 +32,8 @@ import {
   Download,
   Camera,
   X,
-  HeartPulse
+  HeartPulse,
+  Check
 } from "lucide-react";
 
 export interface JourneyEmployee {
@@ -892,33 +893,97 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                   />
                 </div>
 
-                {/* 주요 마일스톤 도달 캘린더 */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 mt-4 pt-3 border-t text-[11px]" style={{ borderColor: 'var(--color-border)' }}>
-                  <div>
-                    <span className="text-neutral-500 block">입사일 (D-Day)</span>
-                    <span className="font-bold text-neutral-900">{selectedEmployee.target_date || '-'}</span>
-                  </div>
-                  <div>
-                    <span className="text-neutral-500 block">1주차 런치 (D+7)</span>
-                    <span className="font-bold text-neutral-900">{calculateMilestoneDate(selectedEmployee.target_date, 7)}</span>
-                  </div>
-                  <div>
-                    <span className="text-neutral-500 block">1개월 설문 (D+30)</span>
-                    <span className="font-bold text-neutral-900">{calculateMilestoneDate(selectedEmployee.target_date, 30)}</span>
-                  </div>
-                  <div>
-                    <span className="text-neutral-500 block">3개월 수습 (D+90)</span>
-                    <span className="font-bold text-neutral-900">{calculateMilestoneDate(selectedEmployee.target_date, 90)}</span>
-                  </div>
-                  <div>
-                    <span className="text-neutral-500 block">6개월 몰입 (D+180)</span>
-                    <span className="font-bold text-neutral-900">{calculateMilestoneDate(selectedEmployee.target_date, 180)}</span>
-                  </div>
-                  <div>
-                    <span className="text-neutral-500 block">1년차 안착 (D+365)</span>
-                    <span className="font-bold text-neutral-900">{calculateMilestoneDate(selectedEmployee.target_date, 365)}</span>
-                  </div>
-                </div>
+                {/* 7대 온보딩 타임라인 스테퍼 (D-7 ~ D+365) */}
+                {(() => {
+                  const dDayInfo = getDDayInfo(selectedEmployee.target_date);
+                  const diffDays = dDayInfo.diffDays;
+
+                  const steps = [
+                    { key: "D-7", label: "사전 준비", dDay: "D-7", days: -7, date: calculateMilestoneDate(selectedEmployee.target_date, -7) },
+                    { key: "DAY_1", label: "첫 출근", dDay: "D-Day", days: 0, date: selectedEmployee.target_date || '-' },
+                    { key: "WEEK_1", label: "1주차 런치", dDay: "D+7", days: 7, date: calculateMilestoneDate(selectedEmployee.target_date, 7) },
+                    { key: "MONTH_1", label: "1개월 적응", dDay: "D+30", days: 30, date: calculateMilestoneDate(selectedEmployee.target_date, 30), isSurvey: true },
+                    { key: "MONTH_3", label: "3개월 수습", dDay: "D+90", days: 90, date: calculateMilestoneDate(selectedEmployee.target_date, 90), isSurvey: true },
+                    { key: "MONTH_6", label: "6개월 몰입", dDay: "D+180", days: 180, date: calculateMilestoneDate(selectedEmployee.target_date, 180), isSurvey: true },
+                    { key: "YEAR_1", label: "1년차 안착", dDay: "D+365", days: 365, date: calculateMilestoneDate(selectedEmployee.target_date, 365), isSurvey: true },
+                  ];
+
+                  let activeIndex = 0;
+                  if (diffDays > 0) {
+                    activeIndex = 0;
+                  } else if (diffDays === 0) {
+                    activeIndex = 1;
+                  } else {
+                    const el = Math.abs(diffDays);
+                    if (el <= 7) activeIndex = 2;
+                    else if (el <= 30) activeIndex = 3;
+                    else if (el <= 90) activeIndex = 4;
+                    else if (el <= 180) activeIndex = 5;
+                    else activeIndex = 6;
+                  }
+
+                  return (
+                    <div className="mt-4 pt-3 border-t space-y-3" style={{ borderColor: 'var(--color-border)' }}>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-neutral-800 flex items-center gap-1.5">
+                          <Calendar size={14} className="text-[#0071E3]" />
+                          온보딩 라이프사이클 마일스톤 (D-7 ~ 1주년)
+                        </span>
+                        <span className="text-[11px] font-bold text-[#0071E3] bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
+                          현재: {steps[activeIndex].dDay} ({steps[activeIndex].label})
+                        </span>
+                      </div>
+
+                      <div className="relative pt-2 pb-1 overflow-x-auto">
+                        <div className="min-w-[620px] flex items-center justify-between relative px-2">
+                          {/* Background Connecting Line */}
+                          <div className="absolute left-8 right-8 top-3.5 h-0.5 bg-[#E5E5EA] -z-0" />
+                          
+                          {/* Active Progress Line */}
+                          <div 
+                            className="absolute left-8 top-3.5 h-0.5 bg-[#0071E3] transition-all duration-500 -z-0" 
+                            style={{ width: `${(activeIndex / (steps.length - 1)) * 92}%` }}
+                          />
+
+                          {steps.map((step, idx) => {
+                            const isPassed = idx < activeIndex;
+                            const isCurrent = idx === activeIndex;
+
+                            return (
+                              <div key={step.key} className="flex flex-col items-center text-center relative z-10">
+                                <div 
+                                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-xs ${
+                                    isCurrent 
+                                      ? "bg-[#0071E3] text-white ring-4 ring-blue-100 scale-110" 
+                                      : isPassed 
+                                      ? "bg-emerald-500 text-white" 
+                                      : "bg-white text-neutral-400 border border-neutral-300"
+                                  }`}
+                                >
+                                  {isPassed ? <Check size={13} className="stroke-[3]" /> : idx + 1}
+                                </div>
+                                
+                                <span className={`text-[11px] font-bold mt-1.5 whitespace-nowrap ${
+                                  isCurrent ? "text-[#0071E3]" : isPassed ? "text-neutral-800" : "text-neutral-400"
+                                }`}>
+                                  {step.dDay}
+                                </span>
+
+                                <span className="text-[10px] text-neutral-500 font-medium whitespace-nowrap">
+                                  {step.label}
+                                </span>
+
+                                <span className="text-[9px] text-neutral-400 font-mono mt-0.5 whitespace-nowrap">
+                                  {step.date}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* 🤖 피플 애널리틱스: AI 신입사원 조직 적응도 & 조기퇴사 위험 신호 진단 리포트 */}
