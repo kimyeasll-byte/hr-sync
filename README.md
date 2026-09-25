@@ -25,7 +25,8 @@
 
 | 문서명 | 주요 내용 | 링크 |
 | :--- | :--- | :---: |
-| **🚀 [신규] 비개발자를 위한 AI 웹서비스 제작 바이블** | 아이디어만으로 3일 만에 웹서비스를 구축하는 범용 5단계 프레임워크 | [docs/UNIVERSAL_WEB_BUILDER_GUIDE.md](./docs/UNIVERSAL_WEB_BUILDER_GUIDE.md) |
+| **🎤 [신규] 90분 참여형 워크숍 슬라이드 & 강사 대본** | 슬라이드 1~15장 상세 화면안 + 강사 발화 대본(Script) + 실습 가이드 | [docs/WORKSHOP_SLIDES_AND_SCRIPT.md](./docs/WORKSHOP_SLIDES_AND_SCRIPT.md) |
+| **🚀 비개발자를 위한 AI 웹서비스 제작 바이블** | 아이디어 인터뷰부터 PRD, 개발, 배포까지 범용 6단계 프레임워크 | [docs/UNIVERSAL_WEB_BUILDER_GUIDE.md](./docs/UNIVERSAL_WEB_BUILDER_GUIDE.md) |
 | **🎓 팀내 교육용 교안 & 워크숍 가이드** | AI 페어 프로그래밍 실전, 5단계 커리큘럼, 30분 팀원 핸즈온 실습 | [docs/TRAINING_GUIDE.md](./docs/TRAINING_GUIDE.md) |
 | **📖 사용자 & 관리자 운영 매뉴얼** | 원터치 입사/퇴사, 모바일 포털, AI 서베이, IT 자산 관리 상세 가이드 | [docs/MANUAL.md](./docs/MANUAL.md) |
 | **📐 시스템 아키텍처 & 재현 설계명세서** | ERD, API 명세, 알고리즘, 환경 변수 및 동일 앱 재현 가이드 | [docs/SPECIFICATION.md](./docs/SPECIFICATION.md) |
