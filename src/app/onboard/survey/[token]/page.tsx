@@ -14,7 +14,11 @@ import {
   ArrowLeft,
   Phone,
   ShieldCheck,
-  Calendar,
+  Target,
+  Users,
+  TrendingUp,
+  Award,
+  Compass,
   Gift
 } from "lucide-react";
 
@@ -29,45 +33,231 @@ interface EmployeeInfo {
 
 type SurveyStageKey = "MONTH_1" | "MONTH_3" | "MONTH_6" | "YEAR_1";
 
-const STAGE_CONFIG: Record<SurveyStageKey, {
+export interface QuestionOption {
+  score: number;
+  emoji: string;
+  label: string;
+}
+
+export interface StageQuestion {
+  key: "workScore" | "teamScore" | "equipScore";
+  category: string;
+  title: string;
+  iconType: "work" | "team" | "equip";
+  options: QuestionOption[];
+}
+
+export interface StageConfigItem {
   label: string;
   sublabel: string;
   title: string;
   description: string;
   dDayText: string;
   badgeColor: string;
-}> = {
+  feedbackPlaceholder: string;
+  questions: [StageQuestion, StageQuestion, StageQuestion];
+}
+
+const STAGE_CONFIG: Record<SurveyStageKey, StageConfigItem> = {
   MONTH_1: {
     label: "1개월차",
     sublabel: "D+30",
     title: "입사 1개월차 조직 적응도 펄스 서베이",
     description: "파워넷 합류 첫 한 달! 팀 분위기, 담당 업무 난이도, 장비 지원에 대한 솔직한 생각을 들려주세요.",
     dDayText: "입사 1개월차 안착 점검",
-    badgeColor: "bg-blue-50 text-blue-700 border-blue-200"
+    badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
+    feedbackPlaceholder: "예: 사수 멘토링이 친절하여 업무 적응에 큰 도움이 됩니다 / 초기 인프라(ERP 계정, 모니터) 지급이 더 빨랐으면 좋겠습니다 등",
+    questions: [
+      {
+        key: "workScore",
+        category: "업무 적응 & 난이도",
+        title: "1. 현재 부여받은 초기 업무의 난이도와 업무량은 적절한가요?",
+        iconType: "work",
+        options: [
+          { score: 1, emoji: "😫", label: "과부하" },
+          { score: 2, emoji: "🙁", label: "부담됨" },
+          { score: 3, emoji: "😐", label: "보통" },
+          { score: 4, emoji: "😃", label: "수월함" },
+          { score: 5, emoji: "😍", label: "매우적절" },
+        ]
+      },
+      {
+        key: "teamScore",
+        category: "팀 분위기 & 소통",
+        title: "2. 멘토(사수) 및 팀원들과의 소통과 팀 분위기는 편안한가요?",
+        iconType: "team",
+        options: [
+          { score: 1, emoji: "😫", label: "고립감" },
+          { score: 2, emoji: "🙁", label: "어색함" },
+          { score: 3, emoji: "😐", label: "무난함" },
+          { score: 4, emoji: "😃", label: "화기애애" },
+          { score: 5, emoji: "😍", label: "최고팀워크" },
+        ]
+      },
+      {
+        key: "equipScore",
+        category: "IT 전산 & 장비 지원",
+        title: "3. 업무에 필요한 IT 장비, 권한 계정, 전산 인프라 지원이 충분한가요?",
+        iconType: "equip",
+        options: [
+          { score: 1, emoji: "😫", label: "심각부족" },
+          { score: 2, emoji: "🙁", label: "일부불편" },
+          { score: 3, emoji: "😐", label: "기본충족" },
+          { score: 4, emoji: "😃", label: "쾌적지원" },
+          { score: 5, emoji: "😍", label: "완벽지원" },
+        ]
+      }
+    ]
   },
   MONTH_3: {
     label: "3개월차",
     sublabel: "D+90",
-    title: "수습 3개월차 온보딩 피드백 서베이",
-    description: "수습 기간을 마무리하며 업무 수행 만족도와 사내 협업 환경에 대한 의견을 나누어주세요.",
+    title: "수습 3개월차 직무 R&R 및 협업 서베이",
+    description: "수습 기간을 마무리하며 직무 역할의 명확성, 사내 유관 부서와의 협업, 업무 자율성에 대해 들려주세요.",
     dDayText: "3개월차 수습 평가",
-    badgeColor: "bg-purple-50 text-purple-700 border-purple-200"
+    badgeColor: "bg-purple-50 text-purple-700 border-purple-200",
+    feedbackPlaceholder: "예: 수습을 거치며 담당 업무 목표가 뚜렷해졌습니다 / 유관 부서와의 협업 프로세스 가이드가 더 보강되면 좋겠습니다 등",
+    questions: [
+      {
+        key: "workScore",
+        category: "직무 R&R & 목표 명확성",
+        title: "1. 본인의 직무 역할(R&R)과 달성해야 할 성과 목표가 명확히 정립되었나요?",
+        iconType: "work",
+        options: [
+          { score: 1, emoji: "😫", label: "매우모호" },
+          { score: 2, emoji: "🙁", label: "혼란스러움" },
+          { score: 3, emoji: "😐", label: "보통" },
+          { score: 4, emoji: "😃", label: "명확한편" },
+          { score: 5, emoji: "😍", label: "완벽정립" },
+        ]
+      },
+      {
+        key: "teamScore",
+        category: "부서 간 협업 & 소통",
+        title: "2. 팀 내 동료 및 타 유관 부서와의 협업과 업무 조율이 원활하게 이루어지나요?",
+        iconType: "team",
+        options: [
+          { score: 1, emoji: "😫", label: "협업단절" },
+          { score: 2, emoji: "🙁", label: "소통어려움" },
+          { score: 3, emoji: "😐", label: "무난함" },
+          { score: 4, emoji: "😃", label: "원활한편" },
+          { score: 5, emoji: "😍", label: "환상호흡" },
+        ]
+      },
+      {
+        key: "equipScore",
+        category: "업무 자율성 & 주도성",
+        title: "3. 업무를 스스로 주도하고 판단하여 진행할 수 있는 적절한 자율성이 보장되나요?",
+        iconType: "equip",
+        options: [
+          { score: 1, emoji: "😫", label: "자율없음" },
+          { score: 2, emoji: "🙁", label: "수동적지시" },
+          { score: 3, emoji: "😐", label: "보통" },
+          { score: 4, emoji: "😃", label: "주도적인편" },
+          { score: 5, emoji: "😍", label: "완전주도" },
+        ]
+      }
+    ]
   },
   MONTH_6: {
     label: "6개월차",
     sublabel: "D+180",
-    title: "입사 6개월차 직무 몰입 & 성장 서베이",
-    description: "어느덧 반 년! 담당 직무에 대한 몰입도와 앞으로의 성장 방향성에 대해 들려주세요.",
+    title: "입사 6개월차 직무 몰입 & 역량 성장 서베이",
+    description: "어느덧 반 년! 직무 전문성 성장 체감도, 성과에 대한 피드백 및 인정, 업무 몰입도와 워라밸을 점검합니다.",
     dDayText: "반기 직무 몰입 점검",
-    badgeColor: "bg-indigo-50 text-indigo-700 border-indigo-200"
+    badgeColor: "bg-indigo-50 text-indigo-700 border-indigo-200",
+    feedbackPlaceholder: "예: 다양한 실무 프로젝트를 통해 크게 성장하고 있습니다 / 특정 프로젝트 기간 동안 야근이 잦아 일정 조율이 필요합니다 등",
+    questions: [
+      {
+        key: "workScore",
+        category: "직무 전문성 & 역량 성장",
+        title: "1. 파워넷에서 실무를 수행하며 본인의 직무 전문성과 역량이 성장하고 있음을 느끼나요?",
+        iconType: "work",
+        options: [
+          { score: 1, emoji: "😫", label: "성장정체" },
+          { score: 2, emoji: "🙁", label: "미미한성장" },
+          { score: 3, emoji: "😐", label: "현상유지" },
+          { score: 4, emoji: "😃", label: "꾸준한성장" },
+          { score: 5, emoji: "😍", label: "폭풍성장" },
+        ]
+      },
+      {
+        key: "teamScore",
+        category: "성과 피드백 & 인정",
+        title: "2. 본인이 창출한 업무 성과에 대해 리더나 팀원들로부터 적절한 인정과 피드백을 받고 있나요?",
+        iconType: "team",
+        options: [
+          { score: 1, emoji: "😫", label: "무관심" },
+          { score: 2, emoji: "🙁", label: "피드백부족" },
+          { score: 3, emoji: "😐", label: "형식적피드백" },
+          { score: 4, emoji: "😃", label: "충분한격려" },
+          { score: 5, emoji: "😍", label: "아낌없는인정" },
+        ]
+      },
+      {
+        key: "equipScore",
+        category: "업무 몰입도 & 워라밸",
+        title: "3. 현재 업무량 속에서 지속 가능한 워라밸(일과 삶의 균형)과 몰입을 유지하고 있나요?",
+        iconType: "equip",
+        options: [
+          { score: 1, emoji: "😫", label: "극심번아웃" },
+          { score: 2, emoji: "🙁", label: "피로누적" },
+          { score: 3, emoji: "😐", label: "견딜만함" },
+          { score: 4, emoji: "😃", label: "안정적몰입" },
+          { score: 5, emoji: "😍", label: "최적밸런스" },
+        ]
+      }
+    ]
   },
   YEAR_1: {
     label: "1년차 (1주년)",
     sublabel: "D+365",
     title: "입사 1주년 안착 & 직무 리텐션 서베이",
-    description: "파워넷과 함께한 빛나는 1주년을 축하드립니다! 파워넷에서의 1년간의 소회와 제안을 적어주세요.",
+    description: "파워넷과 함께한 빛나는 1주년을 축하드립니다! 중장기 커리어 비전, 조직 문화 만족도, 지인 추천 의향을 들려주세요.",
     dDayText: "입사 1주년 안착 진단",
-    badgeColor: "bg-amber-50 text-amber-800 border-amber-200"
+    badgeColor: "bg-amber-50 text-amber-800 border-amber-200",
+    feedbackPlaceholder: "예: 1년간 함께하며 많은 보람을 느꼈습니다 / 차기 연도 커리어 개발 플랜(CDP) 기회가 더 확대되면 좋겠습니다 등",
+    questions: [
+      {
+        key: "workScore",
+        category: "중장기 커리어 비전",
+        title: "1. 파워넷에서 중장기적으로 성장할 수 있는 커리어 비전과 성장 가능성을 확신하시나요?",
+        iconType: "work",
+        options: [
+          { score: 1, emoji: "😫", label: "비전없음" },
+          { score: 2, emoji: "🙁", label: "불투명함" },
+          { score: 3, emoji: "😐", label: "보통" },
+          { score: 4, emoji: "😃", label: "성장기대" },
+          { score: 5, emoji: "😍", label: "확고한비전" },
+        ]
+      },
+      {
+        key: "teamScore",
+        category: "평가/보상 & 조직 문화",
+        title: "2. 회사의 평가 및 보상 체계, 그리고 전반적인 사내 조직문화에 얼마나 만족하시나요?",
+        iconType: "team",
+        options: [
+          { score: 1, emoji: "😫", label: "매우불만" },
+          { score: 2, emoji: "🙁", label: "다소불만" },
+          { score: 3, emoji: "😐", label: "보통" },
+          { score: 4, emoji: "😃", label: "만족스러움" },
+          { score: 5, emoji: "😍", label: "매우만족" },
+        ]
+      },
+      {
+        key: "equipScore",
+        category: "회사 추천 의향 (eNPS)",
+        title: "3. 파워넷을 가까운 지인이나 유능한 동료에게 입사하고 싶은 좋은 일터로 추천하시겠습니까?",
+        iconType: "equip",
+        options: [
+          { score: 1, emoji: "😫", label: "절대비추" },
+          { score: 2, emoji: "🙁", label: "망설여짐" },
+          { score: 3, emoji: "😐", label: "중립" },
+          { score: 4, emoji: "😃", label: "추천의향" },
+          { score: 5, emoji: "😍", label: "적극추천" },
+        ]
+      }
+    ]
   }
 };
 
@@ -348,23 +538,25 @@ function SurveyContent() {
             </p>
           </div>
 
-          {/* 문항 1: 업무 난이도 */}
+          {/* 문항 1 */}
           <div className="p-4 rounded-2xl bg-[#F8F9FA] border border-[#E5E5EA] space-y-2.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-[#1D1D1F] flex items-center gap-1.5">
-                <Briefcase size={14} className="text-[#0071E3]" />
-                1. 현재 담당하고 계신 업무의 난이도와 양은 적절한가요?
-              </label>
-              <span className="text-[11px] font-bold text-[#0071E3]">{workScore}점 / 5점</span>
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-extrabold text-[#0071E3] bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100 inline-block">
+                  {currentConfig.questions[0].category}
+                </span>
+                <label className="text-xs font-bold text-[#1D1D1F] flex items-center gap-1.5 pt-0.5">
+                  {stage === "MONTH_3" ? <Target size={14} className="text-[#0071E3]" /> :
+                   stage === "MONTH_6" ? <TrendingUp size={14} className="text-[#0071E3]" /> :
+                   stage === "YEAR_1" ? <Compass size={14} className="text-[#0071E3]" /> :
+                   <Briefcase size={14} className="text-[#0071E3]" />}
+                  {currentConfig.questions[0].title}
+                </label>
+              </div>
+              <span className="text-[11px] font-bold text-[#0071E3] shrink-0 ml-2">{workScore}점 / 5점</span>
             </div>
             <div className="grid grid-cols-5 gap-1.5">
-              {[
-                { score: 1, emoji: "😫", label: "과부하" },
-                { score: 2, emoji: "🙁", label: "부담됨" },
-                { score: 3, emoji: "😐", label: "보통" },
-                { score: 4, emoji: "😃", label: "수월함" },
-                { score: 5, emoji: "😍", label: "매우적절" },
-              ].map((item) => (
+              {currentConfig.questions[0].options.map((item) => (
                 <button
                   key={item.score}
                   type="button"
@@ -382,30 +574,32 @@ function SurveyContent() {
             </div>
           </div>
 
-          {/* 문항 2: 팀 분위기 & 소통 */}
+          {/* 문항 2 */}
           <div className="p-4 rounded-2xl bg-[#F8F9FA] border border-[#E5E5EA] space-y-2.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-[#1D1D1F] flex items-center gap-1.5">
-                <HeartPulse size={14} className="text-rose-500" />
-                2. 팀원 및 사수(멘토)와의 소통과 조직 분위기는 편안한가요?
-              </label>
-              <span className="text-[11px] font-bold text-[#0071E3]">{teamScore}점 / 5점</span>
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-extrabold text-[#5856D6] bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 inline-block">
+                  {currentConfig.questions[1].category}
+                </span>
+                <label className="text-xs font-bold text-[#1D1D1F] flex items-center gap-1.5 pt-0.5">
+                  {stage === "MONTH_3" ? <Users size={14} className="text-[#5856D6]" /> :
+                   stage === "MONTH_6" ? <Award size={14} className="text-[#5856D6]" /> :
+                   stage === "YEAR_1" ? <ShieldCheck size={14} className="text-[#5856D6]" /> :
+                   <HeartPulse size={14} className="text-rose-500" />}
+                  {currentConfig.questions[1].title}
+                </label>
+              </div>
+              <span className="text-[11px] font-bold text-[#5856D6] shrink-0 ml-2">{teamScore}점 / 5점</span>
             </div>
             <div className="grid grid-cols-5 gap-1.5">
-              {[
-                { score: 1, emoji: "😫", label: "고립감" },
-                { score: 2, emoji: "🙁", label: "어색함" },
-                { score: 3, emoji: "😐", label: "무난함" },
-                { score: 4, emoji: "😃", label: "화기애애" },
-                { score: 5, emoji: "😍", label: "최고팀워크" },
-              ].map((item) => (
+              {currentConfig.questions[1].options.map((item) => (
                 <button
                   key={item.score}
                   type="button"
                   onClick={() => setTeamScore(item.score)}
                   className={`py-2 px-1 rounded-xl text-center transition-all border flex flex-col items-center gap-0.5 ${
                     teamScore === item.score
-                      ? "bg-[#0071E3] text-white border-[#0071E3] shadow-xs scale-102"
+                      ? "bg-[#5856D6] text-white border-[#5856D6] shadow-xs scale-102"
                       : "bg-white text-[#1D1D1F] border-[#E5E5EA] hover:border-neutral-300"
                   }`}
                 >
@@ -416,30 +610,32 @@ function SurveyContent() {
             </div>
           </div>
 
-          {/* 문항 3: 필요 장비 및 인프라 */}
+          {/* 문항 3 */}
           <div className="p-4 rounded-2xl bg-[#F8F9FA] border border-[#E5E5EA] space-y-2.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-[#1D1D1F] flex items-center gap-1.5">
-                <Laptop size={14} className="text-[#5856D6]" />
-                3. 업무에 필요한 IT 장비, 소프트웨어, 인프라 지원이 충분한가요?
-              </label>
-              <span className="text-[11px] font-bold text-[#0071E3]">{equipScore}점 / 5점</span>
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-extrabold text-[#1E8E3E] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 inline-block">
+                  {currentConfig.questions[2].category}
+                </span>
+                <label className="text-xs font-bold text-[#1D1D1F] flex items-center gap-1.5 pt-0.5">
+                  {stage === "MONTH_3" ? <Sparkles size={14} className="text-amber-500" /> :
+                   stage === "MONTH_6" ? <HeartPulse size={14} className="text-rose-500" /> :
+                   stage === "YEAR_1" ? <Gift size={14} className="text-amber-600" /> :
+                   <Laptop size={14} className="text-[#1E8E3E]" />}
+                  {currentConfig.questions[2].title}
+                </label>
+              </div>
+              <span className="text-[11px] font-bold text-[#1E8E3E] shrink-0 ml-2">{equipScore}점 / 5점</span>
             </div>
             <div className="grid grid-cols-5 gap-1.5">
-              {[
-                { score: 1, emoji: "😫", label: "심각부족" },
-                { score: 2, emoji: "🙁", label: "일부불편" },
-                { score: 3, emoji: "😐", label: "기본충족" },
-                { score: 4, emoji: "😃", label: "쾌적지원" },
-                { score: 5, emoji: "😍", label: "완벽지원" },
-              ].map((item) => (
+              {currentConfig.questions[2].options.map((item) => (
                 <button
                   key={item.score}
                   type="button"
                   onClick={() => setEquipScore(item.score)}
                   className={`py-2 px-1 rounded-xl text-center transition-all border flex flex-col items-center gap-0.5 ${
                     equipScore === item.score
-                      ? "bg-[#0071E3] text-white border-[#0071E3] shadow-xs scale-102"
+                      ? "bg-[#1E8E3E] text-white border-[#1E8E3E] shadow-xs scale-102"
                       : "bg-white text-[#1D1D1F] border-[#E5E5EA] hover:border-neutral-300"
                   }`}
                 >
@@ -460,7 +656,7 @@ function SurveyContent() {
               rows={3}
               value={feedbackText}
               onChange={(e) => setFeedbackText(e.target.value)}
-              placeholder="예: 업무 방향성에 대한 멘토링이 더 필요합니다 / 팀 분위기가 매우 편안하고 만족스럽습니다 / 추가 모니터 지급을 요청드립니다."
+              placeholder={currentConfig.feedbackPlaceholder}
               className="w-full p-3.5 text-xs rounded-2xl border border-[#E5E5EA] bg-[#F8F9FA] outline-none resize-none transition-all focus:border-[#5856D6] focus:bg-white focus:ring-2 focus:ring-indigo-100"
             />
           </div>

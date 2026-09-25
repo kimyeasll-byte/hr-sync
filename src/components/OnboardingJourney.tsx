@@ -1030,20 +1030,33 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                           </div>
 
                           {/* 3문항 세부 점수 */}
-                          <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-1.5 text-xs">
-                            <div className="flex justify-between items-center text-[11px]">
-                              <span className="text-neutral-600">💼 업무 난이도</span>
-                              <span className="font-bold text-neutral-900">{analysis.scores?.workScore ?? 0} / 5</span>
-                            </div>
-                            <div className="flex justify-between items-center text-[11px]">
-                              <span className="text-neutral-600">🤝 팀 분위기·소통</span>
-                              <span className="font-bold text-neutral-900">{analysis.scores?.teamScore ?? 0} / 5</span>
-                            </div>
-                            <div className="flex justify-between items-center text-[11px]">
-                              <span className="text-neutral-600">💻 인프라·장비</span>
-                              <span className="font-bold text-neutral-900">{analysis.scores?.equipScore ?? 0} / 5</span>
-                            </div>
-                          </div>
+                          {(() => {
+                            const labels = analysis.scores?.labels || {
+                              score1: survey.stage === 'MONTH_3' || survey.stage === 'D_90' ? '직무 R&R/목표 명확성' : survey.stage === 'MONTH_6' ? '직무 역량 성장감' : survey.stage === 'YEAR_1' ? '중장기 커리어 비전' : '초기 업무 난이도',
+                              score2: survey.stage === 'MONTH_3' || survey.stage === 'D_90' ? '부서·협업 원활성' : survey.stage === 'MONTH_6' ? '성과 피드백·인정' : survey.stage === 'YEAR_1' ? '평가/보상·조직문화' : '사수·팀원 소통',
+                              score3: survey.stage === 'MONTH_3' || survey.stage === 'D_90' ? '업무 자율성/주도권' : survey.stage === 'MONTH_6' ? '업무 몰입·워라밸' : survey.stage === 'YEAR_1' ? '회사 추천(eNPS)' : 'IT·장비 인프라',
+                            };
+                            const icon1 = survey.stage === 'MONTH_3' || survey.stage === 'D_90' ? '🎯' : survey.stage === 'MONTH_6' ? '📈' : survey.stage === 'YEAR_1' ? '🧭' : '💼';
+                            const icon2 = survey.stage === 'MONTH_3' || survey.stage === 'D_90' ? '👥' : survey.stage === 'MONTH_6' ? '🏆' : survey.stage === 'YEAR_1' ? '🏛️' : '🤝';
+                            const icon3 = survey.stage === 'MONTH_3' || survey.stage === 'D_90' ? '✨' : survey.stage === 'MONTH_6' ? '⚖️' : survey.stage === 'YEAR_1' ? '🎁' : '💻';
+
+                            return (
+                              <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-1.5 text-xs">
+                                <div className="flex justify-between items-center text-[11px]">
+                                  <span className="text-neutral-600 truncate mr-2">{icon1} {labels.score1}</span>
+                                  <span className="font-bold text-neutral-900 shrink-0">{analysis.scores?.workScore ?? 0} / 5</span>
+                                </div>
+                                <div className="flex justify-between items-center text-[11px]">
+                                  <span className="text-neutral-600 truncate mr-2">{icon2} {labels.score2}</span>
+                                  <span className="font-bold text-neutral-900 shrink-0">{analysis.scores?.teamScore ?? 0} / 5</span>
+                                </div>
+                                <div className="flex justify-between items-center text-[11px]">
+                                  <span className="text-neutral-600 truncate mr-2">{icon3} {labels.score3}</span>
+                                  <span className="font-bold text-neutral-900 shrink-0">{analysis.scores?.equipScore ?? 0} / 5</span>
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </div>
 
                         {/* 2. AI 심층 진단 브리핑 (Apple-style Highlight Quote Card) */}

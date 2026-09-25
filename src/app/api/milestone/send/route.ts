@@ -140,10 +140,16 @@ export async function POST(request: Request) {
         ${isSurveyMilestone ? `
           <div style="margin: 28px 0; padding: 20px; background-color: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 12px; text-align: center;">
             <div style="font-size: 13px; font-weight: 800; color: #6d28d9; margin-bottom: 6px;">
-              📊 초간단 3문항 펄스 서베이 (소요시간 약 3분)
+              📊 ${milestoneType === 'YEAR_1' ? '입사 1주년 리텐션 서베이' : milestoneType === 'MONTH_6' ? '6개월차 직무 몰입 서베이' : milestoneType === 'MONTH_3' ? '3개월차 수습 평가 서베이' : '1개월차 조직 적응 펄스 서베이'} (약 3분 소요)
             </div>
             <p style="font-size: 12px; color: #5b21b6; margin-top: 0; margin-bottom: 16px; line-height: 1.5;">
-              업무 난이도, 팀 분위기, 필요 장비에 대한 생각을 들려주시면 AI가 분석하여 더 나은 근무 환경을 만들어 드립니다.
+              ${milestoneType === 'MONTH_3' 
+                ? '수습 3개월간의 직무 R&R 명확성, 부서 간 협업, 업무 자율성에 대한 피드백을 들려주세요.'
+                : milestoneType === 'MONTH_6'
+                ? '직무 전문성 성장 체감, 성과 피드백 및 인정, 업무 몰입도와 워라밸을 점검해 주세요.'
+                : milestoneType === 'YEAR_1'
+                ? '1년간의 중장기 커리어 비전, 평가/보상 만족도, 지인 추천 의향(eNPS)을 들려주세요.'
+                : '초기 업무량, 팀 소통 분위기, 전산 장비 지원에 대한 솔직한 생각을 들려주시면 AI가 분석하여 맞춤 케어를 지원합니다.'}
             </p>
             <a href="${surveyUrl}" style="display: inline-block; background-color: #7c3aed; color: #ffffff; text-decoration: none; padding: 13px 32px; border-radius: 10px; font-weight: 800; font-size: 14px; box-shadow: 0 2px 4px rgba(124, 58, 237, 0.3);">
               펄스 서베이 참여하기 (3분 소요) →

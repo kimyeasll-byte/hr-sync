@@ -59,21 +59,89 @@ export function analyzePulseSurvey(params: {
   }
 
   // AI 심층 분석 요약 작성
+  // AI 심층 분석 요약 작성 (회차별 질문 특성에 맞춘 리스크 팩터 도출)
   const riskFactors: string[] = [];
   const actionItems: string[] = [];
 
-  if (teamScore <= 2) {
-    riskFactors.push('팀원 및 멘토와의 소통 단절 및 고립감 호소');
-    actionItems.push('사수(멘토)와의 1:1 캐주얼 커피챗 및 멘토 교체/재교육 검토');
+  let scoreLabels = {
+    score1: '초기 업무 난이도',
+    score2: '사수·팀원 소통',
+    score3: 'IT·장비 인프라'
+  };
+
+  if (stage === 'MONTH_3' || stage === 'D_90') {
+    scoreLabels = {
+      score1: '직무 R&R/목표 명확성',
+      score2: '부서·협업 원활성',
+      score3: '업무 자율성/주도권'
+    };
+
+    if (workScore <= 2) {
+      riskFactors.push('담당 직무 역할(R&R) 및 핵심 목표 모호함');
+      actionItems.push('부서장 면담을 통해 직무 기술서(JD) 재정립 및 구체적 수습 KPI 공유');
+    }
+    if (teamScore <= 2) {
+      riskFactors.push('팀 및 타 부서와의 협업 조율 갈등 또는 소통 난항');
+      actionItems.push('유관 부서 인터페이스 조율 및 팀장 중재 미팅 진행');
+    }
+    if (equipScore <= 2) {
+      riskFactors.push('업무 자율성 부족 및 지나친 수동적 업무 지시');
+      actionItems.push('자기주도 과제 부여 및 단계적 의사결정 권한 위임');
+    }
+  } else if (stage === 'MONTH_6') {
+    scoreLabels = {
+      score1: '직무 역량 성장감',
+      score2: '성과 피드백·인정',
+      score3: '업무 몰입·워라밸'
+    };
+
+    if (workScore <= 2) {
+      riskFactors.push('직무 전문성 성장 정체 및 업무 매너리즘 징후');
+      actionItems.push('신규 프로젝트 참여 기회 제공 및 직무 교육/도서 구매 지원');
+    }
+    if (teamScore <= 2) {
+      riskFactors.push('성과에 대한 피드백 및 상사의 인정 결여');
+      actionItems.push('부서장 1:1 면담을 통한 중간 성과 칭찬 및 구체적 피드백 제공');
+    }
+    if (equipScore <= 2) {
+      riskFactors.push('업무 과부하로 인한 피로 누적 및 번아웃 위험');
+      actionItems.push('부서 내 업무 분장 재검토 및 리프레시 연차 사용 권장');
+    }
+  } else if (stage === 'YEAR_1') {
+    scoreLabels = {
+      score1: '중장기 커리어 비전',
+      score2: '평가/보상·조직문화',
+      score3: '회사 추천(eNPS)'
+    };
+
+    if (workScore <= 2) {
+      riskFactors.push('파워넷에서의 중장기 커리어 비전 부재 및 이직 고민');
+      actionItems.push('인사팀 리텐션 심층 면담 및 중장기 커리어 패스(CDP) 설계 지원');
+    }
+    if (teamScore <= 2) {
+      riskFactors.push('평가/보상 체계 또는 사내 조직문화에 대한 불만족');
+      actionItems.push('차기 연도 연봉/승진 프로세스 투명 안내 및 고충 수렴');
+    }
+    if (equipScore <= 2) {
+      riskFactors.push('회사 추천 의향(eNPS) 저조 (외피적 소속감)');
+      actionItems.push('조직문화 개선 TF 의견 수렴 및 1주년 축하 기념 케어 진행');
+    }
+  } else {
+    // 1개월차 (MONTH_1 / 기본값)
+    if (workScore <= 2) {
+      riskFactors.push('초기 업무 난이도 과중 및 방향성 혼란');
+      actionItems.push('멘토(사수)와의 업무량 조율 및 기본 OJT 보강');
+    }
+    if (teamScore <= 2) {
+      riskFactors.push('팀원 및 멘토와의 소통 단절 및 고립감 호소');
+      actionItems.push('사수와의 1:1 캐주얼 커피챗 및 멘토링 프로그램 점검');
+    }
+    if (equipScore <= 2) {
+      riskFactors.push('필수 IT 장비(노트북/모니터) 또는 시스템 권한 지원 지연');
+      actionItems.push('전산 총무팀에 고정 IP/ERP 계정 및 듀얼 모니터 긴급 불출 요청');
+    }
   }
-  if (workScore <= 2) {
-    riskFactors.push('담당 업무 난이도 과중 및 목표 방향성 모호');
-    actionItems.push('부서장과의 1:1 업무량 조율 면담 및 명확한 R&R 가이드라인 재정립');
-  }
-  if (equipScore <= 2) {
-    riskFactors.push('필수 IT 장비(노트북/모니터) 또는 시스템 권한 지급 지연');
-    actionItems.push('전산 총무팀에 고정 IP/ERP 계정 및 듀얼 모니터 긴급 불출 요청');
-  }
+
   if (matchedHigh.length > 0) {
     riskFactors.push(`주관식 의견 내 위험 징후 키워드 감지: "${matchedHigh.join(', ')}"`);
     actionItems.push('인사기획팀 온보딩 담당자의 비밀 보장 1:1 심층 고충 면담 진행');
@@ -120,7 +188,8 @@ export function analyzePulseSurvey(params: {
     scores: {
       workScore,
       teamScore,
-      equipScore
+      equipScore,
+      labels: scoreLabels
     },
     analyzedAt: new Date().toISOString()
   };
