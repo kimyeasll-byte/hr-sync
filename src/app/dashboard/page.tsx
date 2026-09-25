@@ -5,7 +5,7 @@ import AssetManagement from "@/components/AssetManagement";
 import DocumentPrintModal, { PrintDocumentData } from "@/components/DocumentPrintModal";
 
 import { useState, useEffect, useRef } from "react";
-import { UserPlus, UserMinus, Calendar, Briefcase, Loader2, AlertCircle, CheckCircle2, Clock, Search, RefreshCw, FileText, IdCard, LogOut, Mail, Laptop, Download, Printer } from "lucide-react";
+import { UserPlus, UserMinus, Calendar, Briefcase, Loader2, AlertCircle, CheckCircle2, Clock, Search, RefreshCw, FileText, IdCard, LogOut, Mail, Laptop, Download, Printer, RotateCcw } from "lucide-react";
 import { supabase } from "@/utils/supabase/client";
 
 export default function DashboardPage() {
@@ -31,6 +31,51 @@ export default function DashboardPage() {
   const [offStatus, setOffStatus] = useState<"idle" | "loading" | "scheduled" | "error">("idle");
   const [offErrorMessage, setOffErrorMessage] = useState("");
   
+  // Offboarding IT Asset Tracking States
+  const [offEmpAssets, setOffEmpAssets] = useState<any[]>([]);
+
+  const loadOffEmpAssets = (name: string) => {
+    if (typeof window === "undefined" || !name) {
+      setOffEmpAssets([]);
+      return;
+    }
+    try {
+      const raw = localStorage.getItem("powernet_it_assets");
+      if (raw) {
+        const all = JSON.parse(raw);
+        setOffEmpAssets(all.filter((a: any) => a.empName === name));
+      } else {
+        setOffEmpAssets([]);
+      }
+    } catch (e) {
+      setOffEmpAssets([]);
+    }
+  };
+
+  const handleBatchReturnOffAssets = () => {
+    if (!offName) return;
+    if (!confirm(`${offName} 님의 보유 IT 자산 ${offEmpAssets.length}건을 모두 '반납 완료' 처리하시겠습니까?`)) return;
+
+    const today = new Date().toISOString().split("T")[0];
+    try {
+      const raw = localStorage.getItem("powernet_it_assets");
+      if (raw) {
+        const all = JSON.parse(raw);
+        const updated = all.map((a: any) => {
+          if (a.empName === offName) {
+            return { ...a, status: "RETURNED", returnDate: today };
+          }
+          return a;
+        });
+        localStorage.setItem("powernet_it_assets", JSON.stringify(updated));
+        loadOffEmpAssets(offName);
+        alert(`${offName} 님의 보유 IT 자산이 모두 정상 반납 완료 처리되었습니다.`);
+      }
+    } catch (e) {
+      alert("반납 처리 중 오류 발생");
+    }
+  };
+
   // Search States (Offboarding)
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -237,6 +282,22 @@ export default function DashboardPage() {
       const data = await res.json();
       setOffTaskId(data.taskId);
       setOffStatus("scheduled");
+
+      // 퇴사 예약 시 미반납 자산이 있으면 자동으로 PENDING_RETURN(반납 대기)으로 전환
+      try {
+        const raw = localStorage.getItem("powernet_it_assets");
+        if (raw) {
+          const all = JSON.parse(raw);
+          const updated = all.map((a: any) => {
+            if (a.empName === offName && a.status === "ACTIVE") {
+              return { ...a, status: "PENDING_RETURN" };
+            }
+            return a;
+          });
+          localStorage.setItem("powernet_it_assets", JSON.stringify(updated));
+          loadOffEmpAssets(offName);
+        }
+      } catch (e) {}
     } catch (error) {
       setOffStatus("error"); setOffErrorMessage("서버 통신 중 오류가 발생했습니다.");
     }
@@ -247,6 +308,7 @@ export default function DashboardPage() {
     setOffDept(emp.department);
     setSearchQuery("");
     setShowDropdown(false);
+    loadOffEmpAssets(emp.name);
   };
 
   return (
@@ -619,17 +681,80 @@ export default function DashboardPage() {
               </div>
 
               {offName && (
-                <div className="mt-3 p-3 rounded-xl border border-blue-200 bg-blue-50/50 flex items-center justify-between text-xs">
-                  <span className="text-neutral-700">
-                    💡 <strong>{offName}</strong> 님의 지급 대여 장비(PC/모니터/보안카드) 반납 상태를 확인하세요.
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("assets")}
-                    className="px-2.5 py-1 rounded-md bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-200 font-bold transition-colors"
-                  >
-                    IT 자산 대장 확인
-                  </button>
+                <div className="mt-4 p-4 rounded-2xl border border-neutral-200 bg-neutral-50/70 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Laptop size={16} className="text-neutral-700" />
+                      <h4 className="text-xs font-bold text-neutral-900">
+                        {offName} 님 보유 IT 자산 회수 현황 ({offEmpAssets.length}건)
+                      </h4>
+                    </div>
+                    {offEmpAssets.some(a => a.status !== "RETURNED") && (
+                      <button
+                        type="button"
+                        onClick={handleBatchReturnOffAssets}
+                        className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white transition-colors shadow-xs flex items-center gap-1"
+                      >
+                        <RotateCcw size={12} /> 보유 자산 일괄 반납 완료 처리
+                      </button>
+                    )}
+                  </div>
+
+                  {offEmpAssets.length === 0 ? (
+                    <p className="text-xs text-neutral-400 py-1">
+                      현재 등록된 보유 IT 자산이 없습니다. (자산 대장 미등록)
+                    </p>
+                  ) : (
+                    <div className="border border-neutral-200 rounded-xl overflow-hidden bg-white">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead className="bg-[#F8F9FA] border-b text-[11px] text-neutral-500 font-semibold">
+                          <tr>
+                            <th className="py-2 px-3">분류</th>
+                            <th className="py-2 px-3">기종 및 모델명</th>
+                            <th className="py-2 px-3">시리얼 번호</th>
+                            <th className="py-2 px-3">IP / MAC</th>
+                            <th className="py-2 px-3">회수 상태</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-neutral-100 text-[11px]">
+                          {offEmpAssets.map((asset: any) => (
+                            <tr key={asset.id} className="hover:bg-neutral-50">
+                              <td className="py-2 px-3">
+                                <span className="px-1.5 py-0.5 rounded font-bold text-[10px] bg-neutral-100 text-neutral-700">
+                                  {asset.category === 'LAPTOP' ? '노트북' : asset.category === 'MONITOR' ? '모니터' : asset.category === 'SECURITY_CARD' ? '출입카드' : asset.category}
+                                </span>
+                              </td>
+                              <td className="py-2 px-3 font-semibold text-neutral-800">{asset.modelName}</td>
+                              <td className="py-2 px-3 font-mono text-[10px] text-neutral-500">{asset.serialNumber}</td>
+                              <td className="py-2 px-3 font-mono text-[10px] text-neutral-500">{asset.fixedIp || "-"}</td>
+                              <td className="py-2 px-3">
+                                {asset.status === 'RETURNED' ? (
+                                  <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                    반납 완료 ({asset.returnDate || '완료'})
+                                  </span>
+                                ) : (
+                                  <span className="text-amber-800 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                                    회수 필요 (대여 중)
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap items-center justify-between text-[11px] text-neutral-500 pt-1 gap-2">
+                    <span>퇴사 처리 시 사내 보안 규정(ITGC)에 따라 PC 포맷 및 보안 출입카드 반납이 완료되어야 합니다.</span>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("assets")}
+                      className="text-blue-600 font-bold hover:underline shrink-0"
+                    >
+                      IT 자산 대장 이동 →
+                    </button>
+                  </div>
                 </div>
               )}
 

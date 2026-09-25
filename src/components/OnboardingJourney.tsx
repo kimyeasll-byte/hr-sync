@@ -229,6 +229,27 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
   const [pulseSurveys, setPulseSurveys] = useState<Record<string, any>>({});
   const [isSurveysLoading, setIsSurveysLoading] = useState(false);
 
+  // IT 자산 실시간 연동 상태
+  const [assignedAssets, setAssignedAssets] = useState<any[]>([]);
+  const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
+
+  const loadAssignedAssets = (empName?: string) => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem("powernet_it_assets");
+      if (raw) {
+        const allAssets = JSON.parse(raw);
+        if (empName) {
+          setAssignedAssets(allAssets.filter((a: any) => a.empName === empName));
+        }
+      } else {
+        setAssignedAssets([]);
+      }
+    } catch (e) {
+      setAssignedAssets([]);
+    }
+  };
+
   const fetchPortalSubmissions = async () => {
     setIsSubmissionsLoading(true);
     try {
@@ -520,6 +541,85 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
   const selectedEmpChecks = selectedEmployee ? (checklists[selectedEmployee.id] || {}) : {};
   const completedCount = MILESTONES.filter(m => selectedEmpChecks[m.id]).length;
   const progressPercent = Math.round((completedCount / MILESTONES.length) * 100);
+
+  useEffect(() => {
+    if (selectedEmployee?.name) {
+      loadAssignedAssets(selectedEmployee.name);
+    }
+  }, [selectedEmployee?.name]);
+
+  const handleProvisionDefaultAssets = () => {
+    if (!selectedEmployee) return;
+
+    const today = new Date().toISOString().split("T")[0];
+    const dept = selectedEmployee.department || "";
+    const isLab = dept.includes("연구소") || dept.includes("개발") || dept.includes("HW") || dept.includes("SW");
+
+    const defaultAssets = [
+      {
+        id: `ast-${Date.now()}-1`,
+        empName: selectedEmployee.name,
+        department: selectedEmployee.department,
+        category: "LAPTOP",
+        modelName: isLab ? "삼성 갤럭시북4 Pro 16인치 (i7/32GB/SSD 1TB)" : "LG 그램 15 (15ZD90R)",
+        serialNumber: `SN-PWN-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+        assignedDate: today,
+        fixedIp: `192.168.10.${Math.floor(50 + Math.random() * 150)}`,
+        macAddress: `00:E0:4C:${Math.floor(10 + Math.random() * 89)}:${Math.floor(10 + Math.random() * 89)}:${Math.floor(10 + Math.random() * 89)}`,
+        status: "ACTIVE",
+        notes: "온보딩 자동 패키지 지급"
+      },
+      {
+        id: `ast-${Date.now()}-2`,
+        empName: selectedEmployee.name,
+        department: selectedEmployee.department,
+        category: "MONITOR",
+        modelName: "삼성 27인치 FHD 모니터 (듀얼)",
+        serialNumber: `SN-MON-27-${Math.floor(1000 + Math.random() * 9000)}`,
+        assignedDate: today,
+        status: "ACTIVE",
+        notes: "HDMI 듀얼 연결"
+      },
+      {
+        id: `ast-${Date.now()}-3`,
+        empName: selectedEmployee.name,
+        department: selectedEmployee.department,
+        category: "SECURITY_CARD",
+        modelName: "에스원(S1) 보안 출입카드",
+        serialNumber: `S1-KEY-${Math.floor(10000 + Math.random() * 90000)}`,
+        assignedDate: today,
+        status: "ACTIVE",
+        notes: "수원/서울 출입 권한 등록"
+      }
+    ];
+
+    try {
+      const raw = localStorage.getItem("powernet_it_assets");
+      const existing = raw ? JSON.parse(raw) : [];
+      const updated = [...defaultAssets, ...existing];
+      localStorage.setItem("powernet_it_assets", JSON.stringify(updated));
+      setAssignedAssets(defaultAssets);
+
+      // 온보딩 체크리스트의 PC세팅, 네트워크, 사원증 발주 항목을 자동 완료(true) 처리
+      const empChecks = checklists[selectedEmployee.id] || {};
+      const updatedEmpChecks = {
+        ...empChecks,
+        pre_pc_setup: true,
+        pre_network: true,
+        day1_pass_s1: true
+      };
+      const updatedFull = {
+        ...checklists,
+        [selectedEmployee.id]: updatedEmpChecks
+      };
+      saveChecklistsToStorage(updatedFull);
+
+      alert(`🎉 ${selectedEmployee.name} 님에게 기본 IT 장비 3종(노트북, 듀얼 모니터, 에스원 카드)이 성공적으로 배정되었습니다!\n\n관련 온보딩 체크리스트(PC 세팅, 고정 IP, 출입증 발주) 3건이 자동으로 완료 처리되었습니다.`);
+      setIsAssetModalOpen(false);
+    } catch (err: any) {
+      alert("장비 지급 중 오류가 발생했습니다: " + err.message);
+    }
+  };
 
   // Group milestones by phase
   const phases = [
@@ -820,6 +920,21 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                       <IdCard size={14} /> 명함 제작 바로가기
                     </button>
                   )}
+                  <button
+                    onClick={() => {
+                      loadAssignedAssets(selectedEmployee.name);
+                      setIsAssetModalOpen(true);
+                    }}
+                    className={`text-xs px-3 py-2 rounded-xl border font-bold transition-colors flex items-center gap-1.5 whitespace-nowrap shadow-xs ${
+                      assignedAssets.length > 0 
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100" 
+                        : "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
+                    }`}
+                    title="IT 자산 대장과 실시간 연동된 장비 지급 및 조회"
+                  >
+                    <Laptop size={13} className={assignedAssets.length > 0 ? "text-emerald-600" : "text-indigo-600"} />
+                    {assignedAssets.length > 0 ? `IT 장비 현황 (${assignedAssets.length}건)` : "⚡ IT 장비 원클릭 지급"}
+                  </button>
                   <button
                     onClick={() => {
                       setPrintData({
@@ -1761,6 +1876,175 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
               >
                 <Send size={12} /> 지금 즉시 테스트 발송
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* IT 자산 실시간 지급 및 관리 연동 모달 */}
+      {isAssetModalOpen && selectedEmployee && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150">
+          <div 
+            className="w-full max-w-2xl bg-white rounded-3xl border border-neutral-200 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col"
+          >
+            {/* 헤더 */}
+            <div className="flex items-center justify-between px-6 py-4 border-b bg-[#F8F9FA] border-neutral-200">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-indigo-50 text-indigo-700">
+                  <Laptop size={18} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-neutral-900">
+                    신입사원 IT 기본 장비 패키지 연동 관리
+                  </h3>
+                  <p className="text-[11px] text-neutral-500">
+                    IT 자산 대장 및 온보딩 체크리스트와 100% 실시간 연동됩니다.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAssetModalOpen(false)}
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/50 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* 본문 */}
+            <div className="p-6 space-y-4 text-xs">
+              {/* 대상자 박스 */}
+              <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-neutral-400 block font-semibold">지급 대상자</span>
+                  <strong className="text-sm text-neutral-900 font-bold">
+                    {selectedEmployee.name} ({selectedEmployee.department})
+                  </strong>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-neutral-400 block font-semibold">입사 예정일</span>
+                  <span className="font-bold text-neutral-700">{selectedEmployee.target_date || "-"}</span>
+                </div>
+              </div>
+
+              {assignedAssets.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-neutral-800 flex items-center gap-1.5">
+                      <CheckCircle2 size={15} className="text-emerald-600" />
+                      현재 배정된 IT 자산 목록 ({assignedAssets.length}건)
+                    </span>
+                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      정상 지급 완료
+                    </span>
+                  </div>
+
+                  <div className="border border-neutral-200 rounded-2xl overflow-hidden">
+                    <table className="w-full text-left text-[11px] border-collapse">
+                      <thead className="bg-[#F8F9FA] border-b text-neutral-500 font-semibold">
+                        <tr>
+                          <th className="py-2.5 px-3">분류</th>
+                          <th className="py-2.5 px-3">모델명</th>
+                          <th className="py-2.5 px-3">시리얼 번호</th>
+                          <th className="py-2.5 px-3">IP / MAC</th>
+                          <th className="py-2.5 px-3">상태</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-100">
+                        {assignedAssets.map((asset: any) => (
+                          <tr key={asset.id} className="hover:bg-neutral-50">
+                            <td className="py-2 px-3">
+                              <span className="px-1.5 py-0.5 rounded font-bold text-[10px] bg-neutral-100 text-neutral-700">
+                                {asset.category === 'LAPTOP' ? '노트북' : asset.category === 'MONITOR' ? '모니터' : asset.category === 'SECURITY_CARD' ? '출입카드' : asset.category}
+                              </span>
+                            </td>
+                            <td className="py-2 px-3 font-bold text-neutral-800">{asset.modelName}</td>
+                            <td className="py-2 px-3 font-mono text-[10px] text-neutral-500">{asset.serialNumber}</td>
+                            <td className="py-2 px-3 font-mono text-[10px] text-neutral-500">{asset.fixedIp || "-"}</td>
+                            <td className="py-2 px-3">
+                              <span className="text-emerald-600 font-bold text-[10px]">운용중</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="p-3 bg-blue-50/70 border border-blue-100 rounded-xl text-[11px] text-blue-700 leading-relaxed">
+                    💡 이미 기본 장비가 배정되어 있습니다. 추가 지급이나 반납 관리는 상단 <strong>[IT 자산 관리]</strong> 탭에서 언제든 진행하실 수 있습니다.
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-neutral-800 flex items-center gap-1.5">
+                      <Sparkles size={14} className="text-indigo-600" />
+                      신입사원 표준 IT 패키지 (3종 자동 구성)
+                    </span>
+                    <span className="text-[11px] font-bold text-neutral-500">원클릭 자동 발급 대기</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <div className="p-3 rounded-2xl border border-neutral-200 bg-neutral-50/60 space-y-1">
+                      <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">
+                        1. 노트북 PC
+                      </span>
+                      <div className="font-bold text-xs text-neutral-900 pt-1">
+                        {(selectedEmployee.department || "").includes("연구소") || (selectedEmployee.department || "").includes("개발")
+                          ? "갤럭시북4 Pro 16인치"
+                          : "LG 그램 15 (15ZD90R)"}
+                      </div>
+                      <p className="text-[10px] text-neutral-500">고성능 SSD / OS 설치 / IP 할당</p>
+                    </div>
+
+                    <div className="p-3 rounded-2xl border border-neutral-200 bg-neutral-50/60 space-y-1">
+                      <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
+                        2. 듀얼 모니터
+                      </span>
+                      <div className="font-bold text-xs text-neutral-900 pt-1">
+                        삼성 27인치 FHD (듀얼)
+                      </div>
+                      <p className="text-[10px] text-neutral-500">HDMI 케이블 & 거치대 세트</p>
+                    </div>
+
+                    <div className="p-3 rounded-2xl border border-neutral-200 bg-neutral-50/60 space-y-1">
+                      <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">
+                        3. 보안 출입카드
+                      </span>
+                      <div className="font-bold text-xs text-neutral-900 pt-1">
+                        에스원(S1) 보안 출입증
+                      </div>
+                      <p className="text-[10px] text-neutral-500">수원 본사 / 서울 연구소 출입</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 bg-indigo-50/60 border border-indigo-100 rounded-2xl text-[11px] text-indigo-800 leading-relaxed">
+                    ✨ <strong>원클릭 지급 시 자동 연동 혜택:</strong><br />
+                    1. 사내 IT 자산 대장에 해당 직원의 장비 3종(고유 S/N, IP 포함)이 즉시 영구 등록됩니다.<br />
+                    2. 온보딩 체크리스트의 <strong>'PC 세팅', '고정 IP 할당', '출입증 발주' 3개 항목이 자동으로 완료(✔)</strong> 처리됩니다.
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 푸터 */}
+            <div className="flex items-center justify-end gap-2 px-6 py-3.5 border-t bg-[#F8F9FA] border-neutral-200">
+              <button
+                type="button"
+                onClick={() => setIsAssetModalOpen(false)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-600 hover:bg-neutral-200/50 transition-colors"
+              >
+                닫기
+              </button>
+              {assignedAssets.length === 0 && (
+                <button
+                  type="button"
+                  onClick={handleProvisionDefaultAssets}
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-[#0071E3] hover:bg-blue-600 text-white transition-all shadow-xs flex items-center gap-1.5"
+                >
+                  <Sparkles size={14} /> 기본 3종 패키지 즉시 지급 및 체크리스트 자동 완료
+                </button>
+              )}
             </div>
           </div>
         </div>
