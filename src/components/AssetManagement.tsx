@@ -304,15 +304,15 @@ export default function AssetManagement() {
   const getCategoryBadge = (category: ITAsset["category"]) => {
     switch (category) {
       case "LAPTOP":
-        return { label: "노트북", icon: Laptop, color: "text-blue-400 bg-blue-950/60 border-blue-800" };
+        return { label: "노트북", icon: Laptop, color: "text-blue-700 bg-blue-50 border-blue-200" };
       case "DESKTOP":
-        return { label: "데스크탑/WS", icon: Laptop, color: "text-cyan-400 bg-cyan-950/60 border-cyan-800" };
+        return { label: "데스크탑/WS", icon: Laptop, color: "text-cyan-700 bg-cyan-50 border-cyan-200" };
       case "MONITOR":
-        return { label: "모니터", icon: Monitor, color: "text-indigo-400 bg-indigo-950/60 border-indigo-800" };
+        return { label: "모니터", icon: Monitor, color: "text-indigo-700 bg-indigo-50 border-indigo-200" };
       case "NETWORK":
-        return { label: "네트워크/IP", icon: Wifi, color: "text-emerald-400 bg-emerald-950/60 border-emerald-800" };
+        return { label: "네트워크/IP", icon: Wifi, color: "text-emerald-700 bg-emerald-50 border-emerald-200" };
       case "SECURITY_CARD":
-        return { label: "보안 출입카드", icon: KeyRound, color: "text-amber-400 bg-amber-950/60 border-amber-800" };
+        return { label: "보안 출입카드", icon: KeyRound, color: "text-amber-700 bg-amber-50 border-amber-200" };
     }
   };
 
@@ -343,7 +343,7 @@ export default function AssetManagement() {
       
       {/* 1. 상단 통계 요약 대시보드 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+        <div className="p-4 rounded-2xl border shadow-xs" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs font-semibold" style={{ color: 'var(--color-text-muted)' }}>총 등록 IT 자산</span>
             <Laptop size={15} style={{ color: 'var(--color-text-muted)' }} />
@@ -353,27 +353,27 @@ export default function AssetManagement() {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+        <div className="p-4 rounded-2xl border shadow-xs" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-semibold text-emerald-400">정상 운용 중 (Active)</span>
-            <CheckCircle2 size={15} className="text-emerald-400" />
+            <span className="text-xs font-semibold text-emerald-600">정상 운용 중 (Active)</span>
+            <CheckCircle2 size={15} className="text-emerald-600" />
           </div>
-          <div className="text-2xl font-black text-emerald-400">
+          <div className="text-2xl font-black text-emerald-600">
             {activeCount}<span className="text-xs font-normal ml-1" style={{ color: 'var(--color-text-muted)' }}>대</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+        <div className="p-4 rounded-2xl border shadow-xs" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-semibold text-amber-400">반납 대기 (회수 대상)</span>
-            <AlertTriangle size={15} className="text-amber-400" />
+            <span className="text-xs font-semibold text-amber-600">반납 대기 (회수 대상)</span>
+            <AlertTriangle size={15} className="text-amber-600" />
           </div>
-          <div className="text-2xl font-black text-amber-400">
+          <div className="text-2xl font-black text-amber-600">
             {pendingReturnCount}<span className="text-xs font-normal ml-1" style={{ color: 'var(--color-text-muted)' }}>대</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+        <div className="p-4 rounded-2xl border shadow-xs" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs font-semibold" style={{ color: 'var(--color-text-muted)' }}>반납 완료 / 창고 보관</span>
             <RotateCcw size={15} style={{ color: 'var(--color-text-muted)' }} />
@@ -386,23 +386,23 @@ export default function AssetManagement() {
 
       {/* 2. 퇴사 예정자 미반납 알림 배너 (있을 경우) */}
       {pendingReturnCount > 0 && (
-        <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="p-4 rounded-2xl border border-amber-200 bg-amber-50/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400">
+            <div className="p-2 rounded-xl bg-amber-100 text-amber-700">
               <ShieldAlert size={20} />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-amber-300">
+              <h4 className="text-sm font-bold text-amber-900">
                 퇴사 예정자 자산 회수 대기 안내 ({pendingReturnCount}건)
               </h4>
-              <p className="text-xs text-neutral-400">
+              <p className="text-xs text-amber-700">
                 퇴사 처리 시 사내 보안 규정(ITGC)에 따라 PC 포맷 및 보안 출입카드 반납이 완료되어야 합니다.
               </p>
             </div>
           </div>
           <button
             onClick={() => setStatusFilter("PENDING_RETURN")}
-            className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-amber-600 hover:bg-amber-700 text-white transition-colors flex items-center gap-1.5 self-start sm:self-auto"
+            className="px-3.5 py-1.5 text-xs font-bold rounded-xl bg-amber-600 hover:bg-amber-700 text-white transition-colors flex items-center gap-1.5 self-start sm:self-auto shadow-xs"
           >
             회수 대상 목록 보기
           </button>
@@ -420,9 +420,9 @@ export default function AssetManagement() {
               placeholder="직원명, 부서, 기종, S/N, IP 검색"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-2 text-xs rounded-lg outline-none"
+              className="w-full pl-8 pr-3 py-2 text-xs rounded-xl outline-none transition-all"
               style={{
-                backgroundColor: 'var(--color-surface)',
+                backgroundColor: '#F5F5F7',
                 border: '1px solid var(--color-border)',
                 color: 'var(--color-text-title)'
               }}
@@ -430,35 +430,35 @@ export default function AssetManagement() {
           </div>
 
           {/* 상태 필터 */}
-          <div className="flex gap-1 p-0.5 rounded-lg border text-xs" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+          <div className="flex gap-1 p-1 rounded-xl border text-xs" style={{ backgroundColor: '#EBEBED', borderColor: 'var(--color-border)' }}>
             <button
               onClick={() => setStatusFilter("ALL")}
-              className={`px-2.5 py-1 rounded font-semibold transition-colors ${
-                statusFilter === "ALL" ? "bg-blue-600 text-white" : "text-neutral-400 hover:text-white"
+              className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
+                statusFilter === "ALL" ? "bg-white text-neutral-900 shadow-xs" : "text-neutral-500 hover:text-neutral-900"
               }`}
             >
               전체
             </button>
             <button
               onClick={() => setStatusFilter("ACTIVE")}
-              className={`px-2.5 py-1 rounded font-semibold transition-colors ${
-                statusFilter === "ACTIVE" ? "bg-emerald-600 text-white" : "text-neutral-400 hover:text-white"
+              className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
+                statusFilter === "ACTIVE" ? "bg-white text-emerald-700 shadow-xs" : "text-neutral-500 hover:text-neutral-900"
               }`}
             >
               운용 중
             </button>
             <button
               onClick={() => setStatusFilter("PENDING_RETURN")}
-              className={`px-2.5 py-1 rounded font-semibold transition-colors ${
-                statusFilter === "PENDING_RETURN" ? "bg-amber-600 text-white" : "text-neutral-400 hover:text-white"
+              className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
+                statusFilter === "PENDING_RETURN" ? "bg-white text-amber-700 shadow-xs" : "text-neutral-500 hover:text-neutral-900"
               }`}
             >
               반납 대기
             </button>
             <button
               onClick={() => setStatusFilter("RETURNED")}
-              className={`px-2.5 py-1 rounded font-semibold transition-colors ${
-                statusFilter === "RETURNED" ? "bg-neutral-700 text-white" : "text-neutral-400 hover:text-white"
+              className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
+                statusFilter === "RETURNED" ? "bg-white text-neutral-800 shadow-xs" : "text-neutral-500 hover:text-neutral-900"
               }`}
             >
               반납 완료
@@ -469,9 +469,9 @@ export default function AssetManagement() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-2.5 py-1.5 text-xs rounded-lg outline-none cursor-pointer border"
+            className="px-3 py-2 text-xs rounded-xl outline-none cursor-pointer border"
             style={{
-              backgroundColor: 'var(--color-surface)',
+              backgroundColor: '#FFFFFF',
               borderColor: 'var(--color-border)',
               color: 'var(--color-text-title)'
             }}
@@ -488,31 +488,31 @@ export default function AssetManagement() {
         {/* 신규 자산 지급 등록 버튼 */}
         <button
           onClick={handleOpenCreate}
-          className="px-3.5 py-2 text-xs font-bold rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-1.5 shadow-sm self-end sm:self-auto"
+          className="px-4 py-2 text-xs font-bold rounded-xl bg-[#0071E3] hover:bg-blue-600 text-white transition-colors flex items-center gap-1.5 shadow-xs self-end sm:self-auto"
         >
           <Plus size={15} /> 신규 자산 지급 등록
         </button>
       </div>
 
       {/* 4. 자산 목록 테이블 */}
-      <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+      <div className="rounded-2xl border overflow-hidden shadow-xs" style={{ backgroundColor: '#FFFFFF', borderColor: 'var(--color-border)' }}>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b text-neutral-400 uppercase tracking-wider text-[11px]" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg)' }}>
-                <th className="py-3 px-4 font-semibold">사용자 / 소속</th>
-                <th className="py-3 px-4 font-semibold">자산 분류 & 기종</th>
-                <th className="py-3 px-4 font-semibold">시리얼 번호 (S/N)</th>
-                <th className="py-3 px-4 font-semibold">네트워크 (IP / MAC)</th>
-                <th className="py-3 px-4 font-semibold">지급일자</th>
-                <th className="py-3 px-4 font-semibold">상태</th>
-                <th className="py-3 px-4 font-semibold text-right">작업</th>
+              <tr className="border-b text-neutral-500 uppercase tracking-wider text-[11px] font-semibold" style={{ borderColor: 'var(--color-border)', backgroundColor: '#F8F9FA' }}>
+                <th className="py-3 px-4">사용자 / 소속</th>
+                <th className="py-3 px-4">자산 분류 & 기종</th>
+                <th className="py-3 px-4">시리얼 번호 (S/N)</th>
+                <th className="py-3 px-4">네트워크 (IP / MAC)</th>
+                <th className="py-3 px-4">지급일자</th>
+                <th className="py-3 px-4">상태</th>
+                <th className="py-3 px-4 text-right">작업</th>
               </tr>
             </thead>
             <tbody className="divide-y" style={{ borderColor: 'var(--color-border)' }}>
               {filteredAssets.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-neutral-500 font-medium">
+                  <td colSpan={7} className="py-12 text-center text-neutral-400 font-medium">
                     등록된 IT 자산이 없거나 검색 결과와 일치하는 항목이 없습니다.
                   </td>
                 </tr>
@@ -524,21 +524,21 @@ export default function AssetManagement() {
                   return (
                     <tr 
                       key={asset.id} 
-                      className={`hover:bg-neutral-800/30 transition-colors ${
-                        asset.status === 'PENDING_RETURN' ? 'bg-amber-950/10' : ''
+                      className={`hover:bg-neutral-50/80 transition-colors ${
+                        asset.status === 'PENDING_RETURN' ? 'bg-amber-50/40' : ''
                       }`}
                     >
                       {/* 사용자 & 부서 */}
                       <td className="py-3.5 px-4">
-                        <div className="font-bold text-sm text-neutral-100 flex items-center gap-1.5">
+                        <div className="font-bold text-sm text-neutral-900 flex items-center gap-1.5">
                           {asset.empName}
                           {asset.status === 'PENDING_RETURN' && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800 font-semibold">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-semibold">
                               퇴사 예정
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-neutral-400 truncate max-w-[160px]">
+                        <div className="text-[11px] text-neutral-500 truncate max-w-[160px]">
                           {asset.department}
                         </div>
                       </td>
@@ -546,11 +546,11 @@ export default function AssetManagement() {
                       {/* 자산 분류 & 기종 */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-1.5 mb-0.5">
-                          <span className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border font-semibold ${cat.color}`}>
+                          <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full border font-semibold ${cat.color}`}>
                             <CatIcon size={11} /> {cat.label}
                           </span>
                         </div>
-                        <div className="font-bold text-neutral-200">
+                        <div className="font-bold text-neutral-800">
                           {asset.modelName}
                         </div>
                         {asset.notes && (
@@ -561,31 +561,31 @@ export default function AssetManagement() {
                       </td>
 
                       {/* 시리얼 번호 (S/N) */}
-                      <td className="py-3.5 px-4 font-mono text-[11px] text-neutral-300">
+                      <td className="py-3.5 px-4 font-mono text-[11px] text-neutral-700">
                         {asset.serialNumber || "-"}
                       </td>
 
                       {/* 네트워크 IP & MAC */}
                       <td className="py-3.5 px-4">
                         {asset.fixedIp ? (
-                          <div className="font-mono text-[11px] text-blue-400 font-semibold">
+                          <div className="font-mono text-[11px] text-blue-600 font-semibold">
                             {asset.fixedIp}
                           </div>
                         ) : (
-                          <span className="text-neutral-500">-</span>
+                          <span className="text-neutral-400">-</span>
                         )}
                         {asset.macAddress && (
-                          <div className="font-mono text-[10px] text-neutral-500">
+                          <div className="font-mono text-[10px] text-neutral-400">
                             {asset.macAddress}
                           </div>
                         )}
                       </td>
 
                       {/* 지급일자 */}
-                      <td className="py-3.5 px-4 text-neutral-300">
+                      <td className="py-3.5 px-4 text-neutral-600">
                         <div>{asset.assignedDate}</div>
                         {asset.returnDate && (
-                          <div className="text-[10px] text-neutral-500">
+                          <div className="text-[10px] text-neutral-400">
                             반납: {asset.returnDate}
                           </div>
                         )}
@@ -594,19 +594,19 @@ export default function AssetManagement() {
                       {/* 상태 배지 */}
                       <td className="py-3.5 px-4">
                         {asset.status === 'ACTIVE' && (
-                          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                          <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                             운용 중
                           </span>
                         )}
                         {asset.status === 'PENDING_RETURN' && (
-                          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-950 text-amber-400 border border-amber-800 animate-pulse">
+                          <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">
                             <AlertTriangle size={11} />
                             반납 대기
                           </span>
                         )}
                         {asset.status === 'RETURNED' && (
-                          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-bold bg-neutral-800 text-neutral-400 border border-neutral-700">
+                          <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-neutral-100 text-neutral-600 border border-neutral-200">
                             <Check size={11} />
                             반납 완료
                           </span>
@@ -620,17 +620,17 @@ export default function AssetManagement() {
                             <button
                               onClick={() => handleToggleReturn(asset.id)}
                               title="반납 취소 (운용 복구)"
-                              className="px-2 py-1 rounded text-[11px] font-semibold bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700 transition-colors"
+                              className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-200 transition-colors shadow-xs"
                             >
                               재지급
                             </button>
                           ) : (
                             <button
                               onClick={() => handleToggleReturn(asset.id)}
-                              className={`px-2.5 py-1 rounded text-[11px] font-bold transition-colors ${
+                              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors shadow-xs ${
                                 asset.status === 'PENDING_RETURN'
                                   ? 'bg-amber-600 hover:bg-amber-700 text-white'
-                                  : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700'
+                                  : 'bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-200'
                               }`}
                             >
                               반납 확인
@@ -640,7 +640,7 @@ export default function AssetManagement() {
                           <button
                             onClick={() => handleOpenEdit(asset)}
                             title="정보 수정"
-                            className="p-1 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+                            className="p-1 rounded-lg text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
                           >
                             <Edit3 size={14} />
                           </button>
@@ -648,7 +648,7 @@ export default function AssetManagement() {
                           <button
                             onClick={() => handleDeleteAsset(asset.id, asset.modelName)}
                             title="자산 삭제"
-                            className="p-1 rounded text-neutral-500 hover:text-red-400 hover:bg-neutral-800 transition-colors"
+                            className="p-1 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -665,14 +665,14 @@ export default function AssetManagement() {
 
       {/* 5. 신규 등록 / 수정 모달 다이얼로그 */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/35 backdrop-blur-xs flex items-center justify-center p-4">
           <div 
             className="w-full max-w-lg rounded-2xl border p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-150"
             style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
           >
             <div className="flex items-center justify-between pb-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
+                <div className="p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-200">
                   <Laptop size={18} />
                 </div>
                 <h3 className="text-base font-bold" style={{ color: 'var(--color-text-title)' }}>
@@ -681,7 +681,7 @@ export default function AssetManagement() {
               </div>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-800 hover:bg-neutral-100 transition-colors"
               >
                 <X size={18} />
               </button>
@@ -876,7 +876,7 @@ export default function AssetManagement() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-lg font-semibold hover:bg-neutral-800 transition-colors"
+                  className="px-4 py-2 rounded-lg font-semibold hover:bg-neutral-100 transition-colors"
                   style={{ color: 'var(--color-text-muted)' }}
                 >
                   취소

@@ -293,9 +293,9 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* 1차 대메뉴 네비게이션 바 */}
-      <div className="flex items-center gap-2 mb-3 p-1.5 overflow-x-auto rounded-2xl border" 
-           style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)', width: 'fit-content' }}>
+      {/* 1차 대메뉴 네비게이션 바 (Apple Segmented Control Style) */}
+      <div className="flex items-center gap-1.5 mb-3 p-1.5 overflow-x-auto rounded-2xl border" 
+           style={{ backgroundColor: '#EBEBED', borderColor: 'var(--color-border)', width: 'fit-content' }}>
         
         {/* 대메뉴 1: 신규 입사자 관리 (그룹) */}
         <button
@@ -304,14 +304,14 @@ export default function DashboardPage() {
           }}
           className={`px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold transition-all rounded-xl flex items-center gap-2 ${
             isNewHireGroup 
-              ? "bg-blue-600 text-white shadow-md shadow-blue-900/20" 
-              : "text-neutral-400 hover:text-white hover:bg-neutral-800/50"
+              ? "bg-white text-neutral-900 shadow-sm border border-black/5" 
+              : "text-neutral-500 hover:text-neutral-900 hover:bg-white/40"
           }`}
         >
-          <UserPlus size={16} />
+          <UserPlus size={16} className={isNewHireGroup ? "text-blue-600" : "text-neutral-400"} />
           <span>신규 입사자 관리</span>
-          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
-            isNewHireGroup ? "bg-blue-800 text-blue-200" : "bg-neutral-800 text-neutral-400"
+          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+            isNewHireGroup ? "bg-blue-50 text-blue-700 border border-blue-200" : "bg-neutral-300/60 text-neutral-600"
           }`}>
             3
           </span>
@@ -322,11 +322,11 @@ export default function DashboardPage() {
           onClick={() => setActiveTab("assets")}
           className={`px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold transition-all rounded-xl flex items-center gap-2 ${
             activeTab === "assets" 
-              ? "bg-blue-600 text-white shadow-md shadow-blue-900/20" 
-              : "text-neutral-400 hover:text-white hover:bg-neutral-800/50"
+              ? "bg-white text-neutral-900 shadow-sm border border-black/5" 
+              : "text-neutral-500 hover:text-neutral-900 hover:bg-white/40"
           }`}
         >
-          <Laptop size={16} />
+          <Laptop size={16} className={activeTab === "assets" ? "text-blue-600" : "text-neutral-400"} />
           <span>IT 자산 관리</span>
         </button>
 
@@ -335,11 +335,11 @@ export default function DashboardPage() {
           onClick={() => setActiveTab("offboard")}
           className={`px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold transition-all rounded-xl flex items-center gap-2 ${
             activeTab === "offboard" 
-              ? "bg-blue-600 text-white shadow-md shadow-blue-900/20" 
-              : "text-neutral-400 hover:text-white hover:bg-neutral-800/50"
+              ? "bg-white text-neutral-900 shadow-sm border border-black/5" 
+              : "text-neutral-500 hover:text-neutral-900 hover:bg-white/40"
           }`}
         >
-          <UserMinus size={16} />
+          <UserMinus size={16} className={activeTab === "offboard" ? "text-red-600" : "text-neutral-400"} />
           <span>퇴사자 권한 회수</span>
         </button>
 
@@ -348,25 +348,25 @@ export default function DashboardPage() {
           onClick={() => setActiveTab("history")}
           className={`px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold transition-all rounded-xl flex items-center gap-2 ${
             activeTab === "history" 
-              ? "bg-blue-600 text-white shadow-md shadow-blue-900/20" 
-              : "text-neutral-400 hover:text-white hover:bg-neutral-800/50"
+              ? "bg-white text-neutral-900 shadow-sm border border-black/5" 
+              : "text-neutral-500 hover:text-neutral-900 hover:bg-white/40"
           }`}
         >
-          <FileText size={16} />
+          <FileText size={16} className={activeTab === "history" ? "text-blue-600" : "text-neutral-400"} />
           <span>감사 로그 (ITGC)</span>
         </button>
       </div>
 
       {/* 2차 서브메뉴: 신규 입사자 관리 전용 서브 탭 */}
       {isNewHireGroup && (
-        <div className="flex items-center gap-1.5 mb-8 p-1.5 rounded-xl border w-fit"
-             style={{ backgroundColor: 'var(--color-bg)', borderColor: 'var(--color-border)' }}>
+        <div className="flex items-center gap-1.5 mb-8 p-1 rounded-xl border w-fit shadow-xs"
+             style={{ backgroundColor: '#FFFFFF', borderColor: 'var(--color-border)' }}>
           <button
             onClick={() => setActiveTab("onboard")}
             className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
               activeTab === "onboard"
-                ? "bg-neutral-800 text-blue-400 border border-neutral-700 shadow-sm"
-                : "text-neutral-400 hover:text-white"
+                ? "bg-blue-50 text-blue-700 border border-blue-200/80 shadow-xs"
+                : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
             }`}
           >
             <UserPlus size={13} />
@@ -376,8 +376,8 @@ export default function DashboardPage() {
             onClick={() => setActiveTab("journey")}
             className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
               activeTab === "journey"
-                ? "bg-neutral-800 text-blue-400 border border-neutral-700 shadow-sm"
-                : "text-neutral-400 hover:text-white"
+                ? "bg-blue-50 text-blue-700 border border-blue-200/80 shadow-xs"
+                : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
             }`}
           >
             <Calendar size={13} />
@@ -387,8 +387,8 @@ export default function DashboardPage() {
             onClick={() => setActiveTab("card")}
             className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
               activeTab === "card"
-                ? "bg-neutral-800 text-blue-400 border border-neutral-700 shadow-sm"
-                : "text-neutral-400 hover:text-white"
+                ? "bg-blue-50 text-blue-700 border border-blue-200/80 shadow-xs"
+                : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
             }`}
           >
             <IdCard size={13} />
@@ -412,14 +412,14 @@ export default function DashboardPage() {
                 {onStatus === "in_progress" ? ( <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold" style={{ backgroundColor: 'var(--color-progress-bg)', color: 'var(--color-progress-text)', border: '1px solid currentColor' }}><Loader2 size={16} strokeWidth={2} className="animate-spin" /><span>작업 중 30%</span></div> ) : ( <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold" style={{ backgroundColor: 'var(--color-success-bg)', color: 'var(--color-success-text)', border: '1px solid currentColor' }}><CheckCircle2 size={16} strokeWidth={2} /><span>100% 완료</span></div> )}
               </div>
               {onStatus === "completed" && (
-                <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.25)' }}>
+                <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-blue-200 bg-blue-50/60">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-full text-blue-400" style={{ backgroundColor: 'rgba(59, 130, 246, 0.15)' }}>
+                    <div className="p-2.5 rounded-full text-blue-600 bg-blue-100">
                       <IdCard size={20} />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-blue-300">신규 입사 준비가 완료되었습니다!</h4>
-                      <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>명함을 바로 제작하거나, 온보딩 일정 및 마일스톤 체크리스트를 관리할 수 있습니다.</p>
+                      <h4 className="text-sm font-bold text-neutral-900">신규 입사 준비가 완료되었습니다!</h4>
+                      <p className="text-xs text-neutral-600">명함을 바로 제작하거나, 온보딩 일정 및 마일스톤 체크리스트를 관리할 수 있습니다.</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -503,7 +503,7 @@ export default function DashboardPage() {
                     value={onLocation} 
                     onChange={(e) => setOnLocation(e.target.value as 'seoul' | 'suwon')} 
                     className="w-full px-4 py-3 outline-none cursor-pointer font-medium"
-                    style={{ backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: '#60a5fa', fontSize: '15px' }}
+                    style={{ backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text-title)', fontSize: '15px' }}
                   >
                     <option value="suwon">수원1 (영통 현대테라타워 A동 1403호)</option>
                     <option value="seoul">서울1 (금천 현대지식산업센터 B동 17층)</option>
@@ -619,14 +619,14 @@ export default function DashboardPage() {
               </div>
 
               {offName && (
-                <div className="mt-3 p-3 rounded-lg border border-blue-500/20 bg-blue-500/5 flex items-center justify-between text-xs">
-                  <span className="text-neutral-300">
+                <div className="mt-3 p-3 rounded-xl border border-blue-200 bg-blue-50/50 flex items-center justify-between text-xs">
+                  <span className="text-neutral-700">
                     💡 <strong>{offName}</strong> 님의 지급 대여 장비(PC/모니터/보안카드) 반납 상태를 확인하세요.
                   </span>
                   <button
                     type="button"
                     onClick={() => setActiveTab("assets")}
-                    className="px-2.5 py-1 rounded bg-blue-600/40 hover:bg-blue-600/60 text-blue-300 border border-blue-500/40 font-bold transition-colors"
+                    className="px-2.5 py-1 rounded-md bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-200 font-bold transition-colors"
                   >
                     IT 자산 대장 확인
                   </button>
@@ -673,7 +673,7 @@ export default function DashboardPage() {
               >
                 <Download size={14} /> ITGC 엑셀(CSV) 다운로드
               </button>
-              <button onClick={() => fetchHistory(logSearchQuery)} className="p-2 rounded-lg transition-colors hover:bg-neutral-800" style={{ color: 'var(--color-text-muted)' }}>
+              <button onClick={() => fetchHistory(logSearchQuery)} className="p-2 rounded-lg transition-colors hover:bg-neutral-100" style={{ color: 'var(--color-text-muted)' }}>
                 <RefreshCw size={18} className={isHistoryLoading ? "animate-spin" : ""} />
               </button>
             </div>
@@ -703,16 +703,16 @@ export default function DashboardPage() {
                 <div key={task.id} className="p-4 flex items-center justify-between" style={{ backgroundColor: 'var(--color-bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', opacity: isCancelled ? 0.75 : 1 }}>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={`font-bold ${isCancelled ? 'line-through text-gray-500' : ''}`} style={{ color: isCancelled ? 'var(--color-text-muted)' : 'var(--color-text-title)' }}>
+                      <span className={`font-bold ${isCancelled ? 'line-through text-gray-400' : ''}`} style={{ color: isCancelled ? 'var(--color-text-muted)' : 'var(--color-text-title)' }}>
                         {task.employees?.name}
                       </span>
                       <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>({task.employees?.department})</span>
                       <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ 
                         backgroundColor: isCancelled 
-                           ? '#374151' 
+                           ? '#F3F4F6' 
                           : (task.task_type === 'ONBOARDING' ? 'var(--color-success-bg)' : 'var(--color-error-bg)'),
                         color: isCancelled 
-                          ? '#9CA3AF' 
+                          ? '#6B7280' 
                           : (task.task_type === 'ONBOARDING' ? 'var(--color-success-text)' : 'var(--color-error-text)')
                       }}>
                         {isCancelled ? '작업 철회됨' : (task.task_type === 'ONBOARDING' ? '입사 세팅' : '퇴사 차단')}
@@ -738,12 +738,12 @@ export default function DashboardPage() {
                           progressPercent: 100
                         });
                       }}
-                      className="text-xs px-2.5 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700 font-semibold flex items-center gap-1 transition-colors"
+                      className="text-xs px-2.5 py-1 rounded-md bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border border-neutral-200 font-semibold flex items-center gap-1 transition-colors"
                     >
                       <Printer size={12} /> 증빙서 출력
                     </button>
                     {isCancelled ? (
-                      <span className="text-xs px-2.5 py-1 rounded bg-gray-800 text-gray-400 font-bold border border-gray-700">
+                      <span className="text-xs px-2.5 py-1 rounded-md bg-neutral-100 text-neutral-500 font-bold border border-neutral-200">
                         철회 완료
                       </span>
                     ) : (
@@ -754,7 +754,7 @@ export default function DashboardPage() {
                           task.task_type === 'ONBOARDING' ? '신규 입사 세팅' : '퇴사 권한 회수'
                         )}
                         disabled={cancellingTaskId === task.id}
-                        className="text-xs px-2.5 py-1 rounded bg-red-950/40 text-red-400 hover:bg-red-900/60 border border-red-800/50 font-bold transition-all"
+                        className="text-xs px-2.5 py-1 rounded-md bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 font-bold transition-all"
                       >
                         {cancellingTaskId === task.id ? '철회 중...' : '철회하기'}
                       </button>

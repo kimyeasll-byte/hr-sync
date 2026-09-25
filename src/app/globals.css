@@ -13,62 +13,46 @@
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --radius-xl: 20px;
+
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-elevated: 0 12px 32px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.03);
 
   --transition-fast: 0.15s cubic-bezier(0.2, 0, 0, 1);
-  --active-scale: scale(0.97);
+  --active-scale: scale(0.98);
 
   --icon-stroke-width: 1.5px;
 
-  /* Light mode (default) */
+  /* Apple Clean Minimalist White Theme */
   --color-bg: #f5f5f7;
   --color-surface: #ffffff;
+  --color-surface-muted: #fafafa;
   --color-text-title: #1d1d1f;
-  --color-text-body: #515154;
+  --color-text-body: #424245;
   --color-text-muted: #86868b;
-  --color-border: #d2d2d7;
+  --color-border: #e5e5ea;
+  --color-border-subtle: #f0f0f2;
 
-  --color-primary-bg: #000000;
+  --color-primary-bg: #0071e3;
   --color-primary-text: #ffffff;
   --color-disabled-bg: #e5e5ea;
   --color-disabled-text: #aeaeb2;
 
-  --color-success-bg: #e5f9e7;
-  --color-success-text: #198c39;
-  --color-error-bg: #ffeceb;
-  --color-error-text: #cc2925;
-  --color-progress-bg: #e5f0fa;
-  --color-progress-text: #0052a3;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #000000;
-    --color-surface: #1c1c1e;
-    --color-text-title: #f5f5f7;
-    --color-text-body: #c7c7cc;
-    --color-text-muted: #98989d;
-    --color-border: #38383a;
-
-    --color-primary-bg: #ffffff;
-    --color-primary-text: #000000;
-    --color-disabled-bg: #3a3a3c;
-    --color-disabled-text: #636366;
-
-    --color-success-bg: #198c39;
-    --color-success-text: #ffffff;
-    --color-error-bg: #cc2925;
-    --color-error-text: #ffffff;
-    --color-progress-bg: #0052a3;
-    --color-progress-text: #ffffff;
-  }
+  --color-success-bg: #eaf8ee;
+  --color-success-text: #1e8e3e;
+  --color-error-bg: #fdf0f0;
+  --color-error-text: #d93025;
+  --color-progress-bg: #e8f0fe;
+  --color-progress-text: #1a73e8;
 }
 
 body {
   background-color: var(--color-bg);
   color: var(--color-text-title);
-  font-family: var(--font-jakarta), "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-jakarta), "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, sans-serif;
   letter-spacing: -0.015em;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4, h5, h6 {

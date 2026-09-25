@@ -402,7 +402,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
   };
 
   const getDDayInfo = (targetDateStr: string) => {
-    if (!targetDateStr) return { text: '-', color: '#9ca3af', bg: 'rgba(156, 163, 175, 0.1)', diffDays: 0, phaseDesc: '-' };
+    if (!targetDateStr) return { text: '-', color: '#86868b', bg: '#f5f5f7', diffDays: 0, phaseDesc: '-' };
     const target = new Date(targetDateStr);
     const today = new Date();
     target.setHours(0, 0, 0, 0);
@@ -413,16 +413,16 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
     if (diffDays > 0) {
       return { 
         text: `D-${diffDays}일`, 
-        color: '#60a5fa', 
-        bg: 'rgba(59, 130, 246, 0.15)', 
+        color: '#0071e3', 
+        bg: '#ebf5ff', 
         diffDays,
         phaseDesc: '입사 사전 준비 단계'
       };
     } else if (diffDays === 0) {
       return { 
         text: 'D-Day (오늘)', 
-        color: '#34d399', 
-        bg: 'rgba(16, 185, 129, 0.2)', 
+        color: '#1e8e3e', 
+        bg: '#eaf8ee', 
         diffDays,
         phaseDesc: '첫 출근 & 웰컴 데이'
       };
@@ -430,8 +430,8 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
       const elapsed = Math.abs(diffDays);
       return { 
         text: `D+${elapsed}일차`, 
-        color: '#c084fc', 
-        bg: 'rgba(168, 85, 247, 0.15)', 
+        color: '#7c3aed', 
+        bg: '#f5f3ff', 
         diffDays,
         phaseDesc: elapsed <= 7 ? '1주차 적응 기간' : elapsed <= 30 ? '1개월차 온보딩 기간' : '3개월차 수습 평가'
       };
@@ -445,10 +445,10 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
 
   // Group milestones by phase
   const phases = [
-    { key: 'pre', label: '1단계: 입사 사전 준비 (D-7 ~ D-1)', icon: Laptop, badge: '사전 준비', color: '#60a5fa' },
-    { key: 'day1', label: '2단계: 첫 출근 & 웰컴 데이 (D-Day)', icon: Sparkles, badge: '출근 당일', color: '#34d399' },
-    { key: 'month1', label: '3단계: 업무 적응 & 멘토링 (1주차 ~ 1개월차)', icon: HeartHandshake, badge: '적응 멘토링', color: '#c084fc' },
-    { key: 'month3', label: '4단계: 수습 평가 & 정규직 전환 (3개월차)', icon: Award, badge: '수습 평가', color: '#f59e0b' },
+    { key: 'pre', label: '1단계: 입사 사전 준비 (D-7 ~ D-1)', icon: Laptop, badge: '사전 준비', color: '#0071e3' },
+    { key: 'day1', label: '2단계: 첫 출근 & 웰컴 데이 (D-Day)', icon: Sparkles, badge: '출근 당일', color: '#1e8e3e' },
+    { key: 'month1', label: '3단계: 업무 적응 & 멘토링 (1주차 ~ 1개월차)', icon: HeartHandshake, badge: '적응 멘토링', color: '#7c3aed' },
+    { key: 'month3', label: '4단계: 수습 평가 & 정규직 전환 (3개월차)', icon: Award, badge: '수습 평가', color: '#d97706' },
   ];
 
   // Filtering
@@ -487,34 +487,34 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+        <div className="p-4 rounded-2xl border shadow-xs" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-semibold text-blue-400">사전 준비 중 (D-Day 전)</span>
-            <Clock size={15} className="text-blue-400" />
+            <span className="text-xs font-semibold text-blue-600">사전 준비 중 (D-Day 전)</span>
+            <Clock size={15} className="text-blue-600" />
           </div>
-          <div className="text-2xl font-black text-blue-400">
+          <div className="text-2xl font-black text-blue-600">
             {employees.filter(e => getDDayInfo(e.target_date).diffDays > 0).length}
             <span className="text-xs font-normal ml-1" style={{ color: 'var(--color-text-muted)' }}>명</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+        <div className="p-4 rounded-2xl border shadow-xs" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-semibold text-emerald-400">오늘 첫 출근 (D-Day)</span>
-            <Sparkles size={15} className="text-emerald-400" />
+            <span className="text-xs font-semibold text-emerald-600">오늘 첫 출근 (D-Day)</span>
+            <Sparkles size={15} className="text-emerald-600" />
           </div>
-          <div className="text-2xl font-black text-emerald-400">
+          <div className="text-2xl font-black text-emerald-600">
             {employees.filter(e => getDDayInfo(e.target_date).diffDays === 0).length}
             <span className="text-xs font-normal ml-1" style={{ color: 'var(--color-text-muted)' }}>명</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+        <div className="p-4 rounded-2xl border shadow-xs" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-semibold text-purple-400">적응 / 수습 중 (D+)</span>
-            <HeartHandshake size={15} className="text-purple-400" />
+            <span className="text-xs font-semibold text-purple-600">적응 / 수습 중 (D+)</span>
+            <HeartHandshake size={15} className="text-purple-600" />
           </div>
-          <div className="text-2xl font-black text-purple-400">
+          <div className="text-2xl font-black text-purple-600">
             {employees.filter(e => getDDayInfo(e.target_date).diffDays < 0).length}
             <span className="text-xs font-normal ml-1" style={{ color: 'var(--color-text-muted)' }}>명</span>
           </div>
@@ -526,7 +526,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
         
         {/* 좌측: 신규 입사자 목록 (4 컬럼, 와이드 3 컬럼) */}
         <div className="lg:col-span-4 xl:col-span-3 space-y-3">
-          <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+          <div className="p-4 rounded-2xl border shadow-xs" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-bold flex items-center gap-1.5" style={{ color: 'var(--color-text-title)' }}>
                 <Calendar size={16} /> 신규 입사자 명단
@@ -549,9 +549,9 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                 placeholder="이름 또는 부서 검색"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg outline-none"
+                className="w-full pl-8 pr-3 py-2 text-xs rounded-xl outline-none transition-all"
                 style={{
-                  backgroundColor: 'var(--color-bg)',
+                  backgroundColor: '#F5F5F7',
                   border: '1px solid var(--color-border)',
                   color: 'var(--color-text-title)'
                 }}
@@ -562,32 +562,32 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
             <div className="flex gap-1 mb-3 overflow-x-auto pb-1 text-[11px]">
               <button
                 onClick={() => setFilterType("ALL")}
-                className={`px-2.5 py-1 rounded font-semibold transition-colors ${
-                  filterType === "ALL" ? "bg-blue-600 text-white" : "bg-neutral-800 text-neutral-400 hover:text-white"
+                className={`px-2.5 py-1 rounded-lg font-semibold transition-colors ${
+                  filterType === "ALL" ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/70"
                 }`}
               >
                 전체
               </button>
               <button
                 onClick={() => setFilterType("BEFORE")}
-                className={`px-2.5 py-1 rounded font-semibold transition-colors ${
-                  filterType === "BEFORE" ? "bg-blue-600 text-white" : "bg-neutral-800 text-neutral-400 hover:text-white"
+                className={`px-2.5 py-1 rounded-lg font-semibold transition-colors ${
+                  filterType === "BEFORE" ? "bg-blue-600 text-white" : "bg-neutral-100 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/70"
                 }`}
               >
                 사전 준비
               </button>
               <button
                 onClick={() => setFilterType("TODAY")}
-                className={`px-2.5 py-1 rounded font-semibold transition-colors ${
-                  filterType === "TODAY" ? "bg-emerald-600 text-white" : "bg-neutral-800 text-neutral-400 hover:text-white"
+                className={`px-2.5 py-1 rounded-lg font-semibold transition-colors ${
+                  filterType === "TODAY" ? "bg-emerald-600 text-white" : "bg-neutral-100 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/70"
                 }`}
               >
                 오늘 첫날
               </button>
               <button
                 onClick={() => setFilterType("ACTIVE")}
-                className={`px-2.5 py-1 rounded font-semibold transition-colors ${
-                  filterType === "ACTIVE" ? "bg-purple-600 text-white" : "bg-neutral-800 text-neutral-400 hover:text-white"
+                className={`px-2.5 py-1 rounded-lg font-semibold transition-colors ${
+                  filterType === "ACTIVE" ? "bg-purple-600 text-white" : "bg-neutral-100 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/70"
                 }`}
               >
                 적응 중
@@ -618,12 +618,12 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                       onClick={() => setSelectedEmpId(emp.id)}
                       className={`p-3 rounded-xl border cursor-pointer transition-all ${
                         isSelected 
-                          ? "border-blue-500 shadow-md ring-1 ring-blue-500/50" 
-                          : "hover:border-neutral-600"
+                          ? "border-blue-500 shadow-xs ring-1 ring-blue-500/30" 
+                          : "hover:border-neutral-300 hover:bg-neutral-50/60"
                       }`}
                       style={{
-                        backgroundColor: isSelected ? 'rgba(59, 130, 246, 0.08)' : 'var(--color-bg)',
-                        borderColor: isSelected ? '#3b82f6' : 'var(--color-border)',
+                        backgroundColor: isSelected ? '#F0F7FF' : '#FFFFFF',
+                        borderColor: isSelected ? '#0071E3' : 'var(--color-border)',
                       }}
                     >
                       <div className="flex items-center justify-between mb-1.5 gap-2">
@@ -644,13 +644,13 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
 
                       <div className="flex items-center justify-between text-[11px] mb-1 font-medium">
                         <span style={{ color: 'var(--color-text-muted)' }}>온보딩 여정</span>
-                        <span className="font-bold text-blue-400">{pct}% ({doneCount}/{MILESTONES.length})</span>
+                        <span className="font-bold text-blue-600">{pct}% ({doneCount}/{MILESTONES.length})</span>
                       </div>
 
                       {/* 미니 프로그레스 바 */}
                       <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--color-border)' }}>
                         <div 
-                          className="h-full bg-blue-500 transition-all duration-300"
+                          className="h-full bg-blue-600 transition-all duration-300"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -683,7 +683,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                     >
                       {getDDayInfo(selectedEmployee.target_date).text}
                     </span>
-                    <span className="text-xs px-2.5 py-0.5 rounded bg-neutral-800 text-neutral-400 border border-neutral-700 whitespace-nowrap flex-shrink-0">
+                    <span className="text-xs px-2.5 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200 whitespace-nowrap flex-shrink-0 font-medium">
                       {getDDayInfo(selectedEmployee.target_date).phaseDesc}
                     </span>
                   </div>
@@ -700,7 +700,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                         name: selectedEmployee.name,
                         department: selectedEmployee.department
                       })}
-                      className="text-xs px-3 py-1.5 rounded-lg font-bold bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 transition-colors shadow-sm whitespace-nowrap"
+                      className="text-xs px-3.5 py-2 rounded-xl font-bold bg-[#0071E3] hover:bg-blue-600 text-white flex items-center gap-1.5 transition-colors shadow-xs whitespace-nowrap"
                     >
                       <IdCard size={14} /> 명함 제작 바로가기
                     </button>
@@ -718,22 +718,22 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                         location: "suwon"
                       });
                     }}
-                    className="text-xs px-2.5 py-1.5 rounded-lg border font-semibold hover:bg-neutral-800 transition-colors flex items-center gap-1.5 whitespace-nowrap"
-                    style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-title)' }}
+                    className="text-xs px-3 py-2 rounded-xl border font-semibold hover:bg-neutral-50 transition-colors flex items-center gap-1.5 whitespace-nowrap shadow-xs"
+                    style={{ backgroundColor: '#FFFFFF', borderColor: 'var(--color-border)', color: 'var(--color-text-title)' }}
                   >
-                    <Printer size={13} className="text-blue-400" /> 증명서 인쇄/PDF
+                    <Printer size={13} className="text-blue-600" /> 증명서 인쇄/PDF
                   </button>
                   <button
                     onClick={() => completeAllMilestones(selectedEmployee.id)}
-                    className="text-xs px-2.5 py-1.5 rounded-lg border font-semibold hover:bg-neutral-800 transition-colors whitespace-nowrap"
-                    style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
+                    className="text-xs px-3 py-2 rounded-xl border font-semibold hover:bg-neutral-50 transition-colors whitespace-nowrap shadow-xs"
+                    style={{ backgroundColor: '#FFFFFF', borderColor: 'var(--color-border)', color: 'var(--color-text-title)' }}
                   >
                     전체 완료
                   </button>
                   <button
                     onClick={() => resetAllMilestones(selectedEmployee.id)}
-                    className="text-xs px-2.5 py-1.5 rounded-lg border font-semibold hover:bg-neutral-800 transition-colors text-red-400 whitespace-nowrap"
-                    style={{ borderColor: 'var(--color-border)' }}
+                    className="text-xs px-3 py-2 rounded-xl border font-semibold hover:bg-red-50 transition-colors text-red-600 whitespace-nowrap shadow-xs"
+                    style={{ backgroundColor: '#FFFFFF', borderColor: 'var(--color-border)' }}
                   >
                     초기화
                   </button>
@@ -741,19 +741,19 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
               </div>
 
               {/* 진행률 게이지 바 */}
-              <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--color-bg)', borderColor: 'var(--color-border)' }}>
+              <div className="p-5 rounded-2xl border shadow-xs" style={{ backgroundColor: '#F8F9FA', borderColor: 'var(--color-border)' }}>
                 <div className="flex items-center justify-between text-xs font-bold mb-2">
                   <span className="flex items-center gap-1.5" style={{ color: 'var(--color-text-title)' }}>
-                    <ShieldCheck size={16} className="text-blue-400" />
+                    <ShieldCheck size={16} className="text-blue-600" />
                     온보딩 총 진행률
                   </span>
-                  <span className="text-blue-400 font-extrabold text-sm">
+                  <span className="text-blue-600 font-extrabold text-sm">
                     {progressPercent}% <span className="text-xs font-normal" style={{ color: 'var(--color-text-muted)' }}>({completedCount}/{MILESTONES.length} 완료)</span>
                   </span>
                 </div>
-                <div className="w-full h-3 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--color-border)' }}>
+                <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: '#E5E5EA' }}>
                   <div 
-                    className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-500 rounded-full"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
@@ -762,36 +762,36 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 pt-3 border-t text-[11px]" style={{ borderColor: 'var(--color-border)' }}>
                   <div>
                     <span className="text-neutral-500 block">입사일 (D-Day)</span>
-                    <span className="font-bold text-neutral-200">{selectedEmployee.target_date || '-'}</span>
+                    <span className="font-bold text-neutral-900">{selectedEmployee.target_date || '-'}</span>
                   </div>
                   <div>
                     <span className="text-neutral-500 block">1주차 런치 (D+7)</span>
-                    <span className="font-bold text-neutral-200">{calculateMilestoneDate(selectedEmployee.target_date, 7)}</span>
+                    <span className="font-bold text-neutral-900">{calculateMilestoneDate(selectedEmployee.target_date, 7)}</span>
                   </div>
                   <div>
                     <span className="text-neutral-500 block">1개월 면담 (D+30)</span>
-                    <span className="font-bold text-neutral-200">{calculateMilestoneDate(selectedEmployee.target_date, 30)}</span>
+                    <span className="font-bold text-neutral-900">{calculateMilestoneDate(selectedEmployee.target_date, 30)}</span>
                   </div>
                   <div>
                     <span className="text-neutral-500 block">수습 평가 (D+90)</span>
-                    <span className="font-bold text-neutral-200">{calculateMilestoneDate(selectedEmployee.target_date, 90)}</span>
+                    <span className="font-bold text-neutral-900">{calculateMilestoneDate(selectedEmployee.target_date, 90)}</span>
                   </div>
                 </div>
               </div>
 
               {/* 신입사원 자동 미션 안내 이메일 스케줄러 (입사일 기준 자동 발송) */}
-              <div className="p-5 rounded-xl border space-y-4" style={{ backgroundColor: 'var(--color-bg)', borderColor: 'rgba(59, 130, 246, 0.35)' }}>
+              <div className="p-5 rounded-2xl border space-y-4 shadow-xs" style={{ backgroundColor: '#F8F9FA', borderColor: 'rgba(0, 113, 227, 0.2)' }}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
                   <div>
                     <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--color-text-title)' }}>
-                      <Mail size={16} className="text-blue-400" />
+                      <Mail size={16} className="text-blue-600" />
                       입사일 기준 신입사원 자동 미션 안내 스케줄러
                     </h3>
                     <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
                       인사팀이 수동으로 챙길 필요 없이, 입사일({selectedEmployee.target_date}) 기준으로 1일차/1주차/1개월차/3개월차 미션을 신입사원 이메일로 자동 전송합니다.
                     </p>
                   </div>
-                  <span className="text-[11px] px-2.5 py-1 rounded bg-blue-950 text-blue-400 border border-blue-800 font-semibold self-start sm:self-auto flex items-center gap-1.5">
+                  <span className="text-[11px] px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-bold self-start sm:self-auto flex items-center gap-1.5 shadow-xs">
                     <Clock size={12} /> 자동 스케줄러 가동 중
                   </span>
                 </div>
@@ -810,15 +810,15 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                     return (
                       <div 
                         key={m.type}
-                        className="p-3.5 rounded-lg border flex flex-col justify-between transition-colors"
-                        style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+                        className="p-3.5 rounded-xl border flex flex-col justify-between transition-colors shadow-xs"
+                        style={{ backgroundColor: '#FFFFFF', borderColor: 'var(--color-border)' }}
                       >
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
                             <span className="font-bold text-xs" style={{ color: 'var(--color-text-title)' }}>
                               {m.label}
                             </span>
-                            <span className="text-[10px] px-2 py-0.5 rounded font-bold bg-neutral-800 text-blue-400 border border-neutral-700">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-blue-50 text-blue-700 border border-blue-100">
                               {m.phase} ({m.date})
                             </span>
                           </div>
@@ -830,11 +830,11 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                         <div className="flex items-center justify-between pt-2 border-t text-[11px]" style={{ borderColor: 'var(--color-border)' }}>
                           <div>
                             {isSent ? (
-                              <span className="text-emerald-400 font-bold flex items-center gap-1 text-[11px]">
+                              <span className="text-emerald-600 font-bold flex items-center gap-1 text-[11px]">
                                 <CheckCircle2 size={13} /> 자동 발송 완료
                               </span>
                             ) : (
-                              <span className="text-neutral-400 flex items-center gap-1 text-[11px]">
+                              <span className="text-neutral-500 flex items-center gap-1 text-[11px]">
                                 <Clock size={12} /> 발송 예약 대기
                               </span>
                             )}
@@ -843,7 +843,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                             <button
                               type="button"
                               onClick={() => setPreviewMilestone(getMilestoneDetails(m.type, selectedEmployee))}
-                              className="px-2 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700 font-semibold flex items-center gap-1 transition-colors"
+                              className="px-2 py-1 rounded-lg bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-200 font-semibold flex items-center gap-1 transition-colors shadow-xs"
                             >
                               <Eye size={11} /> 미리보기
                             </button>
@@ -851,7 +851,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                               type="button"
                               disabled={isSending}
                               onClick={() => handleSendMilestone(selectedEmployee, m.type)}
-                              className="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
+                              className="px-2.5 py-1 rounded-lg bg-[#0071E3] hover:bg-blue-600 text-white font-bold flex items-center gap-1 transition-colors disabled:opacity-50 shadow-xs"
                             >
                               {isSending ? (
                                 <><Loader2 size={11} className="animate-spin" /> 발송 중</>
@@ -878,17 +878,17 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                   return (
                     <div 
                       key={phase.key} 
-                      className="rounded-xl border overflow-hidden transition-all"
+                      className="rounded-2xl border overflow-hidden transition-all shadow-xs"
                       style={{ 
-                        backgroundColor: 'var(--color-bg)', 
-                        borderColor: isPhaseComplete ? 'rgba(16, 185, 129, 0.4)' : 'var(--color-border)' 
+                        backgroundColor: '#FFFFFF', 
+                        borderColor: isPhaseComplete ? 'rgba(30, 142, 62, 0.3)' : 'var(--color-border)' 
                       }}
                     >
                       {/* 단계 헤더 */}
                       <div 
                         className="px-4 py-3 flex items-center justify-between border-b"
                         style={{ 
-                          backgroundColor: isPhaseComplete ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                          backgroundColor: isPhaseComplete ? '#EAF8EE' : '#F8F9FA',
                           borderColor: 'var(--color-border)' 
                         }}
                       >
@@ -896,7 +896,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                           <div 
                             className="p-1.5 rounded-lg"
                             style={{ 
-                              backgroundColor: `${phase.color}20`, 
+                              backgroundColor: `${phase.color}15`, 
                               color: phase.color 
                             }}
                           >
@@ -908,10 +908,10 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                         </div>
                         <div className="flex items-center gap-2 text-xs">
                           <span 
-                            className="px-2 py-0.5 rounded font-bold text-[11px]"
+                            className="px-2 py-0.5 rounded-full font-bold text-[11px]"
                             style={{ 
-                              backgroundColor: isPhaseComplete ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                              color: isPhaseComplete ? '#34d399' : 'var(--color-text-muted)'
+                              backgroundColor: isPhaseComplete ? '#D1F2D9' : '#E5E5EA',
+                              color: isPhaseComplete ? '#1E8E3E' : 'var(--color-text-body)'
                             }}
                           >
                             {phaseDoneCount} / {phaseMilestones.length} 완료
@@ -924,21 +924,21 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                         {phaseMilestones.map((milestone) => {
                           const isChecked = !!selectedEmpChecks[milestone.id];
                           const catBadgeColor = 
-                            milestone.category === 'IT/전산' ? 'bg-cyan-950 text-cyan-400 border-cyan-800' :
-                            milestone.category === '총무/복지' ? 'bg-amber-950 text-amber-400 border-amber-800' :
-                            'bg-emerald-950 text-emerald-400 border-emerald-800';
+                            milestone.category === 'IT/전산' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                            milestone.category === '총무/복지' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                            'bg-emerald-50 text-emerald-700 border-emerald-200';
 
                           return (
                             <div
                               key={milestone.id}
                               onClick={() => toggleMilestone(selectedEmployee.id, milestone.id)}
                               className={`p-3.5 flex items-start gap-3 cursor-pointer transition-colors ${
-                                isChecked ? 'opacity-60 bg-neutral-900/40' : 'hover:bg-neutral-800/40'
+                                isChecked ? 'opacity-70 bg-neutral-50/50' : 'hover:bg-neutral-50/80'
                               }`}
                             >
                               <div className="mt-0.5 flex-shrink-0">
                                 {isChecked ? (
-                                  <CheckCircle2 size={18} className="text-emerald-400" />
+                                  <CheckCircle2 size={18} className="text-emerald-600" />
                                 ) : (
                                   <Circle size={18} style={{ color: 'var(--color-text-muted)' }} />
                                 )}
@@ -947,13 +947,13 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                                   <span 
-                                    className={`text-[10px] px-1.5 py-0.5 rounded border font-semibold ${catBadgeColor}`}
+                                    className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${catBadgeColor}`}
                                   >
                                     {milestone.category}
                                   </span>
                                   <span 
                                     className={`text-xs font-bold ${
-                                      isChecked ? 'line-through text-neutral-500' : 'text-neutral-100'
+                                      isChecked ? 'line-through text-neutral-400' : 'text-neutral-900'
                                     }`}
                                   >
                                     {milestone.title}
@@ -975,7 +975,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                                       department: selectedEmployee.department
                                     });
                                   }}
-                                  className="text-[11px] px-2 py-1 rounded bg-blue-900/50 hover:bg-blue-800 text-blue-300 border border-blue-700/60 font-semibold flex items-center gap-1 transition-colors"
+                                  className="text-[11px] px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-semibold flex items-center gap-1 transition-colors shadow-xs"
                                 >
                                   <IdCard size={12} /> 명함 제작
                                 </button>
@@ -990,10 +990,10 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
               </div>
 
               {/* 하단 인사팀 특이사항 메모란 */}
-              <div className="p-4 rounded-xl border space-y-2" style={{ backgroundColor: 'var(--color-bg)', borderColor: 'var(--color-border)' }}>
+              <div className="p-4 rounded-2xl border space-y-2 shadow-xs" style={{ backgroundColor: '#F8F9FA', borderColor: 'var(--color-border)' }}>
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-bold flex items-center gap-1.5" style={{ color: 'var(--color-text-title)' }}>
-                    <FileText size={14} className="text-neutral-400" />
+                    <FileText size={14} className="text-neutral-500" />
                     인사/전산 특이사항 및 온보딩 메모
                   </h4>
                   <span className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>자동 저장</span>
@@ -1003,9 +1003,9 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                   value={notes[selectedEmployee.id] || ""}
                   onChange={(e) => saveNotesToStorage(selectedEmployee.id, e.target.value)}
                   placeholder={`예: 에스원 출입증 발주 번호 #1092, 듀얼 모니터 지급 완료, 멘토: 박수석`}
-                  className="w-full p-2.5 text-xs rounded-lg outline-none resize-none"
+                  className="w-full p-2.5 text-xs rounded-xl outline-none resize-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   style={{
-                    backgroundColor: 'var(--color-surface)',
+                    backgroundColor: '#FFFFFF',
                     border: '1px solid var(--color-border)',
                     color: 'var(--color-text-title)'
                   }}
@@ -1030,14 +1030,14 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
 
       {/* 신입사원 수신 이메일 미리보기 모달 */}
       {previewMilestone && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/35 backdrop-blur-xs flex items-center justify-center p-4">
           <div 
             className="w-full max-w-lg rounded-2xl border p-6 shadow-2xl space-y-4"
             style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
           >
             <div className="flex items-center justify-between pb-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
               <div className="flex items-center gap-2">
-                <span className="p-1.5 rounded-lg bg-blue-600/20 text-blue-400">
+                <span className="p-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-200">
                   <Mail size={16} />
                 </span>
                 <h3 className="text-sm font-bold" style={{ color: 'var(--color-text-title)' }}>
@@ -1046,7 +1046,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
               </div>
               <button
                 onClick={() => setPreviewMilestone(null)}
-                className="p-1 rounded text-neutral-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-800 hover:bg-neutral-100 transition-colors"
               >
                 <X size={18} />
               </button>
@@ -1089,7 +1089,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
               <div className="text-center pt-2">
                 <button
                   type="button"
-                  className="px-4 py-2 rounded-lg bg-blue-700 text-white font-bold text-xs"
+                  className="px-4 py-2 rounded-lg bg-blue-700 text-white font-bold text-xs shadow-sm hover:bg-blue-800 transition-colors"
                 >
                   신입사원 온보딩 로드맵 확인하기 →
                 </button>
@@ -1100,7 +1100,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
               <button
                 type="button"
                 onClick={() => setPreviewMilestone(null)}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-neutral-800 transition-colors"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-neutral-100 transition-colors"
                 style={{ color: 'var(--color-text-muted)' }}
               >
                 닫기
@@ -1113,7 +1113,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                   setPreviewMilestone(null);
                   handleSendMilestone(selectedEmployee, mType);
                 }}
-                className="px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 transition-colors"
+                className="px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 transition-colors shadow-xs"
               >
                 <Send size={12} /> 지금 즉시 테스트 발송
               </button>
