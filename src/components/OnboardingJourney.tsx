@@ -28,6 +28,7 @@ import {
   Send,
   Eye,
   Loader2,
+  ExternalLink,
   X
 } from "lucide-react";
 
@@ -329,6 +330,7 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
           targetDate: emp.target_date,
           hireEmail: 'yskim@gopowernet.com',
           milestoneType,
+          empId: emp.id,
         }),
       });
 
@@ -722,6 +724,26 @@ export default function OnboardingJourney({ onSelectEmployeeForCard }: Onboardin
                     style={{ backgroundColor: '#FFFFFF', borderColor: 'var(--color-border)', color: 'var(--color-text-title)' }}
                   >
                     <Printer size={13} className="text-blue-600" /> 증명서 인쇄/PDF
+                  </button>
+                  <a
+                    href={`/onboard/portal/${selectedEmployee.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs px-3 py-2 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold transition-colors flex items-center gap-1.5 whitespace-nowrap shadow-xs"
+                  >
+                    <ExternalLink size={13} /> 셀프 포털 열기
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const portalUrl = `${window.location.origin}/onboard/portal/${selectedEmployee.id}`;
+                      navigator.clipboard.writeText(portalUrl);
+                      alert(`신입사원 온보딩 포털 링크가 복사되었습니다!\n\n${portalUrl}\n\n입사자에게 문자, 카카오톡 또는 이메일로 전달하세요.`);
+                    }}
+                    className="text-xs px-3 py-2 rounded-xl border font-semibold hover:bg-neutral-50 transition-colors flex items-center gap-1.5 whitespace-nowrap shadow-xs"
+                    style={{ backgroundColor: '#FFFFFF', borderColor: 'var(--color-border)', color: 'var(--color-text-title)' }}
+                  >
+                    <FileText size={13} className="text-neutral-500" /> 링크 복사
                   </button>
                   <button
                     onClick={() => completeAllMilestones(selectedEmployee.id)}

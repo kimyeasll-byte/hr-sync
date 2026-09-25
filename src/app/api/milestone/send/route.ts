@@ -9,7 +9,7 @@ const resend = new Resend(k1 + k2);
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { empName, department, targetDate, hireEmail, milestoneType } = body;
+    const { empName, department, targetDate, hireEmail, milestoneType, empId } = body;
 
     if (!empName) {
       return NextResponse.json({ error: '사원 이름이 누락되었습니다.' }, { status: 400 });
@@ -110,8 +110,8 @@ export async function POST(request: Request) {
         </div>
 
         <div style="margin-top: 32px; text-align: center;">
-          <a href="https://hr-sync-delta.vercel.app/dashboard" style="display: inline-block; background-color: #004b90; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 700; font-size: 13px;">
-            신입사원 온보딩 로드맵 확인하기 →
+          <a href="https://hr-sync-delta.vercel.app/onboard/portal/${empId || empName}" style="display: inline-block; background-color: #0071E3; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 700; font-size: 13px;">
+            신입사원 온보딩 전용 포털 바로가기 →
           </a>
         </div>
 
