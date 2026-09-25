@@ -3,6 +3,7 @@ import BusinessCardGenerator from "@/components/BusinessCardGenerator";
 import OnboardingJourney from "@/components/OnboardingJourney";
 import AssetManagement from "@/components/AssetManagement";
 import DocumentPrintModal, { PrintDocumentData } from "@/components/DocumentPrintModal";
+import UserManualModal from "@/components/UserManualModal";
 
 import { useState, useEffect, useRef } from "react";
 import { 
@@ -32,13 +33,29 @@ import {
   Check,
   CheckCheck,
   KeyRound,
-  ChevronRight
+  ChevronRight,
+  BookOpen
 } from "lucide-react";
 import { supabase } from "@/utils/supabase/client";
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<"onboard" | "journey" | "assets" | "offboard" | "history" | "card">("onboard");
   const isNewHireGroup = activeTab === "onboard" || activeTab === "journey" || activeTab === "card";
+
+  // 사용자 & 관리자 매뉴얼 모달 상태 (접속 시 자동 팝업)
+  const [isManualOpen, setIsManualOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      const hideDate = localStorage.getItem("powernet_hide_manual_today");
+      if (hideDate !== today) {
+        setIsManualOpen(true);
+      }
+    } catch (e) {
+      setIsManualOpen(true);
+    }
+  }, []);
 
   // Onboarding States
   const [onName, setOnName] = useState("");
@@ -548,11 +565,18 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 관리자 프로필 & 로그아웃 */}
+        {/* 관리자 프로필 & 매뉴얼 & 로그아웃 */}
         <div className="flex items-center gap-3 self-end sm:self-auto">
+          <button
+            onClick={() => setIsManualOpen(true)}
+            className="text-xs px-3 py-1.5 rounded-lg border font-bold flex items-center gap-1.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 transition-colors shadow-2xs"
+          >
+            <BookOpen size={13} />
+            <span>📖 이용 매뉴얼</span>
+          </button>
           <div className="text-right">
             <div className="text-xs font-bold" style={{ color: 'var(--color-text-title)' }}>yskim@gopowernet.com</div>
-            <div className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>인사총괄 관리자 (HR Admin)</div>
+            <div className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>인사총괄 관리자 (과제 평가 모드)</div>
           </div>
           <button
             onClick={async () => {
@@ -1674,6 +1698,12 @@ export default function DashboardPage() {
       <DocumentPrintModal 
         data={auditPrintData} 
         onClose={() => setAuditPrintData(null)} 
+      />
+
+      {/* 사용자 & 관리자 가이드 매뉴얼 팝업 모달 (초기 접속 시 자동 팝업) */}
+      <UserManualModal 
+        isOpen={isManualOpen} 
+        onClose={() => setIsManualOpen(false)} 
       />
 
     </div>
