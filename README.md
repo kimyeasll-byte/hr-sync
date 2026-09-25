@@ -25,6 +25,7 @@
 
 | 문서명 | 주요 내용 | 링크 |
 | :--- | :--- | :---: |
+| **🎓 팀내 교육용 교안 & 워크숍 가이드** | AI 페어 프로그래밍 실전, 5단계 커리큘럼, 30분 팀원 핸즈온 실습 | [docs/TRAINING_GUIDE.md](./docs/TRAINING_GUIDE.md) |
 | **📖 사용자 & 관리자 운영 매뉴얼** | 원터치 입사/퇴사, 모바일 포털, AI 서베이, IT 자산 관리 상세 가이드 | [docs/MANUAL.md](./docs/MANUAL.md) |
 | **📐 시스템 아키텍처 & 재현 설계명세서** | ERD, API 명세, 알고리즘, 환경 변수 및 동일 앱 재현 가이드 | [docs/SPECIFICATION.md](./docs/SPECIFICATION.md) |
 | **📅 상세 개발 이력서 (CHANGELOG)** | 일자별/기능별 누적 개발 이력 및 변경점 상세 기록 | [docs/CHANGELOG.md](./docs/CHANGELOG.md) |
